@@ -1,0 +1,43 @@
+name: agua_clara
+version: '1.0.0'
+config-version: 2
+
+profile: agua_clara
+
+seed-paths: ["seeds"]
+model-paths: ["models"]
+macro-paths: ["macros"]
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+seeds:
+  # Builds seeds into '<your_schema_name>_raw_sicab'
+  agua_clara:
+    +schema: raw_sicab
+
+models:
+
+  agua_clara:
+
+    raw_sicab:
+      +schema: raw_sicab
+      +materialized: view
+
+    l4_fact:
+      +schema: l4_fact
+      +materialized: table
+
+    silver_edw:
+      +schema: silver_edw
+      +materialized: table
+
+    silver_fact:
+      +schema: silver_fact
+      +materialized: table
+
+    gold_fact:
+      +schema: gold_fact
+      +materialized: table
+flags:
+  require_generic_test_arguments_property: true
