@@ -22,7 +22,7 @@ models:
 
     raw_sicab:
       +schema: raw_sicab
-      +materialized: view
+      +materialized: table
 
     l4_fact:
       +schema: l4_fact
