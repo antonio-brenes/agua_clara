@@ -1,0 +1,50 @@
+version: 2
+
+sources:
+  - name: raw_sicab
+    description: "Tablas RAW de origen SICAB para el piloto Agua Clara"
+    database: des_agua_clara
+    schema: raw_sicab
+    tables:
+      - name: raw_carrer
+        description: "Tabla raw de carrer."
+      - name: raw_codifications
+        description: "Tabla raw de codifications."
+      - name: raw_conveni_frau
+        description: "Tabla raw de conveni_frau."
+      - name: raw_dte_municipal
+        description: "Tabla raw de dte_municipal."
+      - name: raw_epigraf_iae
+        description: "Tabla raw de epigraf_iae."
+      - name: raw_fact_aigua
+        description: "Tabla raw de fact_aigua."
+      - name: raw_fact_concepte
+        description: "Tabla raw de fact_concepte."
+      - name: raw_fact_resum
+        description: "Tabla raw de fact_resum."
+      - name: raw_finca
+        description: "Tabla raw de finca."
+      - name: raw_hist_ss_pe
+        description: "Tabla raw de hist_ss_pe."
+      - name: raw_municipi_sgab
+        description: "Tabla raw de municipi_sgab."
+      - name: raw_padro_tamgrem
+        description: "Tabla raw de padro_tamgrem."
+      - name: raw_padro_trr
+        description: "Tabla raw de padro_trr."
+      - name: raw_ramal
+        description: "Tabla raw de ramal."
+      - name: raw_servei_eq_ci
+        description: "Tabla raw de servei_eq_ci."
+      - name: raw_servei_facturar
+        description: "Tabla raw de servei_facturar."
+      - name: raw_situacio_fact
+        description: "Tabla raw de situacio_fact."
+      - name: raw_submin_iae
+        description: "Tabla raw de submin_iae."
+      - name: raw_submin_servei
+        description: "Tabla raw de submin_servei."
+      - name: raw_fact_regul
+        description: "Tabla raw vacía de raw_fact_regul pendiente de definición de origen."
+      - name: raw_fact_recup
+        description: "Tabla raw vacía de raw_fact_recup pendiente de definición de origen."

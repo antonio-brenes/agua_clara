@@ -20,10 +20,6 @@ models:
 
   agua_clara:
 
-    raw_sicab:
-      +schema: raw_sicab
-      +materialized: table
-
     l4_fact:
       +schema: l4_fact
       +materialized: table

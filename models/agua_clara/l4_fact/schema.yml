@@ -1,0 +1,1476 @@
+version: 2
+
+models:
+  - name: l4_codificacions
+    description: "Modelo L4 tipado a partir de raw_codificacions."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - TIP_CODI
+              - CLAU_CODI
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: TIP_CODI
+        description: "Campo tipado de raw_codificacions."
+      - name: CLAU_CODI
+        description: "Campo tipado de raw_codificacions."
+      - name: DESC_CODI
+        description: "Campo tipado de raw_codificacions."
+      - name: DESC_BREU
+        description: "Campo tipado de raw_codificacions."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_municipi_sgab
+    description: "Modelo L4 tipado a partir de raw_municipi_sgab."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_MUN_SGAB
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NOM_MUN_SGAB
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: QL_CRITERI_FACT
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: ID_MUN_CP_UNIC
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: CP_PROVINCIA
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: UNITAT_REPARTIMENT
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_DTE_POST
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_DEL_SGAB
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_AGENCIA_SGAB
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: ID_AREA_LECT
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: DELEGA_CO
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: QL_GEST_DTE
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: ID_MUNI_ENT_MET
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NOMB_DIES_ANS
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: MUNI_GENERALITAT
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: CODI_PROV
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: CODI_MUNI
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: QL_TIPUS_VENDA
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: CODI_MUNICIPI
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NOMB_DIES_INDEMN
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NOMB_DIES_SENSE_AUT
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: ADHERIT_L24
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: CARTA_CIRER
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_CAIPS
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_DIAS_ENV_CAIPS
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: CARTA_CIRER_2
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_DIAS_CIRER_2
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: NUM_DIAS_GENERA_CORTE
+        description: "Campo tipado de raw_municipi_sgab."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_dte_municipal
+    description: "Modelo L4 tipado a partir de raw_dte_municipal."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+              - NUM_DTE_MUNI
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_MUN_SGAB
+        description: "Campo tipado de raw_dte_municipal."
+      - name: NUM_DTE_MUNI
+        description: "Campo tipado de raw_dte_municipal."
+      - name: NOM_DTE_MUNI
+        description: "Campo tipado de raw_dte_municipal."
+      - name: NUM_DEL_SGAB
+        description: "Campo tipado de raw_dte_municipal."
+      - name: NUM_AGENCIA_SGAB
+        description: "Campo tipado de raw_dte_municipal."
+      - name: CODI_AREA_SD
+        description: "Campo tipado de raw_dte_municipal."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_epigraf_iae
+    description: "Modelo L4 tipado a partir de raw_epigraf_iae."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - SECCIO
+              - EPIGRAF_IAE
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: SECCIO
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: EPIGRAF_IAE
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: DESCR_IAE
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: TIP_TARIFA
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: TIP_QUOTA_TAMGREM
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: NIV_GEN_RES
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: COD_GEN_RES
+        description: "Campo tipado de raw_epigraf_iae."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_carrer
+    description: "Modelo L4 tipado a partir de raw_carrer."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+              - NUM_CARRER
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_MUN_SGAB
+        description: "Campo tipado de raw_carrer."
+      - name: NUM_CARRER
+        description: "Campo tipado de raw_carrer."
+      - name: CLASSE_CARRER
+        description: "Campo tipado de raw_carrer."
+      - name: NOM_ABREUJ_CARRER
+        description: "Campo tipado de raw_carrer."
+      - name: TIP_DENOMIN_CARRER
+        description: "Campo tipado de raw_carrer."
+      - name: NOM_COMPLET_CARRER
+        description: "Campo tipado de raw_carrer."
+      - name: ID_CARRER_SAP
+        description: "Campo tipado de raw_carrer."
+      - name: QL_CARRER
+        description: "Campo tipado de raw_carrer."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_finca
+    description: "Modelo L4 tipado a partir de raw_finca."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+              - NUM_CARRER
+              - NUM_INI_FINCA
+              - COMP_NUM_INI_FINCA
+              - NUM_FIN_FINCA
+              - COMP_NUM_FIN_FINCA
+              - SIT_FINCA_ESPEC
+              - ORD_FINCA_ESPEC
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_MUN_SGAB
+        description: "Campo tipado de raw_finca."
+      - name: NUM_CARRER
+        description: "Campo tipado de raw_finca."
+      - name: NUM_INI_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: COMP_NUM_INI_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: NUM_FIN_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: COMP_NUM_FIN_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: SIT_FINCA_ESPEC
+        description: "Campo tipado de raw_finca."
+      - name: ORD_FINCA_ESPEC
+        description: "Campo tipado de raw_finca."
+      - name: NUM_TORN_LECT_MENS
+        description: "Campo tipado de raw_finca."
+      - name: ORD_FINCA_TORN_MEN
+        description: "Campo tipado de raw_finca."
+      - name: NUM_DTE_POST_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: ESTAT_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: ID_GRUP_ELEV_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: PRES_XARXA_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: CAT_FISCAL_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: ALTURA_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: ID_FINCA_RENDA_LIM
+        description: "Campo tipado de raw_finca."
+      - name: NUM_EXP_RENDA_LIM
+        description: "Campo tipado de raw_finca."
+      - name: NUM_ZONA_RECOR
+        description: "Campo tipado de raw_finca."
+      - name: NUM_TRAVES
+        description: "Campo tipado de raw_finca."
+      - name: CASA_RECOR_PERIOD
+        description: "Campo tipado de raw_finca."
+      - name: NUM_NUS_XARXA
+        description: "Campo tipado de raw_finca."
+      - name: ID_LOT_LECT
+        description: "Campo tipado de raw_finca."
+      - name: OBS_ADRE_INCOMPLET
+        description: "Campo tipado de raw_finca."
+      - name: PARTICULARIT_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: LOCAL_CLAUS_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: QL_COMPT_ELECTRON
+        description: "Campo tipado de raw_finca."
+      - name: NUM_DTE_MUNI_FINCA
+        description: "Campo tipado de raw_finca."
+      - name: QL_BATERIA_CABLE
+        description: "Campo tipado de raw_finca."
+      - name: CODI_UBICACIO_SAP
+        description: "Campo tipado de raw_finca."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_ramal
+    description: "Modelo L4 tipado a partir de raw_ramal."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_RAMAL
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: DVER_POLISSA_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: SIT_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: TIP_OPER_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: US_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: MATERIAL_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: DATA_INST_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: DIAMETRE_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: SIT_CLAU_PAS
+        description: "Campo tipado de raw_ramal."
+      - name: DATA_SIG_CTE_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: TIP_SUBM_CTE_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: NOMB_JOC_CLAUS_CTE
+        description: "Campo tipado de raw_ramal."
+      - name: DATA_PART_INST_RAM
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_PART_INST_RAM
+        description: "Campo tipado de raw_ramal."
+      - name: QL_ARQUETA_ARMARI
+        description: "Campo tipado de raw_ramal."
+      - name: ESTAT_ARQUETA_ARM
+        description: "Campo tipado de raw_ramal."
+      - name: ID_CIR_RECUP_AIGUA
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_SOL_LIC_AFEC
+        description: "Campo tipado de raw_ramal."
+      - name: DATA_SOL_BAIXA_RAM
+        description: "Campo tipado de raw_ramal."
+      - name: DNI_NIF_CLIENT
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_MUN_SGAB
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_CARRER
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_INI_FINCA
+        description: "Campo tipado de raw_ramal."
+      - name: COMP_NUM_INI_FINCA
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_FIN_FINCA
+        description: "Campo tipado de raw_ramal."
+      - name: COMP_NUM_FIN_FINCA
+        description: "Campo tipado de raw_ramal."
+      - name: SIT_FINCA_ESPEC
+        description: "Campo tipado de raw_ramal."
+      - name: ORD_FINCA_ESPEC
+        description: "Campo tipado de raw_ramal."
+      - name: NUM_ORD_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: POLISSA_RAMAL_AFEC
+        description: "Campo tipado de raw_ramal."
+      - name: DNI_NIF_CLIENT_ORI
+        description: "Campo tipado de raw_ramal."
+      - name: OBS_PRESA_RAMAL
+        description: "Campo tipado de raw_ramal."
+      - name: RAMAL_CO
+        description: "Campo tipado de raw_ramal."
+      - name: QL_TIPUS_DADES_C
+        description: "Campo tipado de raw_ramal."
+      - name: QL_ANOT
+        description: "Campo tipado de raw_ramal."
+      - name: SECCIO_CENSAL
+        description: "Campo tipado de raw_ramal."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_submin_servei
+    description: "Modelo L4 tipado a partir de raw_submin_servei."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_submin_servei."
+      - name: DVER_POLISSA_SUBM
+        description: "Campo tipado de raw_submin_servei."
+      - name: TIP_SUBM_SERV
+        description: "Campo tipado de raw_submin_servei."
+      - name: SIT_SUBM_SERV
+        description: "Campo tipado de raw_submin_servei."
+      - name: DATA_CTE_SUBM_SERV
+        description: "Campo tipado de raw_submin_servei."
+      - name: DATA_ALT_SUBM_SERV
+        description: "Campo tipado de raw_submin_servei."
+      - name: DATA_RES_SUBM_SERV
+        description: "Campo tipado de raw_submin_servei."
+      - name: IMP_FIANSA
+        description: "Campo tipado de raw_submin_servei."
+      - name: SIT_FIANSA
+        description: "Campo tipado de raw_submin_servei."
+      - name: DATA_ULTIMA_FACT
+        description: "Campo tipado de raw_submin_servei."
+      - name: QL_IDIOMA
+        description: "Campo tipado de raw_submin_servei."
+      - name: ID_PAGA_IVA
+        description: "Campo tipado de raw_submin_servei."
+      - name: US_AIGUA_SUBM
+        description: "Campo tipado de raw_submin_servei."
+      - name: NOMB_HABIT_SUBM
+        description: "Campo tipado de raw_submin_servei."
+      - name: TIP_HABIT_SUBM
+        description: "Campo tipado de raw_submin_servei."
+      - name: TIP_TAXA_TRR
+        description: "Campo tipado de raw_submin_servei."
+      - name: POLISSA_RAMAL
+        description: "Campo tipado de raw_submin_servei."
+      - name: PIS_PORTA_DESTI
+        description: "Campo tipado de raw_submin_servei."
+      - name: DNI_NIF_CLIENT
+        description: "Campo tipado de raw_submin_servei."
+      - name: NUM_ENTITAT_COBRA
+        description: "Campo tipado de raw_submin_servei."
+      - name: NUM_AGENCIA_APART
+        description: "Campo tipado de raw_submin_servei."
+      - name: NUM_COMPTE_DEPEND
+        description: "Campo tipado de raw_submin_servei."
+      - name: NOM_TITULAR_COMPTE
+        description: "Campo tipado de raw_submin_servei."
+      - name: ID_QUOTA_SOCIAL
+        description: "Campo tipado de raw_submin_servei."
+      - name: ID_TARIFA_SOCIAL
+        description: "Campo tipado de raw_submin_servei."
+      - name: IND_SERVEI_SOCIAL
+        description: "Campo tipado de raw_submin_servei."
+      - name: IND_POB_ENERG
+        description: "Campo tipado de raw_submin_servei."
+      - name: NOM_COMERCIAL
+        description: "Campo tipado de raw_submin_servei."
+      - name: TIP_FACT_ENV
+        description: "Campo tipado de raw_submin_servei."
+      - name: CODI_PAIS
+        description: "Campo tipado de raw_submin_servei."
+      - name: NUM_COMPTE_IBAN
+        description: "Campo tipado de raw_submin_servei."
+      - name: IND_OKUPA
+        description: "Campo tipado de raw_submin_servei."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_submin_iae
+    description: "Modelo L4 tipado a partir de raw_submin_iae."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - SECCIO
+              - EPIGRAF_IAE
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_submin_iae."
+      - name: SECCIO
+        description: "Campo tipado de raw_submin_iae."
+      - name: EPIGRAF_IAE
+        description: "Campo tipado de raw_submin_iae."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_padro_trr
+    description: "Modelo L4 tipado a partir de raw_padro_trr."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - TS_PADRO_TRR
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_padro_trr."
+      - name: TS_PADRO_TRR
+        description: "Campo tipado de raw_padro_trr."
+      - name: TIP_TAXA_TRR
+        description: "Campo tipado de raw_padro_trr."
+      - name: NOMB_HABIT_SUBM
+        description: "Campo tipado de raw_padro_trr."
+      - name: CONSUM_MES_BASE
+        description: "Campo tipado de raw_padro_trr."
+      - name: TIP_QUOTA_TRR
+        description: "Campo tipado de raw_padro_trr."
+      - name: CONSUM_MIG_DIA
+        description: "Campo tipado de raw_padro_trr."
+      - name: NUMERO_EMPLEAT
+        description: "Campo tipado de raw_padro_trr."
+      - name: SECCIO
+        description: "Campo tipado de raw_padro_trr."
+      - name: EPIGRAF_IAE
+        description: "Campo tipado de raw_padro_trr."
+      - name: PERC_BONIF_TRR
+        description: "Campo tipado de raw_padro_trr."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_padro_tamgrem
+    description: "Modelo L4 tipado a partir de raw_padro_tamgrem."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - TS_PADRO_TAMGREM
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: TS_PADRO_TAMGREM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: TIP_TAXA_TAMGREM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: NOMB_HABIT_SUBM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: CONSUM_MES_BASE
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: TIP_QUOTA_TAMGREM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: CONSUM_MIG_DIA
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: NUMERO_EMPLEAT
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: SECCIO
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: EPIGRAF_IAE
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: PERC_BONIF_TAMGREM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: IMP_CUOTA
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: SUPERFICIE_REAL
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: SUPERFICIE_POND
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: NIV_GEN_RES
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: COD_GEN_RES
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: ORIGEN
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: ID_BONIF_DECGER
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: ID_LIMIT
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: SUBTIP_TAXA_TAMGREM
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: OBSERVACIONS
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: TS_ALTA
+        description: "Campo tipado de raw_padro_tamgrem."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_hist_ss_pe
+    description: "Modelo L4 tipado a partir de raw_hist_ss_pe."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - TIP_COLECTIVO
+              - TS_MOM_IND
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: TS_MOM_IND
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: TIP_COLECTIVO
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: DATA_INI_IND
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: DATA_FIN_IND
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: OBSERVACIONS
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: NUM_EMPLEAT
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: INFORME_SS
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: DATA_ENVIA_ACA
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: NOM_ACA_FITXER
+        description: "Campo tipado de raw_hist_ss_pe."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_servei_eq_ci
+    description: "Modelo L4 tipado a partir de raw_servei_eq_ci."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: NOMB_BOQUES_25
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: NOMB_BOQUES_45
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: NOMB_BOQUES_70
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: NOMB_BOQUES_100
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: NOMB_SPRINCKLERS
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: NUM_PRECINTE_BOCA
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: ID_GRUP_ELEV_EQ_CI
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: ID_VALVULA_MOTOR
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: TIP_PETIC_RES
+        description: "Campo tipado de raw_servei_eq_ci."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_servei_facturar
+    description: "Modelo L4 tipado a partir de raw_servei_facturar."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - DATA_FIN_FACT
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_servei_facturar."
+      - name: DATA_FIN_FACT
+        description: "Campo tipado de raw_servei_facturar."
+      - name: CALCUL_CONSUM_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: DIES_CONSUM_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: NOMB_BOQ_25_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: NOMB_BOQ_45_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: NOMB_BOQ_70_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: NOMB_BOQ_100_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: NOMB_SPRINCK_SERV
+        description: "Campo tipado de raw_servei_facturar."
+      - name: ID_BUTLLETA
+        description: "Campo tipado de raw_servei_facturar."
+      - name: ID_LOT_LECT
+        description: "Campo tipado de raw_servei_facturar."
+      - name: ANY_CALENDARI
+        description: "Campo tipado de raw_servei_facturar."
+      - name: MES_CALENDARI
+        description: "Campo tipado de raw_servei_facturar."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_conveni_frau
+    description: "Modelo L4 tipado a partir de raw_conveni_frau."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_conveni_frau."
+      - name: NUM_MUN_CONV_FRAU
+        description: "Campo tipado de raw_conveni_frau."
+      - name: ADRE_CONV_FRAU
+        description: "Campo tipado de raw_conveni_frau."
+      - name: COD_POST_CONV_FRAU
+        description: "Campo tipado de raw_conveni_frau."
+      - name: DEL_CREACIO_CONV_F
+        description: "Campo tipado de raw_conveni_frau."
+      - name: DATA_CREA_C_FRA
+        description: "Campo tipado de raw_conveni_frau."
+      - name: POLISSA_RAMAL
+        description: "Campo tipado de raw_conveni_frau."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_resum
+    description: "Modelo L4 tipado a partir de raw_fact_resum."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_fact_resum."
+      - name: ANY_FACTURA
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_FACTURA
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_EMPLEAT_SGAB
+        description: "Campo tipado de raw_fact_resum."
+      - name: FREQ_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: M3_BLOC1
+        description: "Campo tipado de raw_fact_resum."
+      - name: M3_BLOC2
+        description: "Campo tipado de raw_fact_resum."
+      - name: M3_BLOC3
+        description: "Campo tipado de raw_fact_resum."
+      - name: M3_BLOC4
+        description: "Campo tipado de raw_fact_resum."
+      - name: M3_BLOC5
+        description: "Campo tipado de raw_fact_resum."
+      - name: IMP_TOTAL_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: IMP_AIGUA_IVA
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_RECUPERACIO
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_REGULARITZACIO
+        description: "Campo tipado de raw_fact_resum."
+      - name: DATA_CARREC_RECAP
+        description: "Campo tipado de raw_fact_resum."
+      - name: IDEN_LOT_LECT_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_PARTICIO
+        description: "Campo tipado de raw_fact_resum."
+      - name: POLISSA_SUBM
+        description: "Campo tipado de raw_fact_resum."
+      - name: DATA_FIN_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_LOT_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: ANY_CALENDARI
+        description: "Campo tipado de raw_fact_resum."
+      - name: MES_CALENDARI
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_CONCEPTES
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_DECLARADA
+        description: "Campo tipado de raw_fact_resum."
+      - name: DNI_NIF_CLIENT
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_GESTIO_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_TIP_COBRA
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_ENTITAT_COBR
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_AGENCIA_APAR
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_COMPTE_DEPEN
+        description: "Campo tipado de raw_fact_resum."
+      - name: DVER_COMPTE_BANC
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_FACTURA
+        description: "Campo tipado de raw_fact_resum."
+      - name: DATA_EMISS_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: DATA_INI_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_RESUM_COMPTABLE
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_QTA_SERV_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_CALCUL_DIARI
+        description: "Campo tipado de raw_fact_resum."
+      - name: US_AIGUA_SUBM_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_HABIT_SUBM_FA
+        description: "Campo tipado de raw_fact_resum."
+      - name: NOMB_HABIT_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: SIT_SUBM_SERV_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_IDIOMA_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: PUBLI_OFI_TARI_FA
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_CARREC_SOCIETAT
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_MONEDA
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_SUBM_SERV
+        description: "Campo tipado de raw_fact_resum."
+      - name: NOM_CLIENT
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_INDEX
+        description: "Campo tipado de raw_fact_resum."
+      - name: APROVADA_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_TIP_COBRA_INI
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_ENVIO_FACT
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_DOMESTIC
+        description: "Campo tipado de raw_fact_resum."
+      - name: QL_DCL_CAI
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_FACT_ENV
+        description: "Campo tipado de raw_fact_resum."
+      - name: EMISSORA
+        description: "Campo tipado de raw_fact_resum."
+      - name: NUM_COMPTE_IBAN
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIP_FACT_SII
+        description: "Campo tipado de raw_fact_resum."
+      - name: TIPUS_FACTURA
+        description: "Campo tipado de raw_fact_resum."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_aigua
+    description: "Modelo L4 tipado a partir de raw_fact_aigua."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_PARTICIO
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_PARTICIO
+        description: "Campo tipado de raw_fact_aigua."
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: ANY_FACTURA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: NUM_FACTURA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: DIAM_COMP_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: DIAM_COMP_SEC_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: MARCA_COMP_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: NUM_COMP_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PROPIETAT_COMP_FA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: CABAL_NOMINAL_CTE
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_QTA_SERV
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_M3_BLOC1_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_BLOC1
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_M3_BLOC2_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_BLOC2
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_M3_BLOC3_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_BLOC3
+        description: "Campo tipado de raw_fact_aigua."
+      - name: TIP_CT_XBASICA_FAC
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_CT_XBASICA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_CT_XBASICA_FA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_CT_XBASICA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: TIP_TCG_SUBM_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_TCG_SUBM
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_TCG_SUBM_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_TCG_SUBM
+        description: "Campo tipado de raw_fact_aigua."
+      - name: TIP_CLAVAG_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_CLAVAG
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_CLAVAG_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_CLAVAG
+        description: "Campo tipado de raw_fact_aigua."
+      - name: TIP_SANEJA_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_SANEJA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_SANEJA_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_SANEJA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_IVA_SANEJA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_IVA_SANEJA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_IVA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PERCENT_IVA_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_IVA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: TIP_ERSU_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_ERSU
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_ERSU_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_ERSU
+        description: "Campo tipado de raw_fact_aigua."
+      - name: TIP_CIH_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_CIH_BLOC1
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_CIH_BLOC1_FA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_CIH_BLOC1
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_CIH_BLOC2
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_CIH_BLOC2_FA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_CIH_BLOC2
+        description: "Campo tipado de raw_fact_aigua."
+      - name: BASE_CIH_BLOC3
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_CIH_BLOC3_FA
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_CIH_BLOC3
+        description: "Campo tipado de raw_fact_aigua."
+      - name: CABAL_CTE
+        description: "Campo tipado de raw_fact_aigua."
+      - name: COEF_CIH_IND_FAC
+        description: "Campo tipado de raw_fact_aigua."
+      - name: QL_1999_2000
+        description: "Campo tipado de raw_fact_aigua."
+      - name: NOMBRE_PERSONES
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_TRAM1_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_TRAM2_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_CAI1_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_CLAV1_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_CAI2_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: NOMBRE_PER_CAI
+        description: "Campo tipado de raw_fact_aigua."
+      - name: NOMBRE_PER_TMTR
+        description: "Campo tipado de raw_fact_aigua."
+      - name: NUM_COMPT_T_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_M3_BLOC4_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_BLOC4
+        description: "Campo tipado de raw_fact_aigua."
+      - name: PREU_M3_BLOC5_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: IMP_BLOC5
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_TRAM3_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_TRAM4_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: LIMIT_CAI3_FACT
+        description: "Campo tipado de raw_fact_aigua."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_concepte
+    description: "Modelo L4 tipado a partir de raw_fact_concepte."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_PARTICIO
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+              - NUM_LINEA
+              - NUM_CONCEPTE
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_PARTICIO
+        description: "Campo tipado de raw_fact_concepte."
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_fact_concepte."
+      - name: ANY_FACTURA
+        description: "Campo tipado de raw_fact_concepte."
+      - name: NUM_FACTURA
+        description: "Campo tipado de raw_fact_concepte."
+      - name: NUM_LINEA
+        description: "Campo tipado de raw_fact_concepte."
+      - name: NUM_CONCEPTE
+        description: "Campo tipado de raw_fact_concepte."
+      - name: BASE_CONCEPTE
+        description: "Campo tipado de raw_fact_concepte."
+      - name: TIP_TAXA_CONCEP
+        description: "Campo tipado de raw_fact_concepte."
+      - name: PREU_CONCEPTE
+        description: "Campo tipado de raw_fact_concepte."
+      - name: IMP_CONCEPTE
+        description: "Campo tipado de raw_fact_concepte."
+      - name: IVA_APLICAT_CONC
+        description: "Campo tipado de raw_fact_concepte."
+      - name: OBSER_CONCEPTE
+        description: "Campo tipado de raw_fact_concepte."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_regul
+    description: "Modelo L4 tipado a partir de raw_fact_regul."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+              - DATA_FIN_PER_INCID
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_fact_regul."
+      - name: ANY_FACTURA
+        description: "Campo tipado de raw_fact_regul."
+      - name: NUM_FACTURA
+        description: "Campo tipado de raw_fact_regul."
+      - name: DATA_FIN_PER_INCID
+        description: "Campo tipado de raw_fact_regul."
+      - name: M3_BLOC1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_M3_BLOC1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_BLOC1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: M3_BLOC2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_M3_BLOC2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_BLOC2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: M3_BLOC3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_M3_BLOC3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_BLOC3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_CT_XBASICA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CT_XBASICA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CT_XBASICA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CT_XBASICA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_TCG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_TCG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_TCG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_TCG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CTG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PERCEN_CTG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CTG_SUBM_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CAN_BAELLS_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CAN_TER_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_PRODUC_BRUT_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_CLAVAG_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CLAVAG_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CLAVAG_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CLAVAG_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_SANEJA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_SANEJA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_SANEJA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_SANEJA_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_ERSU_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_ERSU_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_ERSU_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_ERSU_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_CIH_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CIH_BLOC1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CIH_BLOC1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CIH_BLOC1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CIH_BLOC2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CIH_BLOC2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CIH_BLOC2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CIH_BLOC3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CIH_BLOC3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CIH_BLOC3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: TIP_CAI_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CAI_T1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CAI_T1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CAI_T1_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CAI_T2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CAI_T2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CAI_T2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: COEF_CAI_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CLA_T2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CLA_T2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CLA_T2_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CAI_T3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CAI_T3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CAI_T3_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: BASE_CAI_T4_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_CAI_T4_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_CAI_T4_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: M3_BLOC4_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_M3_BLOC4_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_BLOC4_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: M3_BLOC5_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: PREU_M3_BLOC5_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: IMP_BLOC5_RG
+        description: "Campo tipado de raw_fact_regul."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_recup
+    description: "Modelo L4 tipado a partir de raw_fact_recup."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_fact_recup."
+      - name: ANY_FACTURA
+        description: "Campo tipado de raw_fact_recup."
+      - name: NUM_FACTURA
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_QTA_SERV_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: M3_BLOC1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_M3_BLOC1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_BLOC1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: M3_BLOC2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_M3_BLOC2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_BLOC2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: M3_BLOC3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_M3_BLOC3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_BLOC3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CT_XBASICA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CT_XBASICA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CT_XBASICA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_TCG_SUBM_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_TCG_SUBM_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_TCG_SUBM_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CLAVAG_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CLAVAG_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CLAVAG_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_SANEJA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_SANEJA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_SANEJA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_ERSU_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_ERSU_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_ERSU_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CIH_BLOC1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CIH_BLOC1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CIH_BLOC1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CIH_BLOC2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CIH_BLOC2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CIH_BLOC2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CIH_BLOC3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CIH_BLOC3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CIH_BLOC3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_BONIF_QTA_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CAI_T1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CAI_T1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CAI_T1_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CAI_T2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CAI_T2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CAI_T2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CLA_T2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CLA_T2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CLA_T2_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: BASE_CAI_T3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: PREU_CAI_T3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: IMP_CAI_T3_RC
+        description: "Campo tipado de raw_fact_recup."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_situacio_fact
+    description: "Modelo L4 tipado a partir de raw_situacio_fact."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_PARTICIO
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+              - MOM_SIT_FACT
+    columns:
+      - name: FECHA_EXTRACCION
+        description: "Fecha y hora de extracción heredada de RAW."
+        tests:
+          - not_null
+      - name: NUM_PARTICIO
+        description: "Campo tipado de raw_situacio_fact."
+      - name: ID_EMPRESA
+        description: "Campo tipado de raw_situacio_fact."
+      - name: ANY_FACTURA
+        description: "Campo tipado de raw_situacio_fact."
+      - name: NUM_FACTURA
+        description: "Campo tipado de raw_situacio_fact."
+      - name: MOM_SIT_FACT
+        description: "Campo tipado de raw_situacio_fact."
+      - name: TIP_SIT_FACT
+        description: "Campo tipado de raw_situacio_fact."
+      - name: CAUSA_SIT_FACT
+        description: "Campo tipado de raw_situacio_fact."
+      - name: ID_CARGA
+        description: "Identificador técnico de la carga."
+      - name: FECHA_CARGA
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        description: "Tabla RAW de procedencia."

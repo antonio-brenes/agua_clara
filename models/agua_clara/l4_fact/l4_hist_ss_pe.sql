@@ -1,0 +1,28 @@
+{{ config(
+    materialized='table',
+    schema='l4_fact',
+    tags=['l4_fact']
+) }}
+
+with raw as (
+    select *
+    from {{ source('raw_sicab', 'raw_hist_ss_pe') }}
+)
+
+select
+    NULLIF(TRIM(raw."POLISSA_SUBM"), '') AS POLISSA_SUBM,
+    TRY_TO_TIMESTAMP_NTZ(NULLIF(TRIM(raw."TS_MOM_IND"), '')) AS TS_MOM_IND,
+    NULLIF(TRIM(raw."TIP_COLECTIVO"), '') AS TIP_COLECTIVO,
+    TRY_TO_DATE(NULLIF(TRIM(raw."DATA_INI_IND"), '')) AS DATA_INI_IND,
+    TRY_TO_DATE(NULLIF(TRIM(raw."DATA_FIN_IND"), '')) AS DATA_FIN_IND,
+    NULLIF(TRIM(raw."OBSERVACIONS"), '') AS OBSERVACIONS,
+    CAST(NULL AS VARCHAR(15)) AS NUM_EMPLEAT,
+    CAST(NULL AS VARCHAR(1)) AS INFORME_SS,
+    CAST(NULL AS DATE) AS DATA_ENVIA_ACA,
+    CAST(NULL AS VARCHAR(35)) AS NOM_ACA_FITXER,
+    DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_NTZ, raw.FECHA_EXTRACCION) AS ID_CARGA,
+    raw.FECHA_EXTRACCION AS FECHA_EXTRACCION,
+    CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ AS FECHA_CARGA,
+    raw.SISTEMA_ORIGEN AS SISTEMA_ORIGEN,
+    'RAW_HIST_SS_PE' AS TABLA_ORIGEN
+from raw

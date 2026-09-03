@@ -1,0 +1,29 @@
+{{ config(
+    materialized='table',
+    schema='l4_fact',
+    tags=['l4_fact']
+) }}
+
+with raw as (
+    select *
+    from {{ source('raw_sicab', 'raw_padro_trr') }}
+)
+
+select
+    NULLIF(TRIM(raw."POLISSA_SUBM"), '') AS POLISSA_SUBM,
+    TRY_TO_TIMESTAMP_NTZ(NULLIF(TRIM(raw."TS_PADRO_TRR"), '')) AS TS_PADRO_TRR,
+    NULLIF(TRIM(raw."TIP_TAXA_TRR"), '') AS TIP_TAXA_TRR,
+    TRY_TO_DECIMAL(NULLIF(TRIM(raw."NOMB_HABIT_SUBM"), ''), 3, 0) AS NOMB_HABIT_SUBM,
+    TRY_TO_DECIMAL(NULLIF(TRIM(raw."CONSUM_MES_BASE"), ''), 7, 2) AS CONSUM_MES_BASE,
+    NULLIF(TRIM(raw."TIP_QUOTA_TRR"), '') AS TIP_QUOTA_TRR,
+    TRY_TO_DECIMAL(NULLIF(TRIM(raw."CONSUM_MIG_DIA"), ''), 9, 4) AS CONSUM_MIG_DIA,
+    NULLIF(TRIM(raw."NUMERO_EMPLEAT"), '') AS NUMERO_EMPLEAT,
+    NULLIF(TRIM(raw."SECCIO"), '') AS SECCIO,
+    NULLIF(TRIM(raw."EPIGRAF_IAE"), '') AS EPIGRAF_IAE,
+    TRY_TO_DECIMAL(NULLIF(TRIM(raw."PERC_BONIF_TRR"), ''), 5, 2) AS PERC_BONIF_TRR,
+    DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_NTZ, raw.FECHA_EXTRACCION) AS ID_CARGA,
+    raw.FECHA_EXTRACCION AS FECHA_EXTRACCION,
+    CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ AS FECHA_CARGA,
+    raw.SISTEMA_ORIGEN AS SISTEMA_ORIGEN,
+    'RAW_PADRO_TRR' AS TABLA_ORIGEN
+from raw

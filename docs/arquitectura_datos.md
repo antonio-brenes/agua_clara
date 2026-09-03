@@ -21,6 +21,35 @@ Además de esa clasificación general, existen casos especiales:
 
 ## 3. Principios generales del modelo
 
+### 3.1. Nota de proyecto: zona horaria de Madrid
+
+Nota: en el proyecto se considera la zona horaria de Madrid (`Europe/Madrid`) como referencia de negocio cuando la lógica temporal lo requiere.
+
+Esto aplica especialmente a:
+
+- fechas y horas de consumo o facturación;
+- ventanas horarias de agregación;
+- comparaciones entre períodos;
+- cálculos de consumo por hora, día, semana o mes;
+- cualquier campo que represente un instante de tiempo en el negocio y requiera interpretación local.
+
+La referencia es útil sobre todo en transformaciones que comparen o agreguen tiempo, ya que Madrid tiene cambio de horario de verano/invierno:
+
+- invierno: UTC+1;
+- verano: UTC+2.
+
+Todo campo de fecha u hora que represente tiempo de negocio debe reflejar correctamente la zona horaria `Europe/Madrid`. En Snowflake, la conversión se debe hacer explícitamente antes de almacenar, comparar o agrupar esos valores; no se debe asumir que `TIMESTAMP_NTZ` conserva por sí mismo la zona horaria ni usar directamente el huso horario de la cuenta.
+
+Ejemplo de referencia:
+
+```sql
+CAST(CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP()) AS TIMESTAMP_NTZ)
+```
+
+El mismo patrón se utilizará para `FECHA_EXTRACCION` y para cualquier otro timestamp generado durante una carga o transformación. El `CAST` a `TIMESTAMP_NTZ` solo se realiza después de convertir el instante a la hora local de Madrid.
+
+Los campos que deban conservar información de zona horaria podrán mantenerse como `TIMESTAMP_TZ`, siempre con la zona `Europe/Madrid` aplicada explícitamente.
+
 - La tabla central de suministros es `SUBMIN_SERVEI`.
 
 - Las tablas territoriales y técnicas describen dónde se encuentra el suministro, qué ramal lo abastece y qué características tiene. Las tablas de padrón y de histórico aportan circunstancias adicionales, como la actividad económica, la tasa de residuos, TAMGREM, vulnerabilidad, equipos CI o fraude.
@@ -706,9 +735,11 @@ Los ficheros de origen serán los ficheros CSV con cabecera almacenados en la ca
 
 - Una tabla en capa raw_sicab por fichero CSV.
 - Nombre de tabla: raw_<nombre_fichero>
+- Adicionalmente, se crearán `RAW_FACT_REGUL` y `RAW_FACT_RECUP` aunque actualmente no exista CSV de origen para ellas. Estas tablas permanecerán vacías hasta que se defina su alimentación.
 - Todos los campos de las tablas serán de tipo VARCHAR y tendrán nombres heredados de la cabecera del CSV.
 - No se transformarán los datos.
 - Se conservará la granularidad de origen.
+- Las tablas RAW sin CSV tendrán los mismos campos de negocio que sus tablas L4 correspondientes, todos como `VARCHAR`, y únicamente los campos de auditoría `FECHA_EXTRACCION` y `SISTEMA_ORIGEN`.
 - Los ficheros CSV de la carpeta `datos` son las fuentes de entrada del sistema y no se usarán como `seeds` de dbt.
 - La carga se realizará en Snowflake con `COPY INTO` desde estos archivos CSV del sistema SICAB.
 - Se incluirán campos de auditoría en cada tabla:
