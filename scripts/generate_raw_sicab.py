@@ -103,7 +103,9 @@ for empty_table in ("RAW_FACT_REGUL", "RAW_FACT_RECUP"):
     empty_columns = read_l4_columns(empty_table.replace("RAW_", "L4_"))
     source_entries.append(
         f'      - name: {empty_table.lower()}\n'
-        f'        description: "Tabla raw vacía de {empty_table.lower()} pendiente de definición de origen."'
+        f'        description: "Tabla raw vacía de {empty_table.lower()} pendiente de definición de origen."\n'
+        f'        config:\n'
+        f'          freshness: null'
     )
     ddl_columns = [f'    "{column}" VARCHAR' for column in empty_columns]
     ddl_columns.extend([
@@ -123,6 +125,11 @@ source_yml = (
     "    description: \"Tablas RAW de origen SICAB para el piloto Agua Clara\"\n"
     "    database: des_agua_clara\n"
     "    schema: raw_sicab\n"
+    "    config:\n"
+    "      loaded_at_field: FECHA_EXTRACCION\n"
+    "      freshness:\n"
+    "        warn_after: {count: 7, period: day}\n"
+    "        error_after: {count: 15, period: day}\n"
     "    tables:\n"
     + '\n'.join(source_entries)
     + '\n'

@@ -37,6 +37,16 @@ def require_environment() -> dict[str, Any]:
     authenticator = os.getenv("SNOWFLAKE_AUTHENTICATOR")
     if authenticator:
         connection["authenticator"] = authenticator
+    elif os.getenv("SNOWFLAKE_PRIVATE_KEY_PATH"):
+        private_key_path = Path(os.environ["SNOWFLAKE_PRIVATE_KEY_PATH"]).expanduser()
+        if not private_key_path.is_file():
+            raise RuntimeError(
+                f"No existe la clave privada indicada en SNOWFLAKE_PRIVATE_KEY_PATH: {private_key_path}"
+            )
+        connection["private_key_file"] = str(private_key_path)
+        passphrase = os.getenv("SNOWFLAKE_PRIVATE_KEY_PASSPHRASE")
+        if passphrase:
+            connection["private_key_file_pwd"] = passphrase
     elif os.getenv("SNOWFLAKE_PASSWORD"):
         connection["password"] = os.environ["SNOWFLAKE_PASSWORD"]
     else:

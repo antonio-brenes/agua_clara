@@ -6,7 +6,7 @@
 
 with raw as (
     select *
-    from (select 1 as placeholder where false)
+    from {{ source('raw_sicab', 'raw_fact_regul') }}
 )
 
 select
@@ -83,8 +83,8 @@ select
     CAST(NULL AS NUMBER(9,4)) AS PREU_M3_BLOC5_RG,
     CAST(NULL AS NUMBER(11,2)) AS IMP_BLOC5_RG,
     DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_NTZ, raw.FECHA_EXTRACCION) AS ID_CARGA,
-    CAST(NULL AS TIMESTAMP_NTZ) AS FECHA_EXTRACCION,
+    raw.FECHA_EXTRACCION AS FECHA_EXTRACCION,
     CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ AS FECHA_CARGA,
-    CAST(NULL AS VARCHAR(30)) AS SISTEMA_ORIGEN,
+    raw.SISTEMA_ORIGEN AS SISTEMA_ORIGEN,
     'RAW_FACT_REGUL' AS TABLA_ORIGEN
 from raw

@@ -19,6 +19,8 @@ Dependencias: sin dependencias previas; se ejecuta antes de cualquier modelo.
 6. Mantener las tablas RAW fuera de dbt: no crear modelos `raw_*.sql` materializados como tablas ni reemplazar estas tablas desde dbt.
 7. Declarar las tablas cargadas externamente en `sources.yml` para que las capas posteriores las consuman mediante `source()`.
 8. Validar técnicamente la ingesta: ficheros presentes en el stage, correspondencia fichero-tabla, recuentos de registros, número de columnas, errores de `COPY INTO` y metadatos de auditoría.
+9. Ejecutar la validación de frescura de fuentes con `dbt source freshness`. El campo de referencia será `FECHA_EXTRACCION`, con aviso cuando la antigüedad supere 7 días y error cuando supere 15 días, según [docs/arquitectura_datos.md](docs/arquitectura_datos.md). Las tablas RAW vacías cuyo origen está pendiente quedan excluidas de esta validación.
+10. Para cargas automatizadas mediante `scripts/load_raw_sicab.py`, usar autenticación key-pair mediante `SNOWFLAKE_PRIVATE_KEY_PATH` y `SNOWFLAKE_PRIVATE_KEY_PASSPHRASE`; `scripts/generate_raw_sicab.py` solo genera SQL y no requiere credenciales.
 
 Resultado esperado: raw_sicab cargado y gestionado por Snowflake, declarado como fuente externa de dbt y listo para l4_fact.
 
@@ -28,7 +30,9 @@ Resultado esperado: raw_sicab cargado y gestionado por Snowflake, declarado como
 3. Añadir los campos de auditoría de la capa bronze: ID_CARGA, FECHA_EXTRACCION, FECHA_CARGA, SISTEMA_ORIGEN y TABLA_ORIGEN.
 4. Verificar que la salida se alinea con el DDL de referencia en ddl/DDL_AGUA_CLARA.sql.
 5. Generar modelos dbt de staging/bronze para cada entidad.
-6. Añadir pruebas de calidad técnica: unique, not null, integridad referencial básica y reconciliación con raw.
+6. Derivar del DDL las validaciones de cada modelo: `not_null` para toda columna `NOT NULL`, `unique_combination_of_columns` para cada clave primaria y `relationships_compound` para toda clave foránea, incluidas las compuestas.
+7. Documentar funcionalmente los modelos y columnas en castellano, usando la semántica del dominio de facturación y la nomenclatura catalana de las tablas y campos.
+8. Añadir pruebas de calidad técnica y reconciliación con raw.
 
 La implementación cubrirá todas las tablas L4 definidas en el DDL. Las 19 tablas con correspondencia directa se alimentarán desde sus fuentes RAW. `L4_FACT_REGUL` y `L4_FACT_RECUP` se generarán con su estructura tipada, pero quedarán vacías porque el inventario actual no contiene CSV ni tablas RAW de origen para ellas; su futura alimentación queda pendiente de una decisión de diseño.
 
@@ -109,6 +113,13 @@ Cuando se genere una estructura automáticamente desde un CSV, la secuencia debe
 - [dbt_project.yml](dbt_project.yml) — configuración del proyecto dbt y capas
 - [macros/generate_schema_name.sql](macros/generate_schema_name.sql) — lógica de naming de esquema
 - [ddl/DDL_AGUA_CLARA.sql](ddl/DDL_AGUA_CLARA.sql) — referencia técnica de bronze y modelo de datos
+- [scripts/generate_raw_sicab.py](scripts/generate_raw_sicab.py) — generación automática de DDL, COPY INTO y fuentes RAW a partir de los CSV
+- [scripts/generate_l4_fact.py](scripts/generate_l4_fact.py) — generación automática de modelos, tests y documentación de la capa L4
+- [scripts/load_raw_sicab.py](scripts/load_raw_sicab.py) — carga de CSV a Snowflake mediante key-pair y validación técnica de RAW
+- [macros/test_relationships_compound.sql](macros/test_relationships_compound.sql) — validación de claves foráneas simples y compuestas entre modelos L4
+- [datos](datos) — CSV de entrada del dominio SICAB
+
+Estos archivos son referencias obligatorias para ejecutar el plan. Antes de implementar o validar cada fase se deben revisar las definiciones, convenciones y reglas que correspondan en ellos. En particular, los umbrales de frescura de `raw_sicab` se toman de [docs/arquitectura_datos.md](docs/arquitectura_datos.md) y no se sustituyen por valores genéricos.
 
 ### Decisiones clave tomadas
 - Se mantiene la nomenclatura de capas original del proyecto: raw_sicab, l4_fact, silver_fact, silver_edw y gold_fact.

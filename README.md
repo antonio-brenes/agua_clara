@@ -14,7 +14,7 @@ El script `scripts/load_raw_sicab.py` realiza en una sola ejecución estas opera
 4. Ejecuta `ddl/COPY_INTO_RAW_SICAB.sql` para cargar las tablas desde los ficheros del stage.
 5. Valida técnicamente la ingesta: ficheros presentes, correspondencia fichero-tabla, número de columnas, recuentos de registros y metadatos de auditoría.
 
-El proceso no contiene credenciales. Requiere tener instalado Python y definir las variables de conexión en la sesión desde la que se ejecute.
+El proceso no contiene credenciales. Requiere tener instalado Python y definir las variables de conexión en la sesión desde la que se ejecute. La autenticación recomendada es key-pair.
 
 #### Preparación
 
@@ -24,17 +24,19 @@ Desde la raíz del proyecto:
 python -m pip install -r requirements.txt
 $env:SNOWFLAKE_ACCOUNT = "<cuenta>"
 $env:SNOWFLAKE_USER = "<usuario>"
-$env:SNOWFLAKE_PASSWORD = "<contraseña>"
 $env:SNOWFLAKE_WAREHOUSE = "<warehouse>"
+$env:SNOWFLAKE_ROLE = "<rol>"
+$env:SNOWFLAKE_PRIVATE_KEY_PATH = "C:\Users\<usuario>\.snowflake\rsa_key.p8"
+$env:SNOWFLAKE_PRIVATE_KEY_PASSPHRASE = "<passphrase>"
 ```
 
-También se puede usar autenticación SSO, omitiendo `SNOWFLAKE_PASSWORD` y estableciendo:
+La passphrase debe definirse únicamente en la sesión o en un gestor seguro; no debe escribirse en el repositorio, en scripts ni en documentación. También se puede usar autenticación SSO, omitiendo las variables key-pair y estableciendo:
 
 ```powershell
 $env:SNOWFLAKE_AUTHENTICATOR = "externalbrowser"
 ```
 
-`SNOWFLAKE_DATABASE` y `SNOWFLAKE_SCHEMA` son opcionales. Por defecto se utilizan `DES_AGUA_CLARA` y `RAW_SICAB`. El stage completo también puede cambiarse mediante `SNOWFLAKE_STAGE`.
+`SNOWFLAKE_DATABASE` y `SNOWFLAKE_SCHEMA` son opcionales. Por defecto se utilizan `DES_AGUA_CLARA` y `RAW_SICAB`. El stage utilizado por el script es `RAW_STAGE`.
 
 #### Ejecución
 
@@ -48,6 +50,14 @@ El script debe ejecutarse con un usuario que tenga permisos para crear o reempla
 
 La carga asigna a cada registro los metadatos `FECHA_EXTRACCION` y `SISTEMA_ORIGEN`. `FECHA_EXTRACCION` se calcula convirtiendo explícitamente la hora actual a `Europe/Madrid`, respetando el cambio de horario de verano e invierno.
 
+Después de completar la carga RAW, validar la frescura de las fuentes declaradas en dbt:
+
+```powershell
+dbt source freshness
+```
+
+La frescura se calcula con `FECHA_EXTRACCION`: se emite aviso cuando la antigüedad supera 7 días y error cuando supera 15 días. `RAW_FACT_REGUL` y `RAW_FACT_RECUP` quedan excluidas mientras permanezcan vacías y sin origen definido.
+
 ### Opción manual: ejecución paso a paso
 
 Esta alternativa permite controlar y verificar cada operación individualmente. Las herramientas recomendadas son:
@@ -60,7 +70,7 @@ Para esta carga manual se recomienda utilizar SnowSQL o Snowflake CLI, ya que pe
 
 #### 1. Configurar la conexión
 
-Configurar la conexión en SnowSQL o Snowflake CLI usando la cuenta, usuario, warehouse y método de autenticación de Snowflake. También puede utilizarse la conexión integrada de Snowsight para ejecutar SQL. No se deben escribir contraseñas en los ficheros del proyecto.
+Configurar la conexión en SnowSQL o Snowflake CLI usando cuenta, usuario, warehouse, rol y autenticación key-pair. La clave privada debe configurarse mediante el mecanismo seguro de la herramienta cliente y su passphrase no debe escribirse en los ficheros del proyecto. También puede utilizarse la conexión integrada de Snowsight para ejecutar SQL.
 
 #### 2. Crear o reemplazar el stage
 
@@ -124,7 +134,7 @@ SELECT
 FROM DES_AGUA_CLARA.RAW_SICAB.RAW_CARRER;
 ```
 
-La opción manual debe respetar siempre este orden: crear el stage, subir los CSV, crear las tablas y ejecutar los `COPY INTO`.
+La opción manual debe respetar siempre este orden: crear el stage, subir los CSV, crear las tablas, ejecutar los `COPY INTO` y validar la frescura con `dbt source freshness`.
 
 ## Implementación de la capa L4
 

@@ -5,11 +5,16 @@ sources:
     description: "Tablas RAW de origen SICAB para el piloto Agua Clara"
     database: des_agua_clara
     schema: raw_sicab
+    config:
+      loaded_at_field: FECHA_EXTRACCION
+      freshness:
+        warn_after: {count: 7, period: day}
+        error_after: {count: 15, period: day}
     tables:
       - name: raw_carrer
         description: "Tabla raw de carrer."
-      - name: raw_codifications
-        description: "Tabla raw de codifications."
+      - name: raw_codificacions
+        description: "Tabla raw de codificacions."
       - name: raw_conveni_frau
         description: "Tabla raw de conveni_frau."
       - name: raw_dte_municipal
@@ -46,5 +51,9 @@ sources:
         description: "Tabla raw de submin_servei."
       - name: raw_fact_regul
         description: "Tabla raw vacía de raw_fact_regul pendiente de definición de origen."
+        config:
+          freshness: null
       - name: raw_fact_recup
         description: "Tabla raw vacía de raw_fact_recup pendiente de definición de origen."
+        config:
+          freshness: null

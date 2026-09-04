@@ -13,16 +13,92 @@ L4_DIR = BASE_DIR / "models" / "agua_clara" / "l4_fact"
 L4_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def parse_l4_tables() -> tuple[dict[str, list[tuple[str, str]]], dict[str, list[str]]]:
+TABLE_DESCRIPTIONS = {
+    "l4_codificacions": "Maestro de códigos funcionales utilizados por el sistema de facturación.",
+    "l4_municipi_sgab": "Maestro de municipios y parámetros territoriales de SICAB.",
+    "l4_dte_municipal": "Maestro de distritos o demarcaciones municipales.",
+    "l4_epigraf_iae": "Maestro de epígrafes de actividades económicas IAE.",
+    "l4_carrer": "Maestro de calles del municipio.",
+    "l4_finca": "Maestro de fincas y sus datos de localización y lectura.",
+    "l4_ramal": "Maestro de ramales o acometidas de suministro.",
+    "l4_submin_servei": "Maestro de contratos o suministros de agua y sus características.",
+    "l4_submin_iae": "Relación entre suministros y sus epígrafes de actividad económica.",
+    "l4_padro_trr": "Padrón de la tasa de residuos asociado a los suministros.",
+    "l4_padro_tamgrem": "Padrón de TAMGREM y sus parámetros de cálculo por suministro.",
+    "l4_hist_ss_pe": "Histórico de periodos de vulnerabilidad o protección social.",
+    "l4_servei_eq_ci": "Equipamiento de servicios contra incendios asociado al suministro.",
+    "l4_servei_facturar": "Calendario y cantidades de servicios contra incendios a facturar.",
+    "l4_conveni_frau": "Suministros incluidos en convenios o situaciones de fraude.",
+    "l4_fact_resum": "Cabecera y resumen económico de las facturas.",
+    "l4_fact_aigua": "Desglose de consumos, bloques e importes de agua de cada factura.",
+    "l4_fact_concepte": "Líneas de conceptos e importes asociados a cada factura.",
+    "l4_fact_regul": "Detalle de regularizaciones de facturación; actualmente fuera del alcance del piloto.",
+    "l4_fact_recup": "Detalle de recuperaciones de facturación; actualmente fuera del alcance del piloto.",
+    "l4_situacio_fact": "Histórico de transiciones de estado de las facturas.",
+}
+
+
+FIELD_DESCRIPTIONS = {
+    "TIP_CODI": "Tipo de código del catálogo.",
+    "CLAU_CODI": "Clave de código del catálogo.",
+    "DESC_CODI": "Descripción completa del código.",
+    "DESC_BREU": "Descripción abreviada del código.",
+    "POLISSA_SUBM": "Identificador de la póliza o suministro.",
+    "POLISSA_RAMAL": "Identificador del ramal o acometida.",
+    "ID_EMPRESA": "Identificador de la empresa suministradora.",
+    "ANY_FACTURA": "Año de la factura.",
+    "NUM_FACTURA": "Número secuencial de la factura.",
+    "NUM_PARTICIO": "Número de partición de la factura.",
+    "NUM_LINEA": "Número de línea dentro de la factura.",
+    "NUM_CONCEPTE": "Código del concepto facturado.",
+    "IMP_TOTAL_FACT": "Importe total de la factura.",
+    "IMP_CONCEPTE": "Importe final de la línea de concepto.",
+    "FECHA_EXTRACCION": "Fecha y hora de extracción del registro en la capa RAW.",
+    "FECHA_CARGA": "Fecha y hora de carga del registro en la capa L4.",
+    "SISTEMA_ORIGEN": "Sistema que originó el registro.",
+    "TABLA_ORIGEN": "Tabla RAW de procedencia del registro.",
+}
+
+
+TOKEN_TRANSLATIONS = {
+    "NUM": "número", "NOMB": "número", "NOMBRE": "nombre", "ID": "identificador",
+    "DATA": "fecha", "FECHA": "fecha", "ANY": "año", "MES": "mes", "DIA": "día",
+    "MOM": "instante", "TS": "marca temporal", "TIP": "tipo", "SIT": "situación",
+    "DESC": "descripción", "NOM": "nombre", "CODI": "código", "CLAU": "clave",
+    "IMP": "importe", "BASE": "base", "PREU": "precio", "PERC": "porcentaje",
+    "M3": "metros cúbicos", "BLOC": "bloque", "FACT": "factura", "SERV": "servicio",
+    "SUBM": "suministro", "MUN": "municipio", "CARRER": "calle", "DTE": "distrito",
+    "FINCA": "finca", "RAMAL": "ramal", "IAE": "IAE", "PADRO": "padrón",
+    "HIST": "histórico", "CONCEPTE": "concepto", "AIGUA": "agua", "TAXA": "tasa",
+    "QUOTA": "cuota", "ORIGEN": "origen", "CARGA": "carga", "EMPRESA": "empresa",
+    "CLIENT": "cliente",
+}
+
+
+def field_description(column: str) -> str:
+    if column in FIELD_DESCRIPTIONS:
+        return FIELD_DESCRIPTIONS[column]
+    words = [TOKEN_TRANSLATIONS.get(word, word.lower()) for word in column.split("_")]
+    return "Campo de " + " ".join(words) + "."
+
+
+def parse_l4_tables() -> tuple[
+    dict[str, list[tuple[str, str]]],
+    dict[str, list[str]],
+    dict[str, set[str]],
+    dict[str, list[tuple[list[str], str, list[str]]]],
+]:
     ddl = DDL_PATH.read_text(encoding="utf-8")
     tables: dict[str, list[tuple[str, str]]] = {}
     primary_keys: dict[str, list[str]] = {}
+    not_null_columns: dict[str, set[str]] = {}
     pattern = re.compile(
         r"CREATE OR REPLACE TABLE (L4_[A-Z0-9_]+) \((.*?)\n\s*\n?\);",
         re.DOTALL,
     )
     for match in pattern.finditer(ddl):
         columns: list[tuple[str, str]] = []
+        not_null_columns[match.group(1)] = set()
         primary_key_match = re.search(r"PRIMARY KEY\s*\((.*?)\)", match.group(2), re.DOTALL)
         if primary_key_match:
             primary_keys[match.group(1)] = re.findall(r"[A-Z][A-Z0-9_]*", primary_key_match.group(1))
@@ -33,8 +109,23 @@ def parse_l4_tables() -> tuple[dict[str, list[tuple[str, str]]], dict[str, list[
             column = re.match(r"([A-Z][A-Z0-9_]*)\s+([A-Z]+(?:\([0-9,]+\))?)", line)
             if column and column.group(1) not in {"CONSTRAINT"}:
                 columns.append((column.group(1), column.group(2)))
+                if re.search(r"\bNOT\s+NULL\b", line):
+                    not_null_columns[match.group(1)].add(column.group(1))
         tables[match.group(1)] = columns
-    return tables, primary_keys
+
+    foreign_keys: dict[str, list[tuple[list[str], str, list[str]]]] = {}
+    foreign_key_pattern = re.compile(
+        r"ALTER TABLE\s+(L4_[A-Z0-9_]+).*?FOREIGN KEY\s*\((.*?)\)\s*"
+        r"REFERENCES\s+(L4_[A-Z0-9_]+)\s*\((.*?)\)",
+        re.DOTALL,
+    )
+    for match in foreign_key_pattern.finditer(ddl):
+        local_columns = re.findall(r"[A-Z][A-Z0-9_]*", match.group(2))
+        referenced_columns = re.findall(r"[A-Z][A-Z0-9_]*", match.group(4))
+        foreign_keys.setdefault(match.group(1), []).append(
+            (local_columns, match.group(3), referenced_columns)
+        )
+    return tables, primary_keys, not_null_columns, foreign_keys
 
 
 def raw_sources() -> list[str]:
@@ -58,7 +149,7 @@ def expression(column: str, data_type: str, source_columns: set[str]) -> str:
     return f"{raw} AS {column}"
 
 
-tables, primary_keys = parse_l4_tables()
+tables, primary_keys, not_null_columns, foreign_keys = parse_l4_tables()
 available_sources = set(raw_sources())
 generated: list[str] = []
 schema_lines = ["version: 2", "", "models:"]
@@ -134,20 +225,33 @@ from raw
     generated.append(model_name)
 
     schema_lines.append(f"  - name: {model_name}")
-    schema_lines.append(f'    description: "Modelo L4 tipado a partir de {raw_name}."')
+    schema_lines.append(
+        f'    description: "{TABLE_DESCRIPTIONS.get(model_name, "Entidad L4 del dominio de facturación de Agua Clara.")}"'
+    )
     schema_lines.append("    tests:")
     schema_lines.append("      - dbt_utils.unique_combination_of_columns:")
     schema_lines.append("          arguments:")
     schema_lines.append("            combination_of_columns:")
     for key_column in primary_keys.get(table_name, [columns[0][0]]):
         schema_lines.append(f"              - {key_column}")
+    for local_columns, referenced_table, referenced_columns in foreign_keys.get(table_name, []):
+        referenced_model = f"l4_{referenced_table.removeprefix('L4_').lower()}"
+        schema_lines.extend(
+            [
+                "      - relationships_compound:",
+                "          arguments:",
+                f'            to: "{{{{ ref(\'{referenced_model}\') }}}}"',
+                f"            local_columns: [{', '.join(local_columns)}]",
+                f"            field_columns: [{', '.join(referenced_columns)}]",
+            ]
+        )
     schema_lines.append("    columns:")
-    schema_lines.append("      - name: FECHA_EXTRACCION")
-    schema_lines.append('        description: "Fecha y hora de extracción heredada de RAW."')
-    schema_lines.append("        tests:")
-    schema_lines.append("          - not_null")
     for name, _ in columns:
-        schema_lines.append(f'      - name: {name}\n        description: "Campo tipado de {raw_name}."')
+        schema_lines.append(f"      - name: {name}")
+        schema_lines.append(f'        description: "{field_description(name)}"')
+        if name in not_null_columns.get(table_name, set()) or name in primary_keys.get(table_name, []):
+            schema_lines.append("        tests:")
+            schema_lines.append("          - not_null")
     schema_lines.extend(
         [
             '      - name: ID_CARGA\n        description: "Identificador técnico de la carga."',
