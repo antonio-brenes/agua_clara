@@ -1,0 +1,33 @@
+{{ config(
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['POLISSA_SUBM', 'DATA_FIN_FACT'],
+    schema='l4_fact',
+    tags=['l4_fact', 'l4', 'bronze']
+) }}
+
+with raw as (
+    select *
+    from {{ source('raw_sicab', 'raw_servei_facturar') }}
+)
+
+select
+    COALESCE(NULLIF(TRIM(raw."POLISSA_SUBM"), ''), '^^') AS POLISSA_SUBM,
+    COALESCE(TRY_TO_DATE(NULLIF(TRIM(raw."DATA_FIN_FACT"), '')), '0001-01-01'::DATE) AS DATA_FIN_FACT,
+    COALESCE(NULLIF(TRIM(raw."CALCUL_CONSUM_SERV"), ''), '^^') AS CALCUL_CONSUM_SERV,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."DIES_CONSUM_SERV"), ''), 5, 0), 0) AS DIES_CONSUM_SERV,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NOMB_BOQ_25_SERV"), ''), 3, 0), 0) AS NOMB_BOQ_25_SERV,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NOMB_BOQ_45_SERV"), ''), 3, 0), 0) AS NOMB_BOQ_45_SERV,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NOMB_BOQ_70_SERV"), ''), 3, 0), 0) AS NOMB_BOQ_70_SERV,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NOMB_BOQ_100_SERV"), ''), 3, 0), 0) AS NOMB_BOQ_100_SERV,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NOMB_SPRINCK_SERV"), ''), 5, 0), 0) AS NOMB_SPRINCK_SERV,
+    COALESCE(NULLIF(TRIM(raw."ID_BUTLLETA"), ''), '^^') AS ID_BUTLLETA,
+    COALESCE(NULLIF(TRIM(raw."ID_LOT_LECT"), ''), '^^') AS ID_LOT_LECT,
+    COALESCE(NULLIF(TRIM(raw."ANY_CALENDARI"), ''), '^^') AS ANY_CALENDARI,
+    COALESCE(NULLIF(TRIM(raw."MES_CALENDARI"), ''), '^^') AS MES_CALENDARI,
+    DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_TZ, '{{ run_started_at.isoformat() }}'::TIMESTAMP_TZ) AS ID_CARGA,
+    raw.FECHA_EXTRACCION AS FECHA_EXTRACCION,
+    CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP()) AS FECHA_CARGA,
+    raw.SISTEMA_ORIGEN AS SISTEMA_ORIGEN,
+    'RAW_SERVEI_FACTURAR' AS TABLA_ORIGEN
+from raw

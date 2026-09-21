@@ -13,6 +13,7 @@ from urllib.parse import unquote
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BASE_DIR / "datos"
 DDL_DIR = BASE_DIR / "ddl"
+GENERATE_RAW_SCRIPT = BASE_DIR / "scripts" / "generate_raw_sicab.py"
 DATABASE = os.getenv("SNOWFLAKE_DATABASE", "DES_AGUA_CLARA")
 SCHEMA = os.getenv("SNOWFLAKE_SCHEMA", "RAW_SICAB")
 STAGE = "RAW_STAGE"
@@ -60,6 +61,18 @@ def execute_sql_file(connection: Any, path: Path) -> None:
     print(f"Ejecutando {path.relative_to(BASE_DIR)}")
     sql = path.read_text(encoding="utf-8-sig")
     connection.execute_string(sql)
+
+
+def generate_raw_artifacts() -> None:
+    """Regenerate RAW DDL, COPY and source metadata from the current CSV files."""
+    import subprocess
+
+    print(f"Generando artefactos RAW desde {DATA_DIR}")
+    subprocess.run(
+        [sys.executable, str(GENERATE_RAW_SCRIPT)],
+        cwd=BASE_DIR,
+        check=True,
+    )
 
 
 def validate_raw_load(cursor: Any, csv_files: list[Path]) -> None:
@@ -126,6 +139,7 @@ def main() -> int:
 
     ddl_path = DDL_DIR / "RAW_SICAB_DDL.sql"
     copy_path = DDL_DIR / "COPY_INTO_RAW_SICAB.sql"
+    generate_raw_artifacts()
     for path in (ddl_path, copy_path):
         if not path.exists():
             raise RuntimeError(f"No existe el fichero requerido: {path}")

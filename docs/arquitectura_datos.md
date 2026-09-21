@@ -415,7 +415,7 @@ S000000023 desde 2024-06-18
 S000000091 desde 2025-01-22
 ```
 
-La regla funcional es que un suministro se considera fraudulento desde `DATA_CREA_C_FRA` mientras permanezca en la tabla. Una factura anterior a esa fecha no se identifica como factura posterior al fraude. Aunque `FACT_RECUP` queda fuera del alcance actual, la condición de fraude se refleja mediante consumos anómalos y mediante estados o observaciones coherentes.
+La regla funcional es que un suministro se considera fraudulento desde `DATA_CREA_C_FRA` mientras permanezca en la tabla. Una factura anterior a esa fecha no se identifica como factura posterior al fraude. La condición de fraude se refleja mediante consumos anómalos y mediante estados u observaciones coherentes.
 
 ### 4.16. FACT_RESUM
 
@@ -535,7 +535,8 @@ Para CI todos los bloques son cero.
 
 #### Importe total
 
-`IMP_TOTAL_FACT` es exactamente igual a la suma de `FACT_CONCEPTE.IMP_CONCEPTE` de la factura. Se establece una convención única respecto al IVA: las líneas de concepto incluyen tanto bases como líneas de IVA e `IMP_TOTAL_FACT` es la suma final de todas las líneas, incluidas bonificaciones negativas.
+`IMP_AIGUA_IVA` es la suma de todo `FACT_AIGUA.IMP*` de la factura
+`IMP_TOTAL_FACT` es la suma de `IMP_AIGUA_IVA` y todo `FACT_CONCEPTE.IMP_CONCEPTE` de la factura.
 
 ### 6.2. FACT_AIGUA
 
@@ -545,7 +546,7 @@ El CSV disponible es:
 FACT_AIGUA.csv
 ```
 
-Se genera una fila por cada factura que incluye facturación de agua ordinaria. Para servicios CI se genera una fila con valores de agua a cero o no se crea `FACT_AIGUA` y se mantiene la facturación CI exclusivamente en `FACT_CONCEPTE`.
+Se genera una fila por cada factura que incluye facturación de agua ordinaria. Para servicios CI no se generan filas en `FACT_AIGUA`, manteniéndose la facturación CI exclusivamente en `FACT_CONCEPTE`.
 
 La fila reutiliza:
 
@@ -735,7 +736,6 @@ Los ficheros de origen serán los ficheros CSV con cabecera almacenados en la ca
 
 - Una tabla en capa raw_sicab por fichero CSV.
 - Nombre de tabla: raw_<nombre_fichero>
-- Adicionalmente, se crearán `RAW_FACT_REGUL` y `RAW_FACT_RECUP` aunque actualmente no exista CSV de origen para ellas. Estas tablas permanecerán vacías hasta que se defina su alimentación.
 - Todos los campos de las tablas serán de tipo VARCHAR y tendrán nombres heredados de la cabecera del CSV.
 - No se transformarán los datos.
 - Se conservará la granularidad de origen.
@@ -780,17 +780,20 @@ Este modelo se incorpora en la capa `silver_edw` del proyecto, manteniendo el no
     * FECHA_EXTRACCION (TIMESTAMP_NTZ): Se heredará del registro original de la tabla correspondiente en capa l4_fact.
     * FECHA_CARGA (TIMESTAMP_NTZ): Timestamp del sistema en el instante de carga del registro en esta tabla
     * SISTEMA_ORIGEN (VARCHAR(30)) : Se heredará del registro original de la tabla correspondiente en capa l4_fact.
-    * TABLA_ORIGEN VARCHAR(50): Será el nombre de la tabla que contiene el registro original en capa l4_fact. Si hay más de una tabla tabla1/tabla2...
+    * TABLA_ORIGEN VARCHAR(100): Será el nombre de la tabla o tablas L4 que alimentan el registro. Para subconjuntos de catálogo se indicará también el filtro, por ejemplo `L4_CODIFICACIONS [TIP_CODI='TSS']`.
+
+La validación entre capas se realizará en dos niveles: reconciliación de recuentos RAW→L4 y reconciliación de claves distintas L4→hubs de `silver_edw`. Los tests singulares del proyecto devolverán las discrepancias para impedir que una capa se cierre con pérdida o generación inesperada de registros.
 
 ## 10. Capa silver_fact
 
 Entidades con datos específicos del data mart de facturación. Con un modelado estándar, se alimenta con las tablas `l4_fact` que no se incorporan a `silver_edw`.
 
 Principales tablas:
-- La nueva tabla `S_FACTURA_LINEA` es el eje central del modelo de negocio, representando cada registro una línea o concepto facturado. Incorpora datos de:
-    * `l4_fact_resum` / `l4_fact_aigua` para consumos de agua
+- La tabla `S_FACTURA_CONCEPTO` es el eje central del modelo de negocio, representando cada registro un concepto facturado. Incorpora datos de:
+    * `l4_fact_resum` / `l4_fact_aigua` para consumos de agua y conceptos asociados
     * `l4_fact_resum` / `l4_fact_concepte` para resto de conceptos facturados
-Por tanto, la contribución de `l4_fact_resum`, `l4_fact_aigua` y `l4_fact_concepte` a la capa `silver_fact` se limita a `S_FACTURA_LINEA`.
+
+- `S_FACTURA`, con el resumen de factura, alimentada con `l4_fact_resum`
 
 - `S_FACTURA_SITUACION_HIST`, con la historia de los estados de factura, alimentada con `l4_situacio_fact`
 
@@ -813,7 +816,7 @@ La capa `silver_fact` debe considerarse un dominio de negocio y no un Data Vault
 
 Modelo estrella para Power BI.
 
-Siendo g_h_factura_linea (obtenida directamente de s_factura_linea) y g_h_factura_situacion_hist (obtenida directamente de s_factura_situacion_hist) las tablas de hechos.
+Las tablas de hechos, con el prefijo "g_h_", se construirán a partir de s_factura, s_factura_concepto, s_factura_situacion_hist, s_servicio_ci_facturar, s_factura_recup y s_factura_regul.
 
 Construyéndose tantas tablas de dimensiones, con el prefijo "g_d_", como sean necesarias a partir del resto de tablas silver_edw y silver_fact y sumándose a estas una tabla para dimension temporal.
 
@@ -946,11 +949,6 @@ Se consideran dentro del alcance:
 - capa `l4_fact` conforme a `DDL_AGUA_CLARA.sql`,
 - modelos `silver_fact`, `silver_edw`, `gold_fact` del dominio de Agua Clara,
 - validación y documentación del flujo de transformación.
-
-Se excluyen del alcance actual:
-- `L4_FACT_REGUL`
-- `L4_FACT_RECUP`
-- referencias y transformaciones asociadas a `FACT_REGUL` y `FACT_RECUP`
 
 La tabla `L4_SITUACIO_FACT` sí forma parte del alcance porque es una entidad relevante del flujo de estados de factura y servirá para la capa de negocio.
 

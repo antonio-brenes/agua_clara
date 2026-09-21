@@ -48,7 +48,7 @@ python .\scripts\load_raw_sicab.py
 
 El script debe ejecutarse con un usuario que tenga permisos para crear o reemplazar el stage y las tablas del esquema RAW, subir ficheros al stage y ejecutar `COPY INTO`.
 
-La carga asigna a cada registro los metadatos `FECHA_EXTRACCION` y `SISTEMA_ORIGEN`. `FECHA_EXTRACCION` se calcula convirtiendo explícitamente la hora actual a `Europe/Madrid`, respetando el cambio de horario de verano e invierno.
+La carga asigna a cada registro los metadatos `FECHA_EXTRACCION` y `SISTEMA_ORIGEN`. `FECHA_EXTRACCION` se almacena como `TIMESTAMP_TZ` y se calcula convirtiendo explícitamente la hora actual a `Europe/Madrid`, respetando el cambio de horario de verano e invierno.
 
 Después de completar la carga RAW, validar la frescura de las fuentes declaradas en dbt:
 
@@ -56,7 +56,7 @@ Después de completar la carga RAW, validar la frescura de las fuentes declarada
 dbt source freshness
 ```
 
-La frescura se calcula con `FECHA_EXTRACCION`: se emite aviso cuando la antigüedad supera 7 días y error cuando supera 15 días. `RAW_FACT_REGUL` y `RAW_FACT_RECUP` quedan excluidas mientras permanezcan vacías y sin origen definido.
+La frescura se calcula con `FECHA_EXTRACCION`: se emite aviso cuando la antigüedad supera 7 días y error cuando supera 15 días. 
 
 ### Opción manual: ejecución paso a paso
 
@@ -138,7 +138,7 @@ La opción manual debe respetar siempre este orden: crear el stage, subir los CS
 
 ## Implementación de la capa L4
 
-La capa `l4_fact` transforma las tablas RAW declaradas en `models/agua_clara/raw_sicab/sources.yml` y se materializa mediante dbt como tablas tipadas. La ejecución genera los 21 modelos L4 definidos en el DDL, de los que 19 se alimentan desde RAW y 2 quedan vacíos a la espera de una decisión de diseño. Las conversiones son seguras mediante `TRY_TO_DATE`, `TRY_TO_NUMBER` y `TRY_TO_TIMESTAMP_NTZ`, además de los campos de auditoría definidos en el DDL de referencia.
+La capa `l4_fact` transforma las tablas RAW declaradas en `models/raw_sicab/sources.yml` y se materializa mediante dbt como tablas tipadas. La ejecución genera los 21 modelos L4 definidos en el DDL, de los que 19 se alimentan desde RAW y 2 quedan vacíos a la espera de una decisión de diseño. Las conversiones son seguras mediante `TRY_TO_DATE`, `TRY_TO_NUMBER` y `TRY_TO_TIMESTAMP_NTZ`, además de los campos de auditoría definidos en el DDL de referencia.
 
 Los modelos L4 no vuelven a cargar ni reemplazar las tablas RAW. `FECHA_EXTRACCION` se hereda de RAW y `FECHA_CARGA` se genera en `Europe/Madrid`.
 
@@ -146,7 +146,29 @@ Para regenerar los modelos, tests y documentación de la capa:
 
 ```powershell
 python .\scripts\generate_l4_fact.py
-dbt compile --select "models/agua_clara/l4_fact"
+dbt compile --select "path:models/l4_fact"
 ```
 
-Las tablas `L4_FACT_REGUL` y `L4_FACT_RECUP` se generan con su estructura tipada, pero quedan vacías hasta que se defina su origen y estrategia de alimentación.
+Para materializar L4 y ejecutar únicamente los tests aplicables a esta capa, usar selección indirecta cautelosa:
+
+```powershell
+dbt build --select "path:models/l4_fact tag:reconciliation_raw_l4" --indirect-selection cautious
+```
+
+La reconciliación `reconciliation_raw_l4` comprueba la correspondencia entre RAW y L4. La reconciliación `reconciliation_l4_silver_edw` se ejecuta después de materializar `silver_edw`, incluyendo sus modelos y dependencias:
+
+```powershell
+dbt build --select "+path:models/silver_edw" --indirect-selection cautious
+```
+
+## Fase 5: Silver de negocio
+
+La capa `silver_fact` contiene el modelo estándar de facturación: `s_factura_linea`, `s_factura_situacion_hist`, `s_concepto` y `s_situacion_factura`. La línea de factura separa las líneas funcionales `AIGUA` y `CONCEPTE`, conserva la clave lógica de factura y hereda la auditoría de las fuentes L4 combinadas.
+
+Para compilar esta fase:
+
+```powershell
+dbt compile --select "path:models/silver_fact" "path:tests/reconciliation_l4_silver_fact.sql" "path:tests/silver_fact_*.sql"
+```
+
+La reconciliación `reconciliation_l4_silver_fact` comprueba los recuentos frente a L4. Los tests funcionales detectan líneas sin factura, conceptos no catalogados, estados inválidos y discrepancias entre importes de cabecera y detalle.

@@ -1,0 +1,2300 @@
+version: 2
+models:
+- name: edw_h_municipi_sgab
+  description: Hub Data Vault para el maestro municipal de SGAB.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_MUN_SGAB
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_municipi_sgab'') }}'
+        model_columns:
+        - NUM_MUN_SGAB
+        compare_columns:
+        - NUM_MUN_SGAB
+  columns:
+  - name: HK_MUNICIPI_SGAB
+    description: Hash business key del municipio.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Número de municipio de SGAB. Clave primaria.
+    tests:
+    - not_null
+- name: edw_s_municipi_sgab
+  description: Satellite del maestro municipal con atributos del municipio.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_MUNICIPI_SGAB
+        - FECHA_CARGA
+  columns:
+  - name: HK_MUNICIPI_SGAB
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_municipi_sgab'') }}'
+          field: HK_MUNICIPI_SGAB
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Número de municipio de SGAB. Clave primaria.
+    tests:
+    - not_null
+  - name: NOM_MUN_SGAB
+    data_type: varchar(20)
+    description: Nombre del municipio de SGAB.
+    tests:
+    - not_null
+  - name: QL_CRITERI_FACT
+    data_type: varchar(1)
+    description: Criterio de facturación.
+  - name: ID_MUN_CP_UNIC
+    data_type: varchar(1)
+    description: Código postal único del municipio.
+  - name: CP_PROVINCIA
+    data_type: varchar(2)
+    description: Código postal de la provincia.
+  - name: UNITAT_REPARTIMENT
+    data_type: varchar(1)
+    description: Unitad de reparto.
+  - name: NUM_DTE_POST
+    data_type: varchar(2)
+    description: Número de distrito postal.
+  - name: NUM_DEL_SGAB
+    data_type: varchar(2)
+    description: Número de Número de Delegación de SGAB.
+  - name: NUM_AGENCIA_SGAB
+    data_type: varchar(2)
+    description: Número de agencia de SGAB.
+  - name: ID_AREA_LECT
+    data_type: varchar(1)
+    description: Identificador del área de lectura.
+  - name: ID_EMPRESA
+    data_type: varchar(2)
+    description: Identificador de la empresa suministradora.
+  - name: DELEGA_CO
+    data_type: varchar(1)
+    description: Código de delegación.
+  - name: QL_GEST_DTE
+    data_type: varchar(1)
+    description: Gestión de calidad del distrito.
+  - name: ID_MUNI_ENT_MET
+    data_type: varchar(1)
+    description: Indicador de Área Metropolitana de Barcelona.
+  - name: NOMB_DIES_ANS
+    data_type: number(3,0)
+    description: Número de dias de antelación.
+  - name: MUNI_GENERALITAT
+    data_type: varchar(5)
+    description: Municipio de la Generalitat.
+  - name: CODI_PROV
+    data_type: varchar(2)
+    description: Código de la provincia.
+  - name: CODI_MUNI
+    data_type: varchar(4)
+    description: Código del municipio de 4 dígitos, estándar de Explotación Operativa (SGAB).
+  - name: QL_TIPUS_VENDA
+    data_type: varchar(1)
+    description: Calidad del tipo de venta.
+  - name: CODI_MUNICIPI
+    data_type: varchar(3)
+    description: Código del municipio de 3 dígitos, estándar oficial (INE / Idescat).
+  - name: NOMB_DIES_INDEMN
+    data_type: number(3,0)
+    description: Número de días que la empresa debe abonar o compensar al cliente en caso de cortes de servicio no programados que superen el límite legal establecido en el reglamento.
+  - name: NOMB_DIES_SENSE_AUT
+    data_type: number(2,0)
+    description: Número de días sin autorización. Alude a los días en los que un suministro ha estado activo de manera irregular.
+  - name: ADHERIT_L24
+    data_type: varchar(1)
+    description: Adherido a L24 (Ley 24/2015, de 29 de julio, de medidas urgentes para afrontar la emergencia en el ámbito de la vivienda y la pobreza energética).
+  - name: CARTA_CIRER
+    data_type: varchar(1)
+    description: Carta CIRER. Es un modelo de carta de notificación de deuda, siendo la primera carta de aviso de impago que se envía al cliente tras vencer el recibo.
+  - name: NUM_CAIPS
+    data_type: number(5,0)
+    description: Número de CAIPS.
+  - name: NUM_DIAS_ENV_CAIPS
+    data_type: number(5,0)
+    description: Número de días de envío a CAIPS. Número de días de margen que el sistema espera desde que se genera la deuda (o desde la primera notificación) hasta que los datos se
+      exportan y envían a la plataforma/proveedor CAIPS (módulo centralizado de gestión de impagos o centro de impresión que emite la notificación física de suspensión).
+  - name: CARTA_CIRER_2
+    data_type: varchar(1)
+    description: Carta CIRER 2. Es un modelo de carta de notificación de deuda, siendo la segunda carta de aviso de impago (frecuentemente la carta certificada o burofax que sirve como
+      preaviso legal obligatorio antes de interrumpir el servicio).
+  - name: NUM_DIAS_CIRER_2
+    data_type: number(5,0)
+    description: Número de días de espera entre el primer y el segundo aviso de impago.
+  - name: NUM_DIAS_GENERA_CORTE
+    data_type: number(5,0)
+    description: El plazo legal/operativo en días que debe transcurrir tras las cartas de aviso para que el sistema genere automáticamente la orden física de corte de suministro (suspensión
+      por impago).
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios de los atributos del satélite.
+    tests:
+    - not_null
+- name: edw_h_conveni_frau
+  description: Hub Data Vault para convenios de fraude.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - POLISSA_SUBM
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_conveni_frau'') }}'
+        model_columns:
+        - POLISSA_SUBM
+        compare_columns:
+        - POLISSA_SUBM
+  columns:
+  - name: HK_CONVENI_FRAU
+    description: Hash de la clave del convenio de fraude.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_SUBM
+    description: Póliza de suministro asociada al convenio.
+    data_type: string
+    tests:
+    - not_null
+  - name: ID_CARGA
+    description: Identificador técnico del lote de carga.
+    data_type: number
+  - name: FECHA_EXTRACCION
+    description: Fecha y hora de extracción del registro.
+    data_type: timestamp
+  - name: FECHA_CARGA
+    description: Fecha y hora de carga en silver_edw.
+    data_type: timestamp
+  - name: SISTEMA_ORIGEN
+    description: Sistema de origen del registro.
+    data_type: string
+  - name: TABLA_ORIGEN
+    description: Tabla L4 de procedencia.
+    data_type: string
+- name: edw_s_conveni_frau
+  description: Satellite de convenios de fraude.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_CONVENI_FRAU
+        - FECHA_CARGA
+  columns:
+  - name: HK_CONVENI_FRAU
+    description: Clave hash del hub de convenios de fraude.
+    data_type: string
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_conveni_frau'') }}'
+          field: HK_CONVENI_FRAU
+  - name: HASHDIFF
+    description: Hash de cambios de los atributos del satélite.
+    data_type: string
+    tests:
+    - not_null
+  - name: POLISSA_SUBM
+    description: Póliza de suministro asociada al convenio.
+    data_type: string
+  - name: ADRE_CONV_FRAU
+    description: Dirección asociada al convenio de fraude.
+    data_type: string
+  - name: COD_POST_CONV_FRAU
+    description: Código postal del convenio.
+    data_type: string
+  - name: DEL_CREACIO_CONV_F
+    description: Delegación de creación del convenio.
+    data_type: string
+  - name: DATA_CREA_C_FRA
+    description: Fecha de creación del convenio.
+    data_type: date
+  - name: ID_CARGA
+    description: Identificador técnico del lote de carga.
+    data_type: number
+  - name: FECHA_EXTRACCION
+    description: Fecha y hora de extracción del registro.
+    data_type: timestamp
+  - name: FECHA_CARGA
+    description: Fecha y hora de carga en silver_edw.
+    data_type: timestamp
+  - name: SISTEMA_ORIGEN
+    description: Sistema de origen del registro.
+    data_type: string
+  - name: TABLA_ORIGEN
+    description: Tabla L4 de procedencia.
+    data_type: string
+- name: edw_h_hist_ss_pe
+  description: Hub Data Vault del histórico de servicios sociales.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - POLISSA_SUBM
+        - TIP_COLECTIVO
+        - TS_MOM_IND
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_hist_ss_pe'') }}'
+        model_columns:
+        - POLISSA_SUBM
+        - TIP_COLECTIVO
+        - TS_MOM_IND
+        compare_columns:
+        - POLISSA_SUBM
+        - TIP_COLECTIVO
+        - TS_MOM_IND
+  columns:
+  - name: HK_HIST_SS_PE
+    description: Hash de la clave del histórico de servicios sociales.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_SUBM
+    description: Póliza de suministro del histórico.
+    data_type: string
+    tests:
+    - not_null
+  - name: TIP_COLECTIVO
+    description: Tipo de colectivo de servicios sociales.
+    data_type: string
+    tests:
+    - not_null
+  - name: TS_MOM_IND
+    description: Marca temporal del indicador.
+    data_type: timestamp
+    tests:
+    - not_null
+- name: edw_s_hist_ss_pe
+  description: Satellite del histórico de servicios sociales.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_HIST_SS_PE
+        - FECHA_CARGA
+  columns:
+  - name: HK_HIST_SS_PE
+    description: Clave hash del hub del histórico.
+    data_type: string
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_hist_ss_pe'') }}'
+          field: HK_HIST_SS_PE
+  - name: HASHDIFF
+    description: Hash de cambios de los atributos del satélite.
+    data_type: string
+    tests:
+    - not_null
+  - name: POLISSA_SUBM
+    description: Póliza de suministro del histórico.
+    data_type: string
+  - name: TIP_COLECTIVO
+    description: Tipo de colectivo de servicios sociales.
+    data_type: string
+  - name: TS_MOM_IND
+    description: Marca temporal del indicador.
+    data_type: timestamp
+  - name: DATA_INI_IND
+    description: Fecha inicial del indicador.
+    data_type: date
+  - name: DATA_FIN_IND
+    description: Fecha final del indicador.
+    data_type: date
+  - name: OBSERVACIONS
+    description: Observaciones del indicador.
+    data_type: string
+  - name: NUM_EMPLEAT
+    description: Número del empleado asociado.
+    data_type: string
+  - name: INFORME_SS
+    description: Informe de servicios sociales.
+    data_type: string
+  - name: DATA_ENVIA_ACA
+    description: Fecha de envío al ACA.
+    data_type: date
+  - name: NOM_ACA_FITXER
+    description: Nombre del fichero del ACA.
+    data_type: string
+  - name: ID_CARGA
+    description: Identificador técnico del lote de carga.
+    data_type: number
+  - name: FECHA_EXTRACCION
+    description: Fecha y hora de extracción del registro.
+    data_type: timestamp
+  - name: FECHA_CARGA
+    description: Fecha y hora de carga en silver_edw.
+    data_type: timestamp
+  - name: SISTEMA_ORIGEN
+    description: Sistema de origen del registro.
+    data_type: string
+  - name: TABLA_ORIGEN
+    description: Tabla L4 de procedencia.
+    data_type: string
+- name: edw_h_padro_trr
+  description: Hub Data Vault del padrón TRR.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - POLISSA_SUBM
+        - TS_PADRO_TRR
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_padro_trr'') }}'
+        model_columns:
+        - POLISSA_SUBM
+        - TS_PADRO_TRR
+        compare_columns:
+        - POLISSA_SUBM
+        - TS_PADRO_TRR
+  columns:
+  - name: HK_PADRO_TRR
+    description: Hash de la clave del padrón TRR.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_SUBM
+    description: Póliza de suministro del padrón.
+    data_type: string
+    tests:
+    - not_null
+  - name: TS_PADRO_TRR
+    description: Marca temporal de la versión del padrón TRR.
+    data_type: timestamp
+    tests:
+    - not_null
+- name: edw_s_padro_trr
+  description: Satellite del padrón TRR.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_PADRO_TRR
+        - FECHA_CARGA
+  columns:
+  - name: HK_PADRO_TRR
+    description: Clave hash del hub del padrón TRR.
+    data_type: string
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_padro_trr'') }}'
+          field: HK_PADRO_TRR
+  - name: HASHDIFF
+    description: Hash de cambios de los atributos del satélite.
+    data_type: string
+    tests:
+    - not_null
+  - name: POLISSA_SUBM
+    description: Póliza de suministro del padrón.
+    data_type: string
+  - name: TS_PADRO_TRR
+    description: Marca temporal de la versión del padrón TRR.
+    data_type: timestamp
+  - name: TIP_TAXA_TRR
+    description: Tipo de tasa TRR.
+    data_type: string
+  - name: NOMB_HABIT_SUBM
+    description: Número de habitantes del suministro.
+    data_type: number
+  - name: CONSUM_MES_BASE
+    description: Consumo mensual base.
+    data_type: number
+  - name: TIP_QUOTA_TRR
+    description: Tipo de cuota TRR.
+    data_type: string
+  - name: CONSUM_MIG_DIA
+    description: Consumo medio diario.
+    data_type: number
+  - name: NUMERO_EMPLEAT
+    description: Número de empleado asociado.
+    data_type: string
+  - name: PERC_BONIF_TRR
+    description: Porcentaje de bonificación TRR.
+    data_type: number
+  - name: ID_CARGA
+    description: Identificador técnico del lote de carga.
+    data_type: number
+  - name: FECHA_EXTRACCION
+    description: Fecha y hora de extracción del registro.
+    data_type: timestamp
+  - name: FECHA_CARGA
+    description: Fecha y hora de carga en silver_edw.
+    data_type: timestamp
+  - name: SISTEMA_ORIGEN
+    description: Sistema de origen del registro.
+    data_type: string
+  - name: TABLA_ORIGEN
+    description: Tabla L4 de procedencia.
+    data_type: string
+- name: edw_l_conveni_frau_municipi_sgab
+  description: Link entre convenios de fraude y municipios.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_CONVENI_FRAU
+        - HK_MUNICIPI_SGAB
+  columns:
+  - name: HK_CONVENI_FRAU_MUNICIPI_SGAB
+    description: Hash técnica del link entre convenio y municipio.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_CONVENI_FRAU
+    data_type: string
+    description: Hash del convenio de fraude.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_conveni_frau')
+          field: HK_CONVENI_FRAU
+  - name: HK_MUNICIPI_SGAB
+    data_type: string
+    description: Hash del municipio.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_municipi_sgab')
+          field: HK_MUNICIPI_SGAB
+- name: edw_l_conveni_frau_ramal
+  description: Link entre convenios de fraude y ramales.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_CONVENI_FRAU
+        - HK_RAMAL
+  columns:
+  - name: HK_CONVENI_FRAU_RAMAL
+    description: Hash técnica del link entre convenio y ramal.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_CONVENI_FRAU
+    data_type: string
+    description: Hash del convenio de fraude.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_conveni_frau')
+          field: HK_CONVENI_FRAU
+  - name: HK_RAMAL
+    data_type: string
+    description: Hash del ramal.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_ramal')
+          field: HK_RAMAL
+- name: edw_l_padro_tamgrem_epigraf_iae
+  description: Link entre padrones TAMGREM y epígrafes IAE.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_PADRO_TAMGREM
+        - HK_EPIGRAF_IAE
+  columns:
+  - name: HK_PADRO_TAMGREM_EPIGRAF_IAE
+    description: Hash técnica del link entre padrón TAMGREM y epígrafe IAE.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_PADRO_TAMGREM
+    data_type: string
+    description: Hash del padrón TAMGREM.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_padro_tamgrem')
+          field: HK_PADRO_TAMGREM
+  - name: HK_EPIGRAF_IAE
+    data_type: string
+    description: Hash del epígrafe IAE.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_epigraf_iae')
+          field: HK_EPIGRAF_IAE
+- name: edw_l_padro_trr_epigraf_iae
+  description: Link entre padrones TRR y epígrafes IAE.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_PADRO_TRR
+        - HK_EPIGRAF_IAE
+  columns:
+  - name: HK_PADRO_TRR_EPIGRAF_IAE
+    description: Hash técnica del link entre padrón TRR y epígrafe IAE.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_PADRO_TRR
+    data_type: string
+    description: Hash del padrón TRR.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_padro_trr')
+          field: HK_PADRO_TRR
+  - name: HK_EPIGRAF_IAE
+    data_type: string
+    description: Hash del epígrafe IAE.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_epigraf_iae')
+          field: HK_EPIGRAF_IAE
+- name: edw_l_submin_conveni_frau
+  description: Link entre suministros y convenios de fraude.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_CONVENI_FRAU
+  columns:
+  - name: HK_SUBMIN_CONVENI_FRAU
+    description: Hash técnica del link entre suministro y convenio de fraude.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_submin_servei')
+          field: HK_SUBMIN_SERVEI
+  - name: HK_CONVENI_FRAU
+    data_type: string
+    description: Hash del convenio de fraude.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_conveni_frau')
+          field: HK_CONVENI_FRAU
+- name: edw_l_submin_hist_ss_pe
+  description: Link entre suministros e histórico de servicios sociales.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_HIST_SS_PE
+  columns:
+  - name: HK_SUBMIN_HIST_SS_PE
+    description: Hash técnica del link entre suministro e histórico social.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_submin_servei')
+          field: HK_SUBMIN_SERVEI
+  - name: HK_HIST_SS_PE
+    data_type: string
+    description: Hash del histórico de servicios sociales.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_hist_ss_pe')
+          field: HK_HIST_SS_PE
+- name: edw_l_submin_iae
+  description: Link entre suministros y epígrafes IAE.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_EPIGRAF_IAE
+  columns:
+  - name: HK_SUBMIN_IAE
+    description: Hash técnica del link entre suministro y epígrafe IAE.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_submin_servei')
+          field: HK_SUBMIN_SERVEI
+  - name: HK_EPIGRAF_IAE
+    data_type: string
+    description: Hash del epígrafe IAE.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_epigraf_iae')
+          field: HK_EPIGRAF_IAE
+- name: edw_l_submin_padro_tamgrem
+  description: Link entre suministros y padrones TAMGREM.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_PADRO_TAMGREM
+  columns:
+  - name: HK_SUBMIN_PADRO_TAMGREM
+    description: Hash técnica del link entre suministro y padrón TAMGREM.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_submin_servei')
+          field: HK_SUBMIN_SERVEI
+  - name: HK_PADRO_TAMGREM
+    data_type: string
+    description: Hash del padrón TAMGREM.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_padro_tamgrem')
+          field: HK_PADRO_TAMGREM
+- name: edw_l_submin_padro_trr
+  description: Link entre suministros y padrones TRR.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_PADRO_TRR
+  columns:
+  - name: HK_SUBMIN_PADRO_TRR
+    description: Hash técnica del link entre suministro y padrón TRR.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_submin_servei')
+          field: HK_SUBMIN_SERVEI
+  - name: HK_PADRO_TRR
+    data_type: string
+    description: Hash del padrón TRR.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: ref('edw_h_padro_trr')
+          field: HK_PADRO_TRR
+- name: edw_h_dte_municipal
+  description: Hub Data Vault para los distritos municipales.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_MUN_SGAB
+        - NUM_DTE_MUNI
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_dte_municipal'') }}'
+        model_columns:
+        - NUM_MUN_SGAB
+        - NUM_DTE_MUNI
+        compare_columns:
+        - NUM_MUN_SGAB
+        - NUM_DTE_MUNI
+  columns:
+  - name: HK_DTE_MUNICIPAL
+    description: Hash de la clave del distrito.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB.
+    tests:
+    - not_null
+  - name: NUM_DTE_MUNI
+    data_type: varchar(2)
+    description: Código del distrito o demarcación dentro del municipio. Forma parte de la clave primaria.
+    tests:
+    - not_null
+- name: edw_s_dte_municipal
+  description: Satellite del distrito municipal.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_DTE_MUNICIPAL
+        - FECHA_CARGA
+  columns:
+  - name: HK_DTE_MUNICIPAL
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_dte_municipal'') }}'
+          field: HK_DTE_MUNICIPAL
+  - name: NOM_DTE_MUNI
+    data_type: varchar(35)
+    description: Nombre descriptivo del distrito o demarcación municipal.
+    tests:
+    - not_null
+  - name: NUM_DEL_SGAB
+    data_type: varchar(2)
+    description: Código de la delegación SGAB responsable.
+  - name: NUM_AGENCIA_SGAB
+    data_type: varchar(2)
+    description: Código de la agencia SGAB responsable.
+  - name: CODI_AREA_SD
+    data_type: varchar(1)
+    description: Código del área de servicio o distribución asignada al distrito.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_h_tarifa_facturacio
+  description: Hub Data Vault para las tarifas auxiliares de facturación.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - TIP_TARIFA
+        - SUBTIP_TARIFA
+        - DATA_INI_VIGENCIA
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_tarifa_facturacio'') }}'
+        model_columns:
+        - TIP_TARIFA
+        - SUBTIP_TARIFA
+        - DATA_INI_VIGENCIA
+        compare_columns:
+        - TIP_TARIFA
+        - SUBTIP_TARIFA
+        - DATA_INI_VIGENCIA
+  columns:
+  - name: HK_TARIFA_FACTURACIO
+    description: Hash de la clave de la tarifa auxiliar.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: TIP_TARIFA
+    description: Tipo de tarifa.
+    data_type: string
+    tests:
+    - not_null
+  - name: SUBTIP_TARIFA
+    description: Subtipo de tarifa.
+    data_type: string
+    tests:
+    - not_null
+  - name: DATA_INI_VIGENCIA
+    description: Fecha inicial de vigencia de la tarifa.
+    data_type: date
+    tests:
+    - not_null
+  - name: ID_CARGA
+    description: Identificador técnico del lote de carga.
+    data_type: number
+  - name: FECHA_EXTRACCION
+    description: Fecha y hora de extracción del registro.
+    data_type: timestamp
+  - name: FECHA_CARGA
+    description: Fecha y hora de carga en silver_edw.
+    data_type: timestamp
+  - name: SISTEMA_ORIGEN
+    description: Sistema de origen del registro.
+    data_type: string
+  - name: TABLA_ORIGEN
+    description: Tabla L4 de procedencia.
+    data_type: string
+- name: edw_s_tarifa_facturacio
+  description: Satellite de atributos de las tarifas auxiliares de facturación.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_TARIFA_FACTURACIO
+        - FECHA_CARGA
+  columns:
+  - name: HK_TARIFA_FACTURACIO
+    description: Clave hash del hub de tarifas auxiliares.
+    data_type: string
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tarifa_facturacio'') }}'
+          field: HK_TARIFA_FACTURACIO
+  - name: HASHDIFF
+    description: Hash de cambios de los atributos del satélite.
+    data_type: string
+    tests:
+    - not_null
+  - name: TIP_TARIFA
+    description: Tipo de tarifa.
+    data_type: string
+  - name: SUBTIP_TARIFA
+    description: Subtipo de tarifa.
+    data_type: string
+  - name: DATA_INI_VIGENCIA
+    description: Fecha inicial de vigencia de la tarifa.
+    data_type: date
+  - name: DATA_FI_VIGENCIA
+    description: Fecha final de vigencia de la tarifa.
+    data_type: date
+  - name: ORDRE
+    description: Orden de aplicación de la tarifa.
+    data_type: number
+  - name: VALOR_NUMERIC
+    description: Valor numérico de la tarifa.
+    data_type: number
+  - name: UNITAT
+    description: Unidad de medida del valor tarifario.
+    data_type: string
+  - name: OBSERVACIONS
+    description: Observaciones de la tarifa.
+    data_type: string
+  - name: ID_CARGA
+    description: Identificador técnico del lote de carga.
+    data_type: number
+  - name: FECHA_EXTRACCION
+    description: Fecha y hora de extracción del registro.
+    data_type: timestamp
+  - name: FECHA_CARGA
+    description: Fecha y hora de carga en silver_edw.
+    data_type: timestamp
+  - name: SISTEMA_ORIGEN
+    description: Sistema de origen del registro.
+    data_type: string
+  - name: TABLA_ORIGEN
+    description: Tabla L4 de procedencia.
+    data_type: string
+- name: edw_l_municipi_dte
+  description: Link que relaciona municipio y distrito.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_MUNICIPI_SGAB
+        - HK_DTE_MUNICIPAL
+  columns:
+  - name: HK_MUNICIPI_DTE
+    description: Hash técnica del link entre municipio y distrito.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_DTE_MUNICIPAL
+    data_type: string
+    description: Hash del distrito.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_dte_municipal'') }}'
+          field: HK_DTE_MUNICIPAL
+  - name: HK_MUNICIPI_SGAB
+    data_type: string
+    description: Hash del municipio.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_municipi_sgab'') }}'
+          field: HK_MUNICIPI_SGAB
+- name: edw_h_epigraf_iae
+  description: Hub Data Vault para los epígrafes IAE.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SECCIO
+        - EPIGRAF_IAE
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_epigraf_iae'') }}'
+        model_columns:
+        - SECCIO
+        - EPIGRAF_IAE
+        compare_columns:
+        - SECCIO
+        - EPIGRAF_IAE
+  columns:
+  - name: HK_EPIGRAF_IAE
+    description: Hash de la clave del epígrafe.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: SECCIO
+    data_type: varchar(1)
+    description: Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: EPIGRAF_IAE
+    data_type: varchar(4)
+    description: Código del epígrafe IAE que identifica la actividad económica. Forma parte de la clave primaria.
+    tests:
+    - not_null
+- name: edw_s_epigraf_iae
+  description: Satellite del epígrafe IAE.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_EPIGRAF_IAE
+        - FECHA_CARGA
+  columns:
+  - name: HK_EPIGRAF_IAE
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_epigraf_iae'') }}'
+          field: HK_EPIGRAF_IAE
+  - name: DESCR_IAE
+    data_type: varchar(50)
+    description: Descripción de la actividad económica correspondiente al epígrafe IAE.
+    tests:
+    - not_null
+  - name: TIP_TARIFA
+    data_type: varchar(1)
+    description: Código de tipo de tarifa asociado a la actividad económica.
+  - name: TIP_QUOTA_TAMGREM
+    data_type: varchar(3)
+    description: Tipo de cuota TAMGREM aplicable a la actividad o padrón.
+  - name: NIV_GEN_RES
+    data_type: varchar(1)
+    description: Nivel de generación de residuos asignado a la actividad.
+  - name: COD_GEN_RES
+    data_type: varchar(1)
+    description: Código de categoría de generación de residuos.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_h_carrer
+  description: Hub Data Vault para las calles del municipio.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_MUN_SGAB
+        - NUM_CARRER
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_carrer'') }}'
+        model_columns:
+        - NUM_MUN_SGAB
+        - NUM_CARRER
+        compare_columns:
+        - NUM_MUN_SGAB
+        - NUM_CARRER
+  columns:
+  - name: HK_CARRER
+    description: Hash de la clave de la calle.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB.
+    tests:
+    - not_null
+  - name: NUM_CARRER
+    data_type: number(6,0)
+    description: Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria.
+    tests:
+    - not_null
+- name: edw_s_carrer
+  description: Satellite de la calle con atributos del dominio.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_CARRER
+        - FECHA_CARGA
+  columns:
+  - name: HK_CARRER
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_carrer'') }}'
+          field: HK_CARRER
+  - name: NOM_COMPLET_CARRER
+    data_type: varchar(44)
+    description: Nombre completo normalizado de la vía.
+    tests:
+    - not_null
+  - name: CLASSE_CARRER
+    data_type: varchar(4)
+    description: Clase o categoría administrativa de la vía.
+  - name: NOM_ABREUJ_CARRER
+    data_type: varchar(18)
+    description: Nombre abreviado de la vía, destinado a formatos de espacio limitado.
+  - name: TIP_DENOMIN_CARRER
+    data_type: varchar(1)
+    description: Tipo de denominación de la vía, como calle, avenida o paseo.
+  - name: ID_CARRER_SAP
+    data_type: varchar(1)
+    description: Identificador equivalente de la vía en SAP.
+  - name: QL_CARRER
+    data_type: varchar(1)
+    description: Indicador de calidad, validez o tratamiento del registro de calle.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_l_municipi_carrer
+  description: Link entre municipio y calle.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_MUNICIPI_SGAB
+        - HK_CARRER
+  columns:
+  - name: HK_MUNICIPI_CARRER
+    description: Hash técnica del link entre municipio y calle.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_CARRER
+    data_type: string
+    description: Hash de la calle.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_carrer'') }}'
+          field: HK_CARRER
+  - name: HK_MUNICIPI_SGAB
+    data_type: string
+    description: Hash del municipio.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_municipi_sgab'') }}'
+          field: HK_MUNICIPI_SGAB
+- name: edw_h_finca
+  description: Hub Data Vault para las fincas.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_MUN_SGAB
+        - NUM_CARRER
+        - NUM_INI_FINCA
+        - COMP_NUM_INI_FINCA
+        - NUM_FIN_FINCA
+        - COMP_NUM_FIN_FINCA
+        - SIT_FINCA_ESPEC
+        - ORD_FINCA_ESPEC
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_finca'') }}'
+        model_columns:
+        - NUM_MUN_SGAB
+        - NUM_CARRER
+        - NUM_INI_FINCA
+        - COMP_NUM_INI_FINCA
+        - NUM_FIN_FINCA
+        - COMP_NUM_FIN_FINCA
+        - SIT_FINCA_ESPEC
+        - ORD_FINCA_ESPEC
+        compare_columns:
+        - NUM_MUN_SGAB
+        - NUM_CARRER
+        - NUM_INI_FINCA
+        - COMP_NUM_INI_FINCA
+        - NUM_FIN_FINCA
+        - COMP_NUM_FIN_FINCA
+        - SIT_FINCA_ESPEC
+        - ORD_FINCA_ESPEC
+  columns:
+  - name: HK_FINCA
+    description: Hash de la clave de la finca.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_carrer.NUM_MUN_SGAB.
+    tests:
+    - not_null
+  - name: NUM_CARRER
+    data_type: number(6,0)
+    description: Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_carrer.NUM_CARRER.
+    tests:
+    - not_null
+  - name: NUM_INI_FINCA
+    data_type: varchar(4)
+    description: Número inicial del rango postal que identifica la finca. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: COMP_NUM_INI_FINCA
+    data_type: varchar(1)
+    description: Complemento al número inicial de finca, como letra o sufijo. Forma parte de la clave primaria.
+  - name: NUM_FIN_FINCA
+    data_type: varchar(4)
+    description: Número final del rango postal de la finca. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: COMP_NUM_FIN_FINCA
+    data_type: varchar(1)
+    description: Complemento al número final de finca. Forma parte de la clave primaria.
+  - name: SIT_FINCA_ESPEC
+    data_type: varchar(1)
+    description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: ORD_FINCA_ESPEC
+    data_type: varchar(1)
+    description: Ordinal que distingue fincas especiales con igual dirección base. Forma parte de la clave primaria.
+    tests:
+    - not_null
+- name: edw_s_finca
+  description: Satellite de la finca con ubicación y atributos físicos.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_FINCA
+        - FECHA_CARGA
+  columns:
+  - name: HK_FINCA
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_finca'') }}'
+          field: HK_FINCA
+  - name: NUM_INI_FINCA
+    data_type: varchar(4)
+    description: Número inicial del rango postal que identifica la finca. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: NUM_FIN_FINCA
+    data_type: varchar(4)
+    description: Número final del rango postal de la finca. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: COMP_NUM_INI_FINCA
+    data_type: varchar(1)
+    description: Complemento al número inicial de finca, como letra o sufijo. Forma parte de la clave primaria.
+  - name: COMP_NUM_FIN_FINCA
+    data_type: varchar(1)
+    description: Complemento al número final de finca. Forma parte de la clave primaria.
+  - name: SIT_FINCA_ESPEC
+    data_type: varchar(1)
+    description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de la clave primaria.
+  - name: ORD_FINCA_ESPEC
+    data_type: varchar(1)
+    description: Ordinal que distingue fincas especiales con igual dirección base. Forma parte de la clave primaria.
+  - name: NUM_TORN_LECT_MENS
+    data_type: number(4,0)
+    description: Turno mensual de lectura asignado a la finca; permite derivar el ciclo operativo 1, 11 o 21.
+  - name: ORD_FINCA_TORN_MEN
+    data_type: number(3,0)
+    description: Orden de visita de la finca dentro del turno mensual de lectura.
+  - name: NUM_DTE_POST_FINCA
+    data_type: varchar(2)
+    description: Código del distrito postal de la finca.
+  - name: ESTAT_FINCA
+    data_type: varchar(1)
+    description: Estado operativo o administrativo de la finca.
+  - name: ID_GRUP_ELEV_FINCA
+    data_type: varchar(1)
+    description: Identificador del grupo de elevación o presión al que pertenece la finca.
+  - name: PRES_XARXA_FINCA
+    data_type: number(3,0)
+    description: Presión de red asociada a la finca.
+  - name: CAT_FISCAL_FINCA
+    data_type: varchar(1)
+    description: Categoría fiscal asignada a la finca.
+  - name: ALTURA_FINCA
+    data_type: number(3,0)
+    description: Altura o número de plantas considerado para la finca.
+  - name: ID_FINCA_RENDA_LIM
+    data_type: varchar(1)
+    description: Indicador de finca acogida a un régimen de renta limitada.
+  - name: NUM_EXP_RENDA_LIM
+    data_type: varchar(11)
+    description: Número de expediente del régimen de renta limitada.
+  - name: NUM_ZONA_RECOR
+    data_type: varchar(2)
+    description: Código de la zona del recorrido de lectura.
+  - name: NUM_TRAVES
+    data_type: number(7,0)
+    description: Número de travesía o secuencia dentro del recorrido.
+  - name: CASA_RECOR_PERIOD
+    data_type: varchar(3)
+    description: Identificador o secuencia de la finca dentro del recorrido periódico.
+  - name: NUM_NUS_XARXA
+    data_type: number(5,0)
+    description: Identificador del nodo de red asociado a la finca.
+  - name: ID_LOT_LECT
+    data_type: varchar(3)
+    description: Identificador del lote de lectura.
+  - name: OBS_ADRE_INCOMPLET
+    data_type: varchar(24)
+    description: Observación sobre una dirección incompleta o pendiente de normalización.
+  - name: PARTICULARIT_FINCA
+    data_type: varchar(25)
+    description: Descripción de particularidades físicas u operativas de la finca.
+  - name: LOCAL_CLAUS_FINCA
+    data_type: varchar(18)
+    description: Ubicación o referencia del lugar donde se custodian llaves de acceso.
+  - name: QL_COMPT_ELECTRON
+    data_type: varchar(1)
+    description: Indicador de disponibilidad o tratamiento de contadores electrónicos.
+  - name: NUM_DTE_MUNI_FINCA
+    data_type: varchar(2)
+    description: Código del distrito municipal al que pertenece la finca.
+  - name: QL_BATERIA_CABLE
+    data_type: varchar(2)
+    description: Indicador de batería de contadores cableada o preparada para telelectura.
+  - name: CODI_UBICACIO_SAP
+    data_type: varchar(30)
+    description: Código de ubicación técnica de la finca en SAP.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_l_carrer_finca
+  description: Link entre calle y finca.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_CARRER
+        - HK_FINCA
+  columns:
+  - name: HK_CARRER_FINCA
+    description: Hash técnica del link entre calle y finca.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_FINCA
+    data_type: string
+    description: Hash de la finca.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_finca'') }}'
+          field: HK_FINCA
+  - name: HK_CARRER
+    data_type: string
+    description: Hash de la calle.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_carrer'') }}'
+          field: HK_CARRER
+- name: edw_h_ramal
+  description: Hub Data Vault para los ramales.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - POLISSA_RAMAL
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_ramal'') }}'
+        model_columns:
+        - POLISSA_RAMAL
+        compare_columns:
+        - POLISSA_RAMAL
+  columns:
+  - name: HK_RAMAL
+    description: Hash de la clave del ramal.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_RAMAL
+    data_type: varchar(10)
+    description: Identificador de la póliza de ramal o acometida. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: SIT_CLAU_PAS
+    data_type: varchar(2)
+    description: Situación o disponibilidad de la llave de paso del ramal.
+  - name: DATA_SIG_CTE_RAMAL
+    data_type: date
+    description: Fecha efectiva desde la que aplican las características técnicas actuales del ramal.
+  - name: TIP_SUBM_CTE_RAMAL
+    data_type: varchar(1)
+    description: Tipo de suministro considerado en la configuración técnica vigente del ramal.
+  - name: NOMB_JOC_CLAUS_CTE
+    data_type: number(3,0)
+    description: Número de juegos de llaves asociados a la configuración vigente.
+  - name: DATA_PART_INST_RAM
+    data_type: date
+    description: Fecha del parte de instalación del ramal.
+  - name: NUM_PART_INST_RAM
+    data_type: number(5,0)
+    description: Número identificador del parte de instalación.
+  - name: QL_ARQUETA_ARMARI
+    data_type: varchar(1)
+    description: Indicador de ubicación del conjunto en arqueta o armario.
+  - name: ESTAT_ARQUETA_ARM
+    data_type: varchar(1)
+    description: Estado de conservación de la arqueta o armario.
+  - name: ID_CIR_RECUP_AIGUA
+    data_type: varchar(1)
+    description: Indicador de circuito de recuperación o reutilización de agua.
+  - name: NUM_SOL_LIC_AFEC
+    data_type: varchar(9)
+    description: Número de solicitud o licencia relacionada con una afección del ramal.
+  - name: DATA_SOL_BAIXA_RAM
+    data_type: date
+    description: Fecha de solicitud de baja del ramal.
+  - name: DNI_NIF_CLIENT
+    data_type: varchar(9)
+    description: Documento identificativo fiscal del cliente o titular.
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Código interno del municipio en SGAB. Forma parte de una clave foránea hacia l4_finca.NUM_MUN_SGAB.
+  - name: NUM_CARRER
+    data_type: number(6,0)
+    description: Número interno que identifica la vía dentro del municipio. Forma parte de una clave foránea hacia l4_finca.NUM_CARRER.
+  - name: NUM_INI_FINCA
+    data_type: varchar(4)
+    description: Número inicial del rango postal que identifica la finca. Forma parte de una clave foránea hacia l4_finca.NUM_INI_FINCA.
+  - name: COMP_NUM_INI_FINCA
+    data_type: varchar(1)
+    description: Complemento al número inicial de finca, como letra o sufijo. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_INI_FINCA.
+  - name: NUM_FIN_FINCA
+    data_type: varchar(4)
+    description: Número final del rango postal de la finca. Forma parte de una clave foránea hacia l4_finca.NUM_FIN_FINCA.
+  - name: COMP_NUM_FIN_FINCA
+    data_type: varchar(1)
+    description: Complemento al número final de finca. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_FIN_FINCA.
+  - name: SIT_FINCA_ESPEC
+    data_type: varchar(1)
+    description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de una clave foránea hacia l4_finca.SIT_FINCA_ESPEC.
+  - name: ORD_FINCA_ESPEC
+    data_type: varchar(1)
+    description: Ordinal que distingue fincas especiales con igual dirección base. Forma parte de una clave foránea hacia l4_finca.ORD_FINCA_ESPEC.
+  - name: NUM_ORD_RAMAL
+    data_type: number(2,0)
+    description: Número ordinal del ramal dentro de la finca.
+  - name: POLISSA_RAMAL_AFEC
+    data_type: varchar(10)
+    description: Póliza de otro ramal relacionado o afectado por la operación.
+  - name: DNI_NIF_CLIENT_ORI
+    data_type: varchar(9)
+    description: Documento fiscal del cliente originario asociado al ramal.
+  - name: OBS_PRESA_RAMAL
+    data_type: varchar(16)
+    description: Observaciones sobre la toma o conexión del ramal.
+  - name: RAMAL_CO
+    data_type: number(7,0)
+    description: Código complementario o identificador corporativo del ramal.
+  - name: QL_TIPUS_DADES_C
+    data_type: varchar(2)
+    description: Indicador del tipo o calidad de los datos complementarios del ramal.
+  - name: QL_ANOT
+    data_type: varchar(1)
+    description: Indicador de existencia o tratamiento de anotaciones.
+  - name: SECCIO_CENSAL
+    data_type: varchar(10)
+    description: Código de sección censal de la ubicación del ramal.
+- name: edw_s_ramal
+  description: Satellite del ramal con atributos de instalación y operación.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_RAMAL
+        - FECHA_CARGA
+  columns:
+  - name: HK_RAMAL
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_ramal'') }}'
+          field: HK_RAMAL
+  - name: POLISSA_RAMAL
+    data_type: varchar(10)
+    description: Identificador de la póliza de ramal o acometida. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: DVER_POLISSA_RAMAL
+    data_type: varchar(2)
+    description: Dígitos o valor de verificación de la póliza de ramal.
+  - name: SIT_RAMAL
+    data_type: varchar(1)
+    description: Situación operativa del ramal, por ejemplo activo o de baja.
+  - name: TIP_OPER_RAMAL
+    data_type: varchar(1)
+    description: Tipo de operación o modalidad técnica del ramal.
+  - name: US_RAMAL
+    data_type: varchar(1)
+    description: Uso principal asignado al ramal.
+  - name: MATERIAL_RAMAL
+    data_type: varchar(1)
+    description: Material de fabricación del ramal.
+  - name: DATA_INST_RAMAL
+    data_type: date
+    description: Fecha de instalación o puesta en servicio del ramal.
+  - name: DIAMETRE_RAMAL
+    data_type: number(3,0)
+    description: Diámetro nominal del ramal.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_l_finca_ramal
+  description: Link entre finca y ramal.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_FINCA
+        - HK_RAMAL
+  columns:
+  - name: HK_FINCA_RAMAL
+    description: Hash técnica del link entre finca y ramal.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_RAMAL
+    data_type: string
+    description: Hash del ramal.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_ramal'') }}'
+          field: HK_RAMAL
+  - name: HK_FINCA
+    data_type: string
+    description: Hash de la finca.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_finca'') }}'
+          field: HK_FINCA
+- name: edw_h_submin_servei
+  description: Hub Data Vault para los suministros de servicio.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - POLISSA_SUBM
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_submin_servei'') }}'
+        model_columns:
+        - POLISSA_SUBM
+        compare_columns:
+        - POLISSA_SUBM
+  columns:
+  - name: HK_SUBMIN_SERVEI
+    description: Hash de la clave del suministro.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Identificador único de la póliza de suministro. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: DATA_CTE_SUBM_SERV
+    data_type: date
+    description: Fecha efectiva de las características contractuales actuales del suministro.
+  - name: DATA_ALT_SUBM_SERV
+    data_type: date
+    description: Fecha de alta del suministro; limita el inicio de los periodos facturables.
+  - name: DATA_RES_SUBM_SERV
+    data_type: date
+    description: Fecha de resolución o baja; limita el final de los periodos facturables.
+  - name: IMP_FIANSA
+    data_type: number(9,2)
+    description: Importe de la fianza constituida para el suministro.
+  - name: SIT_FIANSA
+    data_type: varchar(1)
+    description: Situación administrativa de la fianza.
+  - name: DATA_ULTIMA_FACT
+    data_type: date
+    description: Fecha final de la última factura conocida para el suministro.
+  - name: QL_IDIOMA
+    data_type: varchar(1)
+    description: Código o indicador del idioma preferente de comunicación y facturación.
+  - name: ID_PAGA_IVA
+    data_type: varchar(1)
+    description: Indicador de si el suministro está sujeto al pago de IVA.
+  - name: US_AIGUA_SUBM
+    data_type: varchar(1)
+    description: Código de uso del agua asociado al suministro.
+  - name: NOMB_HABIT_SUBM
+    data_type: number(3,0)
+    description: Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas.
+  - name: TIP_HABIT_SUBM
+    data_type: varchar(1)
+    description: Tipo o categoría de vivienda del suministro.
+  - name: TIP_TAXA_TRR
+    data_type: varchar(1)
+    description: Tipo de tasa TRR aplicable al suministro.
+  - name: POLISSA_RAMAL
+    data_type: varchar(10)
+    description: Identificador de la póliza de ramal o acometida. Forma parte de una clave foránea hacia l4_ramal.POLISSA_RAMAL.
+  - name: PIS_PORTA_DESTI
+    data_type: varchar(11)
+    description: Identificación de piso, puerta o unidad concreta del punto de suministro.
+  - name: DNI_NIF_CLIENT
+    data_type: varchar(9)
+    description: Documento identificativo fiscal del cliente o titular.
+  - name: NUM_ENTITAT_COBRA
+    data_type: varchar(5)
+    description: Código de la entidad bancaria utilizada para el cobro.
+  - name: NUM_AGENCIA_APART
+    data_type: varchar(4)
+    description: Código de la oficina o agencia bancaria.
+  - name: NUM_COMPTE_DEPEND
+    data_type: varchar(10)
+    description: Número de cuenta bancaria dependiente en formato nacional legado.
+  - name: NOM_TITULAR_COMPTE
+    data_type: varchar(35)
+    description: Nombre del titular de la cuenta bancaria.
+  - name: ID_QUOTA_SOCIAL
+    data_type: varchar(1)
+    description: Indicador de aplicación de cuota social.
+  - name: ID_TARIFA_SOCIAL
+    data_type: varchar(1)
+    description: Indicador de aplicación de tarifa social.
+  - name: IND_SERVEI_SOCIAL
+    data_type: varchar(1)
+    description: Indicador de intervención o reconocimiento por servicios sociales.
+  - name: IND_POB_ENERG
+    data_type: varchar(1)
+    description: Indicador de situación de pobreza energética.
+  - name: NOM_COMERCIAL
+    data_type: varchar(50)
+    description: Nombre comercial del titular o establecimiento.
+  - name: TIP_FACT_ENV
+    data_type: varchar(2)
+    description: Modalidad o formato de envío de la factura.
+  - name: CODI_PAIS
+    data_type: varchar(2)
+    description: Código del país asociado a la cuenta o titular.
+  - name: NUM_COMPTE_IBAN
+    data_type: varchar(34)
+    description: Número de cuenta bancaria en formato IBAN.
+  - name: IND_OKUPA
+    data_type: varchar(1)
+    description: Indicador de ocupación irregular asociado al suministro.
+- name: edw_s_submin_servei
+  description: Satellite del suministro con atributos operativos.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - FECHA_CARGA
+  columns:
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_submin_servei'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Identificador único de la póliza de suministro. Forma parte de la clave primaria.
+    tests:
+    - not_null
+  - name: DVER_POLISSA_SUBM
+    data_type: varchar(2)
+    description: Dígitos o valor de verificación de la póliza de suministro.
+  - name: TIP_SUBM_SERV
+    data_type: varchar(1)
+    description: 'Tipo de suministro o servicio: D doméstico, I industrial y C contra incendios en el piloto.'
+  - name: SIT_SUBM_SERV
+    data_type: varchar(1)
+    description: Situación del suministro, utilizada para distinguir contratos activos y dados de baja.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_l_submin_ramal
+  description: Link entre suministro y ramal.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_RAMAL
+  columns:
+  - name: HK_SUBMIN_RAMAL
+    description: Hash técnica del link entre suministro y ramal.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_submin_servei'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_RAMAL
+    data_type: string
+    description: Hash del ramal.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_ramal'') }}'
+          field: HK_RAMAL
+- name: edw_h_servei_eq_ci
+  description: Hub Data Vault para los equipos contra incendios.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - POLISSA_SUBM
+  - key_set_equality:
+      arguments:
+        compare_model: '{{ ref(''l4_servei_eq_ci'') }}'
+        model_columns:
+        - POLISSA_SUBM
+        compare_columns:
+        - POLISSA_SUBM
+  columns:
+  - name: HK_SERVEI_EQ_CI
+    description: Hash de la clave del equipo.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM.
+    tests:
+    - not_null
+  - name: NUM_PRECINTE_BOCA
+    data_type: number(3,0)
+    description: Número o referencia del precinto de la boca contra incendios.
+  - name: ID_GRUP_ELEV_EQ_CI
+    data_type: varchar(1)
+    description: Identificador del grupo de elevación asociado al equipo CI.
+  - name: ID_VALVULA_MOTOR
+    data_type: varchar(1)
+    description: Identificador de la válvula motorizada del sistema CI.
+  - name: TIP_PETIC_RES
+    data_type: varchar(1)
+    description: Tipo de petición o resolución asociada al servicio CI.
+- name: edw_s_servei_eq_ci
+  description: Satellite del equipo contra incendios.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SERVEI_EQ_CI
+        - FECHA_CARGA
+  columns:
+  - name: HK_SERVEI_EQ_CI
+    data_type: string
+    description: Clave hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_servei_eq_ci'') }}'
+          field: HK_SERVEI_EQ_CI
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM.
+    tests:
+    - not_null
+  - name: NOMB_BOQUES_25
+    data_type: number(3,0)
+    description: Número de bocas contra incendios de 25 mm instaladas.
+  - name: NOMB_BOQUES_45
+    data_type: number(3,0)
+    description: Número de bocas contra incendios de 45 mm instaladas.
+  - name: NOMB_BOQUES_70
+    data_type: number(3,0)
+    description: Número de bocas contra incendios de 70 mm instaladas.
+  - name: NOMB_BOQUES_100
+    data_type: number(3,0)
+    description: Número de bocas contra incendios de 100 mm instaladas.
+  - name: NOMB_SPRINCKLERS
+    data_type: number(5,0)
+    description: Número de sprinklers instalados.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios del satélite.
+    tests:
+    - not_null
+- name: edw_l_submin_servei_eq_ci
+  description: Link entre suministro y equipo contra incendios.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_SERVEI_EQ_CI
+  columns:
+  - name: HK_SUBMIN_SERVEI_EQ_CI
+    description: Hash técnica del link entre suministro y equipo contra incendios.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_submin_servei'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_SERVEI_EQ_CI
+    data_type: string
+    description: Hash del equipo.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_servei_eq_ci'') }}'
+          field: HK_SERVEI_EQ_CI
+- name: edw_h_tipo_vivienda
+  description: Hub Data Vault para tipos de vivienda THL.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - COD_TIPO_VIVIENDA
+  columns:
+  - name: HK_TIPO_VIVIENDA
+    description: Hash del tipo de vivienda.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: COD_TIPO_VIVIENDA
+    data_type: string
+    description: Código del tipo de vivienda.
+    tests:
+    - not_null
+- name: edw_s_tipo_vivienda
+  description: Satellite del catálogo THL.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_TIPO_VIVIENDA
+        - FECHA_CARGA
+  columns:
+  - name: HK_TIPO_VIVIENDA
+    data_type: string
+    description: Hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tipo_vivienda'') }}'
+          field: HK_TIPO_VIVIENDA
+  - name: COD_TIPO_VIVIENDA
+    data_type: string
+    description: Código del tipo de vivienda.
+    tests:
+    - not_null
+  - name: DES_TIPO_VIVIENDA
+    data_type: string
+    description: Descripción del tipo de vivienda.
+    tests:
+    - not_null
+  - name: DES_ABREV_TIPO_VIVIENDA
+    data_type: string
+    description: Descripción abreviada del tipo de vivienda.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios de los atributos del satélite.
+    tests:
+    - not_null
+- name: edw_h_tipo_suministro
+  description: Hub Data Vault para tipos de suministro TSS.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - COD_TIPO_SUMINISTRO
+  columns:
+  - name: HK_TIPO_SUMINISTRO
+    description: Hash del tipo de suministro.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: COD_TIPO_SUMINISTRO
+    data_type: string
+    description: Código del tipo de suministro.
+    tests:
+    - not_null
+- name: edw_s_tipo_suministro
+  description: Satellite del catálogo TSS.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_TIPO_SUMINISTRO
+        - FECHA_CARGA
+  columns:
+  - name: HK_TIPO_SUMINISTRO
+    data_type: string
+    description: Hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tipo_suministro'') }}'
+          field: HK_TIPO_SUMINISTRO
+  - name: COD_TIPO_SUMINISTRO
+    data_type: string
+    description: Código del tipo de suministro.
+    tests:
+    - not_null
+  - name: DES_TIPO_SUMINISTRO
+    data_type: string
+    description: Descripción del tipo de suministro.
+    tests:
+    - not_null
+  - name: DES_ABREV_TIPO_SUMINISTRO
+    data_type: string
+    description: Descripción abreviada del tipo de suministro.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios de los atributos del satélite.
+    tests:
+    - not_null
+- name: edw_h_tipo_uso_agua
+  description: Hub Data Vault para usos de agua US.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - COD_TIPO_USO_AGUA
+  columns:
+  - name: HK_TIPO_USO_AGUA
+    description: Hash del uso de agua.
+    data_type: string
+    tests:
+    - not_null
+    - unique
+  - name: COD_TIPO_USO_AGUA
+    data_type: string
+    description: Código del tipo de uso del agua.
+    tests:
+    - not_null
+- name: edw_s_tipo_uso_agua
+  description: Satellite del catálogo US.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_TIPO_USO_AGUA
+        - FECHA_CARGA
+  columns:
+  - name: HK_TIPO_USO_AGUA
+    data_type: string
+    description: Hash del hub.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tipo_uso_agua'') }}'
+          field: HK_TIPO_USO_AGUA
+  - name: COD_TIPO_USO_AGUA
+    data_type: string
+    description: Código del tipo de uso del agua.
+    tests:
+    - not_null
+  - name: DES_TIPO_USO_AGUA
+    data_type: string
+    description: Descripción del tipo de uso del agua.
+    tests:
+    - not_null
+  - name: DES_ABREV_TIPO_USO_AGUA
+    data_type: string
+    description: Descripción abreviada del tipo de uso del agua.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote o ejecución que incorporó el registro.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción del registro en RAW.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de carga normalizada a Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de RAW.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla RAW de procedencia.
+    tests:
+    - not_null
+  - name: HASHDIFF
+    data_type: string
+    description: Hash de cambios de los atributos del satélite.
+    tests:
+    - not_null

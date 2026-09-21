@@ -11,11 +11,6 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
-seeds:
-  # Builds seeds into '<your_schema_name>_raw_sicab'
-  agua_clara:
-    +schema: raw_sicab
-
 models:
 
   agua_clara:
@@ -35,5 +30,6 @@ models:
     gold_fact:
       +schema: gold_fact
       +materialized: table
+
 flags:
   require_generic_test_arguments_property: true

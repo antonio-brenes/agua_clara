@@ -1,0 +1,32 @@
+{{ config(
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key=['NUM_PARTICIO', 'ID_EMPRESA', 'ANY_FACTURA', 'NUM_FACTURA', 'NUM_LINEA', 'NUM_CONCEPTE'],
+    schema='l4_fact',
+    tags=['l4_fact', 'l4', 'bronze']
+) }}
+
+with raw as (
+    select *
+    from {{ source('raw_sicab', 'raw_fact_concepte') }}
+)
+
+select
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NUM_PARTICIO"), ''), 2, 0), 0) AS NUM_PARTICIO,
+    COALESCE(NULLIF(TRIM(raw."ID_EMPRESA"), ''), '^^') AS ID_EMPRESA,
+    COALESCE(NULLIF(TRIM(raw."ANY_FACTURA"), ''), '^^') AS ANY_FACTURA,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NUM_FACTURA"), ''), 7, 0), 0) AS NUM_FACTURA,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NUM_LINEA"), ''), 3, 0), 0) AS NUM_LINEA,
+    COALESCE(NULLIF(TRIM(raw."NUM_CONCEPTE"), ''), '^^') AS NUM_CONCEPTE,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."BASE_CONCEPTE"), ''), 11, 2), 0) AS BASE_CONCEPTE,
+    COALESCE(NULLIF(TRIM(raw."TIP_TAXA_CONCEP"), ''), '^^') AS TIP_TAXA_CONCEP,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."PREU_CONCEPTE"), ''), 11, 4), 0) AS PREU_CONCEPTE,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."IMP_CONCEPTE"), ''), 11, 2), 0) AS IMP_CONCEPTE,
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."IVA_APLICAT_CONC"), ''), 5, 2), 0) AS IVA_APLICAT_CONC,
+    COALESCE(NULLIF(TRIM(raw."OBSER_CONCEPTE"), ''), '^^') AS OBSER_CONCEPTE,
+    DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_TZ, '{{ run_started_at.isoformat() }}'::TIMESTAMP_TZ) AS ID_CARGA,
+    raw.FECHA_EXTRACCION AS FECHA_EXTRACCION,
+    CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP()) AS FECHA_CARGA,
+    raw.SISTEMA_ORIGEN AS SISTEMA_ORIGEN,
+    'RAW_FACT_CONCEPTE' AS TABLA_ORIGEN
+from raw

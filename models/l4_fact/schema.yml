@@ -1,0 +1,3136 @@
+version: 2
+
+models:
+  - name: l4_codificacions
+    description: "Maestro de códigos. Granularidad: un registro por código."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - TIP_CODI
+              - CLAU_CODI
+    columns:
+      - name: TIP_CODI
+        data_type: varchar(3)
+        description: "Tipo de código. Parte de la clave primaria."
+        tests:
+          - not_null
+      - name: CLAU_CODI
+        data_type: varchar(5)
+        description: "Clave de código. Parte de la clave primaria."
+        tests:
+          - not_null
+      - name: DESC_CODI
+        data_type: varchar(50)
+        description: "Descripción completa del código."
+        tests:
+          - not_null
+      - name: DESC_BREU
+        data_type: varchar(20)
+        description: "Descripción breve del código."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_municipi_sgab
+    description: "Maestro de municipios de SGAB. Granularidad: un registro por municipio."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+    columns:
+      - name: NUM_MUN_SGAB
+        data_type: varchar(2)
+        description: "Número de municipio de SGAB. Clave primaria."
+        tests:
+          - not_null
+      - name: NOM_MUN_SGAB
+        data_type: varchar(20)
+        description: "Nombre del municipio de SGAB."
+        tests:
+          - not_null
+      - name: QL_CRITERI_FACT
+        data_type: varchar(1)
+        description: "Criterio de facturación."
+        tests:
+          - not_null
+      - name: ID_MUN_CP_UNIC
+        data_type: varchar(1)
+        description: "Código postal único del municipio."
+        tests:
+          - not_null
+      - name: CP_PROVINCIA
+        data_type: varchar(2)
+        description: "Código postal de la provincia."
+        tests:
+          - not_null
+      - name: UNITAT_REPARTIMENT
+        data_type: varchar(1)
+        description: "Unitad de reparto."
+        tests:
+          - not_null
+      - name: NUM_DTE_POST
+        data_type: varchar(2)
+        description: "Número de distrito postal."
+        tests:
+          - not_null
+      - name: NUM_DEL_SGAB
+        data_type: varchar(2)
+        description: "Número de Número de Delegación de SGAB."
+        tests:
+          - not_null
+      - name: NUM_AGENCIA_SGAB
+        data_type: varchar(2)
+        description: "Número de agencia de SGAB."
+        tests:
+          - not_null
+      - name: ID_AREA_LECT
+        data_type: varchar(1)
+        description: "Identificador del área de lectura."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Identificador de la empresa suministradora."
+        tests:
+          - not_null
+      - name: DELEGA_CO
+        data_type: varchar(1)
+        description: "Código de delegación."
+      - name: QL_GEST_DTE
+        data_type: varchar(1)
+        description: "Gestión de calidad del distrito."
+        tests:
+          - not_null
+      - name: ID_MUNI_ENT_MET
+        data_type: varchar(1)
+        description: "Indicador de Área Metropolitana de Barcelona."
+        tests:
+          - not_null
+      - name: NOMB_DIES_ANS
+        data_type: number(3,0)
+        description: "Número de dias de antelación."
+        tests:
+          - not_null
+      - name: MUNI_GENERALITAT
+        data_type: varchar(5)
+        description: "Municipio de la Generalitat."
+      - name: CODI_PROV
+        data_type: varchar(2)
+        description: "Código de la provincia."
+      - name: CODI_MUNI
+        data_type: varchar(4)
+        description: "Código del municipio de 4 dígitos, estándar de Explotación Operativa (SGAB)."
+      - name: QL_TIPUS_VENDA
+        data_type: varchar(1)
+        description: "Calidad del tipo de venta."
+        tests:
+          - not_null
+      - name: CODI_MUNICIPI
+        data_type: varchar(3)
+        description: "Código del municipio de 3 dígitos, estándar oficial (INE / Idescat)."
+      - name: NOMB_DIES_INDEMN
+        data_type: number(3,0)
+        description: "Número de días que la empresa debe abonar o compensar al cliente en caso de cortes de servicio no programados que superen el límite legal establecido en el reglamento."
+      - name: NOMB_DIES_SENSE_AUT
+        data_type: number(2,0)
+        description: "Número de días sin autorización. Alude a los días en los que un suministro ha estado activo de manera irregular."
+      - name: ADHERIT_L24
+        data_type: varchar(1)
+        description: "Adherido a L24 (Ley 24/2015, de 29 de julio, de medidas urgentes para afrontar la emergencia en el ámbito de la vivienda y la pobreza energética)."
+      - name: CARTA_CIRER
+        data_type: varchar(1)
+        description: "Carta CIRER. Es un modelo de carta de notificación de deuda, siendo la primera carta de aviso de impago que se envía al cliente tras vencer el recibo."
+      - name: NUM_CAIPS
+        data_type: number(5,0)
+        description: "Número de CAIPS."
+      - name: NUM_DIAS_ENV_CAIPS
+        data_type: number(5,0)
+        description: "Número de días de envío a CAIPS. Número de días de margen que el sistema espera desde que se genera la deuda (o desde la primera notificación) hasta que los datos se exportan y envían a la plataforma/proveedor CAIPS (módulo centralizado de gestión de impagos o centro de impresión que emite la notificación física de suspensión)."
+      - name: CARTA_CIRER_2
+        data_type: varchar(1)
+        description: "Carta CIRER 2. Es un modelo de carta de notificación de deuda, siendo la segunda carta de aviso de impago (frecuentemente la carta certificada o burofax que sirve como preaviso legal obligatorio antes de interrumpir el servicio)."
+      - name: NUM_DIAS_CIRER_2
+        data_type: number(5,0)
+        description: "Número de días de espera entre el primer y el segundo aviso de impago."
+      - name: NUM_DIAS_GENERA_CORTE
+        data_type: number(5,0)
+        description: "El plazo legal/operativo en días que debe transcurrir tras las cartas de aviso para que el sistema genere automáticamente la orden física de corte de suministro (suspensión por impago)."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_dte_municipal
+    description: "Maestro de distritos o demarcaciones municipales. Granularidad: un registro por combinación de municipio SGAB y distrito municipal."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+              - NUM_DTE_MUNI
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_municipi_sgab') }}"
+            local_columns: [NUM_MUN_SGAB]
+            field_columns: [NUM_MUN_SGAB]
+    columns:
+      - name: NUM_MUN_SGAB
+        data_type: varchar(2)
+        description: "Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB."
+        tests:
+          - not_null
+      - name: NUM_DTE_MUNI
+        data_type: varchar(2)
+        description: "Código del distrito o demarcación dentro del municipio. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: NOM_DTE_MUNI
+        data_type: varchar(35)
+        description: "Nombre descriptivo del distrito o demarcación municipal."
+        tests:
+          - not_null
+      - name: NUM_DEL_SGAB
+        data_type: varchar(2)
+        description: "Código de la delegación SGAB responsable."
+        tests:
+          - not_null
+      - name: NUM_AGENCIA_SGAB
+        data_type: varchar(2)
+        description: "Código de la agencia SGAB responsable."
+        tests:
+          - not_null
+      - name: CODI_AREA_SD
+        data_type: varchar(1)
+        description: "Código del área de servicio o distribución asignada al distrito."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_epigraf_iae
+    description: "Catálogo de epígrafes del Impuesto sobre Actividades Económicas utilizados para clasificar la actividad del suministro y parametrizar tarifas y tasas. Granularidad: un registro por sección y epígrafe IAE."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - SECCIO
+              - EPIGRAF_IAE
+    columns:
+      - name: SECCIO
+        data_type: varchar(1)
+        description: "Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: EPIGRAF_IAE
+        data_type: varchar(4)
+        description: "Código del epígrafe IAE que identifica la actividad económica. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: DESCR_IAE
+        data_type: varchar(50)
+        description: "Descripción de la actividad económica correspondiente al epígrafe IAE."
+        tests:
+          - not_null
+      - name: TIP_TARIFA
+        data_type: varchar(1)
+        description: "Código de tipo de tarifa asociado a la actividad económica."
+        tests:
+          - not_null
+      - name: TIP_QUOTA_TAMGREM
+        data_type: varchar(3)
+        description: "Tipo de cuota TAMGREM aplicable a la actividad o padrón."
+        tests:
+          - not_null
+      - name: NIV_GEN_RES
+        data_type: varchar(1)
+        description: "Nivel de generación de residuos asignado a la actividad."
+        tests:
+          - not_null
+      - name: COD_GEN_RES
+        data_type: varchar(1)
+        description: "Código de categoría de generación de residuos."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_carrer
+    description: "Maestro de vías públicas de los municipios gestionados. Granularidad: un registro por combinación de municipio SGAB y número de calle."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+              - NUM_CARRER
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_municipi_sgab') }}"
+            local_columns: [NUM_MUN_SGAB]
+            field_columns: [NUM_MUN_SGAB]
+    columns:
+      - name: NUM_MUN_SGAB
+        data_type: varchar(2)
+        description: "Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB."
+        tests:
+          - not_null
+      - name: NUM_CARRER
+        data_type: number(6,0)
+        description: "Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: CLASSE_CARRER
+        data_type: varchar(4)
+        description: "Clase o categoría administrativa de la vía."
+        tests:
+          - not_null
+      - name: NOM_ABREUJ_CARRER
+        data_type: varchar(18)
+        description: "Nombre abreviado de la vía, destinado a formatos de espacio limitado."
+        tests:
+          - not_null
+      - name: TIP_DENOMIN_CARRER
+        data_type: varchar(1)
+        description: "Tipo de denominación de la vía, como calle, avenida o paseo."
+        tests:
+          - not_null
+      - name: NOM_COMPLET_CARRER
+        data_type: varchar(44)
+        description: "Nombre completo normalizado de la vía."
+        tests:
+          - not_null
+      - name: ID_CARRER_SAP
+        data_type: varchar(1)
+        description: "Identificador equivalente de la vía en SAP."
+        tests:
+          - not_null
+      - name: QL_CARRER
+        data_type: varchar(1)
+        description: "Indicador de calidad, validez o tratamiento del registro de calle."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_finca
+    description: "Maestro de fincas o rangos de numeración postal, con atributos territoriales, técnicos y de planificación de lectura. Granularidad: un registro por clave completa de finca dentro de una calle y municipio."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_MUN_SGAB
+              - NUM_CARRER
+              - NUM_INI_FINCA
+              - COMP_NUM_INI_FINCA
+              - NUM_FIN_FINCA
+              - COMP_NUM_FIN_FINCA
+              - SIT_FINCA_ESPEC
+              - ORD_FINCA_ESPEC
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_carrer') }}"
+            local_columns: [NUM_MUN_SGAB, NUM_CARRER]
+            field_columns: [NUM_MUN_SGAB, NUM_CARRER]
+    columns:
+      - name: NUM_MUN_SGAB
+        data_type: varchar(2)
+        description: "Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_carrer.NUM_MUN_SGAB."
+        tests:
+          - not_null
+      - name: NUM_CARRER
+        data_type: number(6,0)
+        description: "Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_carrer.NUM_CARRER."
+        tests:
+          - not_null
+      - name: NUM_INI_FINCA
+        data_type: varchar(4)
+        description: "Número inicial del rango postal que identifica la finca. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: COMP_NUM_INI_FINCA
+        data_type: varchar(1)
+        description: "Complemento al número inicial de finca, como letra o sufijo. Forma parte de la clave primaria."
+      - name: NUM_FIN_FINCA
+        data_type: varchar(4)
+        description: "Número final del rango postal de la finca. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: COMP_NUM_FIN_FINCA
+        data_type: varchar(1)
+        description: "Complemento al número final de finca. Forma parte de la clave primaria."
+      - name: SIT_FINCA_ESPEC
+        data_type: varchar(1)
+        description: "Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: ORD_FINCA_ESPEC
+        data_type: varchar(1)
+        description: "Ordinal que distingue fincas especiales con igual dirección base. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: NUM_TORN_LECT_MENS
+        data_type: number(4,0)
+        description: "Turno mensual de lectura asignado a la finca; permite derivar el ciclo operativo 1, 11 o 21."
+        tests:
+          - not_null
+      - name: ORD_FINCA_TORN_MEN
+        data_type: number(3,0)
+        description: "Orden de visita de la finca dentro del turno mensual de lectura."
+        tests:
+          - not_null
+      - name: NUM_DTE_POST_FINCA
+        data_type: varchar(2)
+        description: "Código del distrito postal de la finca."
+        tests:
+          - not_null
+      - name: ESTAT_FINCA
+        data_type: varchar(1)
+        description: "Estado operativo o administrativo de la finca."
+        tests:
+          - not_null
+      - name: ID_GRUP_ELEV_FINCA
+        data_type: varchar(1)
+        description: "Identificador del grupo de elevación o presión al que pertenece la finca."
+        tests:
+          - not_null
+      - name: PRES_XARXA_FINCA
+        data_type: number(3,0)
+        description: "Presión de red asociada a la finca."
+        tests:
+          - not_null
+      - name: CAT_FISCAL_FINCA
+        data_type: varchar(1)
+        description: "Categoría fiscal asignada a la finca."
+        tests:
+          - not_null
+      - name: ALTURA_FINCA
+        data_type: number(3,0)
+        description: "Altura o número de plantas considerado para la finca."
+        tests:
+          - not_null
+      - name: ID_FINCA_RENDA_LIM
+        data_type: varchar(1)
+        description: "Indicador de finca acogida a un régimen de renta limitada."
+        tests:
+          - not_null
+      - name: NUM_EXP_RENDA_LIM
+        data_type: varchar(11)
+        description: "Número de expediente del régimen de renta limitada."
+        tests:
+          - not_null
+      - name: NUM_ZONA_RECOR
+        data_type: varchar(2)
+        description: "Código de la zona del recorrido de lectura."
+        tests:
+          - not_null
+      - name: NUM_TRAVES
+        data_type: number(7,0)
+        description: "Número de travesía o secuencia dentro del recorrido."
+        tests:
+          - not_null
+      - name: CASA_RECOR_PERIOD
+        data_type: varchar(3)
+        description: "Identificador o secuencia de la finca dentro del recorrido periódico."
+        tests:
+          - not_null
+      - name: NUM_NUS_XARXA
+        data_type: number(5,0)
+        description: "Identificador del nodo de red asociado a la finca."
+        tests:
+          - not_null
+      - name: ID_LOT_LECT
+        data_type: varchar(3)
+        description: "Identificador del lote de lectura."
+      - name: OBS_ADRE_INCOMPLET
+        data_type: varchar(24)
+        description: "Observación sobre una dirección incompleta o pendiente de normalización."
+        tests:
+          - not_null
+      - name: PARTICULARIT_FINCA
+        data_type: varchar(25)
+        description: "Descripción de particularidades físicas u operativas de la finca."
+        tests:
+          - not_null
+      - name: LOCAL_CLAUS_FINCA
+        data_type: varchar(18)
+        description: "Ubicación o referencia del lugar donde se custodian llaves de acceso."
+        tests:
+          - not_null
+      - name: QL_COMPT_ELECTRON
+        data_type: varchar(1)
+        description: "Indicador de disponibilidad o tratamiento de contadores electrónicos."
+        tests:
+          - not_null
+      - name: NUM_DTE_MUNI_FINCA
+        data_type: varchar(2)
+        description: "Código del distrito municipal al que pertenece la finca."
+        tests:
+          - not_null
+      - name: QL_BATERIA_CABLE
+        data_type: varchar(2)
+        description: "Indicador de batería de contadores cableada o preparada para telelectura."
+        tests:
+          - not_null
+      - name: CODI_UBICACIO_SAP
+        data_type: varchar(30)
+        description: "Código de ubicación técnica de la finca en SAP."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_ramal
+    description: "Maestro de ramales o acometidas que conectan la red con una finca y sirven de soporte técnico a uno o varios suministros. Granularidad: un registro por póliza de ramal."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_RAMAL
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_finca') }}"
+            local_columns: [NUM_MUN_SGAB, NUM_CARRER, NUM_INI_FINCA, COMP_NUM_INI_FINCA, NUM_FIN_FINCA, COMP_NUM_FIN_FINCA, SIT_FINCA_ESPEC, ORD_FINCA_ESPEC]
+            field_columns: [NUM_MUN_SGAB, NUM_CARRER, NUM_INI_FINCA, COMP_NUM_INI_FINCA, NUM_FIN_FINCA, COMP_NUM_FIN_FINCA, SIT_FINCA_ESPEC, ORD_FINCA_ESPEC]
+    columns:
+      - name: POLISSA_RAMAL
+        data_type: varchar(10)
+        description: "Identificador de la póliza de ramal o acometida. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: DVER_POLISSA_RAMAL
+        data_type: varchar(2)
+        description: "Dígitos o valor de verificación de la póliza de ramal."
+        tests:
+          - not_null
+      - name: SIT_RAMAL
+        data_type: varchar(1)
+        description: "Situación operativa del ramal, por ejemplo activo o de baja."
+        tests:
+          - not_null
+      - name: TIP_OPER_RAMAL
+        data_type: varchar(1)
+        description: "Tipo de operación o modalidad técnica del ramal."
+        tests:
+          - not_null
+      - name: US_RAMAL
+        data_type: varchar(1)
+        description: "Uso principal asignado al ramal."
+        tests:
+          - not_null
+      - name: MATERIAL_RAMAL
+        data_type: varchar(1)
+        description: "Material de fabricación del ramal."
+        tests:
+          - not_null
+      - name: DATA_INST_RAMAL
+        data_type: date
+        description: "Fecha de instalación o puesta en servicio del ramal."
+        tests:
+          - not_null
+      - name: DIAMETRE_RAMAL
+        data_type: number(3,0)
+        description: "Diámetro nominal del ramal."
+        tests:
+          - not_null
+      - name: SIT_CLAU_PAS
+        data_type: varchar(2)
+        description: "Situación o disponibilidad de la llave de paso del ramal."
+        tests:
+          - not_null
+      - name: DATA_SIG_CTE_RAMAL
+        data_type: date
+        description: "Fecha efectiva desde la que aplican las características técnicas actuales del ramal."
+        tests:
+          - not_null
+      - name: TIP_SUBM_CTE_RAMAL
+        data_type: varchar(1)
+        description: "Tipo de suministro considerado en la configuración técnica vigente del ramal."
+        tests:
+          - not_null
+      - name: NOMB_JOC_CLAUS_CTE
+        data_type: number(3,0)
+        description: "Número de juegos de llaves asociados a la configuración vigente."
+        tests:
+          - not_null
+      - name: DATA_PART_INST_RAM
+        data_type: date
+        description: "Fecha del parte de instalación del ramal."
+        tests:
+          - not_null
+      - name: NUM_PART_INST_RAM
+        data_type: number(5,0)
+        description: "Número identificador del parte de instalación."
+        tests:
+          - not_null
+      - name: QL_ARQUETA_ARMARI
+        data_type: varchar(1)
+        description: "Indicador de ubicación del conjunto en arqueta o armario."
+        tests:
+          - not_null
+      - name: ESTAT_ARQUETA_ARM
+        data_type: varchar(1)
+        description: "Estado de conservación de la arqueta o armario."
+        tests:
+          - not_null
+      - name: ID_CIR_RECUP_AIGUA
+        data_type: varchar(1)
+        description: "Indicador de circuito de recuperación o reutilización de agua."
+        tests:
+          - not_null
+      - name: NUM_SOL_LIC_AFEC
+        data_type: varchar(9)
+        description: "Número de solicitud o licencia relacionada con una afección del ramal."
+      - name: DATA_SOL_BAIXA_RAM
+        data_type: date
+        description: "Fecha de solicitud de baja del ramal."
+        tests:
+          - not_null
+      - name: DNI_NIF_CLIENT
+        data_type: varchar(9)
+        description: "Documento identificativo fiscal del cliente o titular."
+        tests:
+          - not_null
+      - name: NUM_MUN_SGAB
+        data_type: varchar(2)
+        description: "Código interno del municipio en SGAB. Forma parte de una clave foránea hacia l4_finca.NUM_MUN_SGAB."
+        tests:
+          - not_null
+      - name: NUM_CARRER
+        data_type: number(6,0)
+        description: "Número interno que identifica la vía dentro del municipio. Forma parte de una clave foránea hacia l4_finca.NUM_CARRER."
+        tests:
+          - not_null
+      - name: NUM_INI_FINCA
+        data_type: varchar(4)
+        description: "Número inicial del rango postal que identifica la finca. Forma parte de una clave foránea hacia l4_finca.NUM_INI_FINCA."
+        tests:
+          - not_null
+      - name: COMP_NUM_INI_FINCA
+        data_type: varchar(1)
+        description: "Complemento al número inicial de finca, como letra o sufijo. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_INI_FINCA."
+      - name: NUM_FIN_FINCA
+        data_type: varchar(4)
+        description: "Número final del rango postal de la finca. Forma parte de una clave foránea hacia l4_finca.NUM_FIN_FINCA."
+        tests:
+          - not_null
+      - name: COMP_NUM_FIN_FINCA
+        data_type: varchar(1)
+        description: "Complemento al número final de finca. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_FIN_FINCA."
+      - name: SIT_FINCA_ESPEC
+        data_type: varchar(1)
+        description: "Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de una clave foránea hacia l4_finca.SIT_FINCA_ESPEC."
+        tests:
+          - not_null
+      - name: ORD_FINCA_ESPEC
+        data_type: varchar(1)
+        description: "Ordinal que distingue fincas especiales con igual dirección base. Forma parte de una clave foránea hacia l4_finca.ORD_FINCA_ESPEC."
+        tests:
+          - not_null
+      - name: NUM_ORD_RAMAL
+        data_type: number(2,0)
+        description: "Número ordinal del ramal dentro de la finca."
+        tests:
+          - not_null
+      - name: POLISSA_RAMAL_AFEC
+        data_type: varchar(10)
+        description: "Póliza de otro ramal relacionado o afectado por la operación."
+      - name: DNI_NIF_CLIENT_ORI
+        data_type: varchar(9)
+        description: "Documento fiscal del cliente originario asociado al ramal."
+      - name: OBS_PRESA_RAMAL
+        data_type: varchar(16)
+        description: "Observaciones sobre la toma o conexión del ramal."
+        tests:
+          - not_null
+      - name: RAMAL_CO
+        data_type: number(7,0)
+        description: "Código complementario o identificador corporativo del ramal."
+      - name: QL_TIPUS_DADES_C
+        data_type: varchar(2)
+        description: "Indicador del tipo o calidad de los datos complementarios del ramal."
+        tests:
+          - not_null
+      - name: QL_ANOT
+        data_type: varchar(1)
+        description: "Indicador de existencia o tratamiento de anotaciones."
+        tests:
+          - not_null
+      - name: SECCIO_CENSAL
+        data_type: varchar(10)
+        description: "Código de sección censal de la ubicación del ramal."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_submin_servei
+    description: "Maestro de contratos de suministro y servicios asociados, con vigencia, tipología, titular, cobro y atributos sociales. Granularidad: un registro por póliza de suministro."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_ramal') }}"
+            local_columns: [POLISSA_RAMAL]
+            field_columns: [POLISSA_RAMAL]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: DVER_POLISSA_SUBM
+        data_type: varchar(2)
+        description: "Dígitos o valor de verificación de la póliza de suministro."
+        tests:
+          - not_null
+      - name: TIP_SUBM_SERV
+        data_type: varchar(1)
+        description: "Tipo de suministro o servicio: D doméstico, I industrial y C contra incendios en el piloto."
+        tests:
+          - not_null
+      - name: SIT_SUBM_SERV
+        data_type: varchar(1)
+        description: "Situación del suministro, utilizada para distinguir contratos activos y dados de baja."
+        tests:
+          - not_null
+      - name: DATA_CTE_SUBM_SERV
+        data_type: date
+        description: "Fecha efectiva de las características contractuales actuales del suministro."
+        tests:
+          - not_null
+      - name: DATA_ALT_SUBM_SERV
+        data_type: date
+        description: "Fecha de alta del suministro; limita el inicio de los periodos facturables."
+        tests:
+          - not_null
+      - name: DATA_RES_SUBM_SERV
+        data_type: date
+        description: "Fecha de resolución o baja; limita el final de los periodos facturables."
+        tests:
+          - not_null
+      - name: IMP_FIANSA
+        data_type: number(9,2)
+        description: "Importe de la fianza constituida para el suministro."
+        tests:
+          - not_null
+      - name: SIT_FIANSA
+        data_type: varchar(1)
+        description: "Situación administrativa de la fianza."
+        tests:
+          - not_null
+      - name: DATA_ULTIMA_FACT
+        data_type: date
+        description: "Fecha final de la última factura conocida para el suministro."
+        tests:
+          - not_null
+      - name: QL_IDIOMA
+        data_type: varchar(1)
+        description: "Código o indicador del idioma preferente de comunicación y facturación."
+        tests:
+          - not_null
+      - name: ID_PAGA_IVA
+        data_type: varchar(1)
+        description: "Indicador de si el suministro está sujeto al pago de IVA."
+        tests:
+          - not_null
+      - name: US_AIGUA_SUBM
+        data_type: varchar(1)
+        description: "Código de uso del agua asociado al suministro."
+        tests:
+          - not_null
+      - name: NOMB_HABIT_SUBM
+        data_type: number(3,0)
+        description: "Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas."
+        tests:
+          - not_null
+      - name: TIP_HABIT_SUBM
+        data_type: varchar(1)
+        description: "Tipo o categoría de vivienda del suministro."
+        tests:
+          - not_null
+      - name: TIP_TAXA_TRR
+        data_type: varchar(1)
+        description: "Tipo de tasa TRR aplicable al suministro."
+      - name: POLISSA_RAMAL
+        data_type: varchar(10)
+        description: "Identificador de la póliza de ramal o acometida. Forma parte de una clave foránea hacia l4_ramal.POLISSA_RAMAL."
+        tests:
+          - not_null
+      - name: PIS_PORTA_DESTI
+        data_type: varchar(11)
+        description: "Identificación de piso, puerta o unidad concreta del punto de suministro."
+        tests:
+          - not_null
+      - name: DNI_NIF_CLIENT
+        data_type: varchar(9)
+        description: "Documento identificativo fiscal del cliente o titular."
+        tests:
+          - not_null
+      - name: NUM_ENTITAT_COBRA
+        data_type: varchar(5)
+        description: "Código de la entidad bancaria utilizada para el cobro."
+        tests:
+          - not_null
+      - name: NUM_AGENCIA_APART
+        data_type: varchar(4)
+        description: "Código de la oficina o agencia bancaria."
+        tests:
+          - not_null
+      - name: NUM_COMPTE_DEPEND
+        data_type: varchar(10)
+        description: "Número de cuenta bancaria dependiente en formato nacional legado."
+        tests:
+          - not_null
+      - name: NOM_TITULAR_COMPTE
+        data_type: varchar(35)
+        description: "Nombre del titular de la cuenta bancaria."
+        tests:
+          - not_null
+      - name: ID_QUOTA_SOCIAL
+        data_type: varchar(1)
+        description: "Indicador de aplicación de cuota social."
+      - name: ID_TARIFA_SOCIAL
+        data_type: varchar(1)
+        description: "Indicador de aplicación de tarifa social."
+      - name: IND_SERVEI_SOCIAL
+        data_type: varchar(1)
+        description: "Indicador de intervención o reconocimiento por servicios sociales."
+      - name: IND_POB_ENERG
+        data_type: varchar(1)
+        description: "Indicador de situación de pobreza energética."
+      - name: NOM_COMERCIAL
+        data_type: varchar(50)
+        description: "Nombre comercial del titular o establecimiento."
+      - name: TIP_FACT_ENV
+        data_type: varchar(2)
+        description: "Modalidad o formato de envío de la factura."
+      - name: CODI_PAIS
+        data_type: varchar(2)
+        description: "Código del país asociado a la cuenta o titular."
+      - name: NUM_COMPTE_IBAN
+        data_type: varchar(34)
+        description: "Número de cuenta bancaria en formato IBAN."
+      - name: IND_OKUPA
+        data_type: varchar(1)
+        description: "Indicador de ocupación irregular asociado al suministro."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_submin_iae
+    description: "Relación entre un suministro y las actividades económicas declaradas para el mismo. Granularidad: un registro por combinación de póliza de suministro, sección y epígrafe IAE."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - SECCIO
+              - EPIGRAF_IAE
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_epigraf_iae') }}"
+            local_columns: [SECCIO, EPIGRAF_IAE]
+            field_columns: [SECCIO, EPIGRAF_IAE]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: SECCIO
+        data_type: varchar(1)
+        description: "Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_epigraf_iae.SECCIO."
+        tests:
+          - not_null
+      - name: EPIGRAF_IAE
+        data_type: varchar(4)
+        description: "Código del epígrafe IAE que identifica la actividad económica. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_epigraf_iae.EPIGRAF_IAE."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_padro_trr
+    description: "Histórico del padrón de la tasa de recogida o tratamiento de residuos (TRR) aplicable a cada suministro. Granularidad: una versión del padrón por póliza de suministro y marca temporal."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - TS_PADRO_TRR
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_epigraf_iae') }}"
+            local_columns: [SECCIO, EPIGRAF_IAE]
+            field_columns: [SECCIO, EPIGRAF_IAE]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: TS_PADRO_TRR
+        data_type: timestamp
+        description: "Marca temporal que identifica la versión del padrón TRR. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: TIP_TAXA_TRR
+        data_type: varchar(1)
+        description: "Tipo de tasa TRR aplicable al suministro."
+        tests:
+          - not_null
+      - name: NOMB_HABIT_SUBM
+        data_type: number(3,0)
+        description: "Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas."
+        tests:
+          - not_null
+      - name: CONSUM_MES_BASE
+        data_type: number(7,2)
+        description: "Consumo mensual de referencia utilizado en el padrón o cálculo de la tasa."
+        tests:
+          - not_null
+      - name: TIP_QUOTA_TRR
+        data_type: varchar(3)
+        description: "Tipo de cuota TRR asignada al suministro."
+        tests:
+          - not_null
+      - name: CONSUM_MIG_DIA
+        data_type: number(9,4)
+        description: "Consumo medio diario de referencia."
+        tests:
+          - not_null
+      - name: NUMERO_EMPLEAT
+        data_type: varchar(8)
+        description: "Número de empleado que registró o gestionó el padrón."
+        tests:
+          - not_null
+      - name: SECCIO
+        data_type: varchar(1)
+        description: "Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de una clave foránea hacia l4_epigraf_iae.SECCIO."
+        tests:
+          - not_null
+      - name: EPIGRAF_IAE
+        data_type: varchar(4)
+        description: "Código del epígrafe IAE que identifica la actividad económica. Forma parte de una clave foránea hacia l4_epigraf_iae.EPIGRAF_IAE."
+        tests:
+          - not_null
+      - name: PERC_BONIF_TRR
+        data_type: number(5,2)
+        description: "Porcentaje de bonificación aplicado a la cuota TRR."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_padro_tamgrem
+    description: "Histórico del padrón TAMGREM para actividades económicas sujetas a la tasa, incluyendo cuota, superficie y bonificaciones. Granularidad: una versión del padrón por póliza de suministro y marca temporal."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - TS_PADRO_TAMGREM
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_epigraf_iae') }}"
+            local_columns: [SECCIO, EPIGRAF_IAE]
+            field_columns: [SECCIO, EPIGRAF_IAE]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: TS_PADRO_TAMGREM
+        data_type: timestamp
+        description: "Marca temporal que identifica la versión del padrón TAMGREM. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: TIP_TAXA_TAMGREM
+        data_type: varchar(1)
+        description: "Tipo de tasa TAMGREM aplicable al suministro."
+        tests:
+          - not_null
+      - name: NOMB_HABIT_SUBM
+        data_type: number(3,0)
+        description: "Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas."
+        tests:
+          - not_null
+      - name: CONSUM_MES_BASE
+        data_type: number(7,0)
+        description: "Consumo mensual de referencia utilizado en el padrón o cálculo de la tasa."
+        tests:
+          - not_null
+      - name: TIP_QUOTA_TAMGREM
+        data_type: varchar(3)
+        description: "Tipo de cuota TAMGREM aplicable a la actividad o padrón."
+        tests:
+          - not_null
+      - name: CONSUM_MIG_DIA
+        data_type: number(9,4)
+        description: "Consumo medio diario de referencia."
+        tests:
+          - not_null
+      - name: NUMERO_EMPLEAT
+        data_type: varchar(4)
+        description: "Número de empleado que registró o gestionó el padrón."
+        tests:
+          - not_null
+      - name: SECCIO
+        data_type: varchar(1)
+        description: "Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de una clave foránea hacia l4_epigraf_iae.SECCIO."
+        tests:
+          - not_null
+      - name: EPIGRAF_IAE
+        data_type: varchar(4)
+        description: "Código del epígrafe IAE que identifica la actividad económica. Forma parte de una clave foránea hacia l4_epigraf_iae.EPIGRAF_IAE."
+        tests:
+          - not_null
+      - name: PERC_BONIF_TAMGREM
+        data_type: number(5,2)
+        description: "Porcentaje de bonificación aplicado a TAMGREM."
+        tests:
+          - not_null
+      - name: IMP_CUOTA
+        data_type: number(11,2)
+        description: "Importe de cuota calculado o asignado al padrón."
+        tests:
+          - not_null
+      - name: SUPERFICIE_REAL
+        data_type: number(7,0)
+        description: "Superficie real del establecimiento, en la unidad utilizada por la tasa."
+        tests:
+          - not_null
+      - name: SUPERFICIE_POND
+        data_type: number(9,2)
+        description: "Superficie ponderada utilizada para calcular la cuota."
+        tests:
+          - not_null
+      - name: NIV_GEN_RES
+        data_type: varchar(1)
+        description: "Nivel de generación de residuos asignado a la actividad."
+        tests:
+          - not_null
+      - name: COD_GEN_RES
+        data_type: varchar(1)
+        description: "Código de categoría de generación de residuos."
+        tests:
+          - not_null
+      - name: ORIGEN
+        data_type: varchar(2)
+        description: "Origen funcional o procedimiento de alta del registro en el padrón."
+        tests:
+          - not_null
+      - name: ID_BONIF_DECGER
+        data_type: varchar(3)
+        description: "Indicador de bonificación vinculada a la declaración o gestión de residuos."
+        tests:
+          - not_null
+      - name: ID_LIMIT
+        data_type: varchar(2)
+        description: "Indicador de aplicación de límites en el cálculo de la cuota."
+        tests:
+          - not_null
+      - name: SUBTIP_TAXA_TAMGREM
+        data_type: varchar(1)
+        description: "Subtipo de tasa TAMGREM aplicable."
+        tests:
+          - not_null
+      - name: OBSERVACIONS
+        data_type: varchar(35)
+        description: "Observaciones funcionales asociadas al registro."
+        tests:
+          - not_null
+      - name: TS_ALTA
+        data_type: timestamp
+        description: "Marca temporal de alta efectiva del registro."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_hist_ss_pe
+    description: "Histórico de periodos de vulnerabilidad, servicio social o pobreza energética asociados al suministro. Granularidad: un registro por póliza, colectivo y momento de declaración del indicador."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - TIP_COLECTIVO
+              - TS_MOM_IND
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: TS_MOM_IND
+        data_type: timestamp
+        description: "Marca temporal de registro o modificación del indicador social. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: TIP_COLECTIVO
+        data_type: varchar(2)
+        description: "Código del colectivo social o supuesto de vulnerabilidad reconocido. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: DATA_INI_IND
+        data_type: date
+        description: "Fecha de inicio de vigencia del indicador social."
+        tests:
+          - not_null
+      - name: DATA_FIN_IND
+        data_type: date
+        description: "Fecha de fin de vigencia del indicador social."
+        tests:
+          - not_null
+      - name: OBSERVACIONS
+        data_type: varchar(200)
+        description: "Observaciones funcionales asociadas al registro."
+        tests:
+          - not_null
+      - name: NUM_EMPLEAT
+        data_type: varchar(15)
+        description: "Número de empleado que gestionó el indicador."
+        tests:
+          - not_null
+      - name: INFORME_SS
+        data_type: varchar(1)
+        description: "Referencia o indicador del informe de servicios sociales."
+        tests:
+          - not_null
+      - name: DATA_ENVIA_ACA
+        data_type: date
+        description: "Fecha de envío de la información a la Agencia Catalana del Agua."
+        tests:
+          - not_null
+      - name: NOM_ACA_FITXER
+        data_type: varchar(35)
+        description: "Nombre del fichero remitido a la Agencia Catalana del Agua."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_servei_eq_ci
+    description: "Inventario actual de equipos de protección contra incendios asociados a un suministro CI. Granularidad: un registro por póliza de suministro contra incendios."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: NOMB_BOQUES_25
+        data_type: number(3,0)
+        description: "Número de bocas contra incendios de 25 mm instaladas."
+        tests:
+          - not_null
+      - name: NOMB_BOQUES_45
+        data_type: number(3,0)
+        description: "Número de bocas contra incendios de 45 mm instaladas."
+        tests:
+          - not_null
+      - name: NOMB_BOQUES_70
+        data_type: number(3,0)
+        description: "Número de bocas contra incendios de 70 mm instaladas."
+        tests:
+          - not_null
+      - name: NOMB_BOQUES_100
+        data_type: number(3,0)
+        description: "Número de bocas contra incendios de 100 mm instaladas."
+        tests:
+          - not_null
+      - name: NOMB_SPRINCKLERS
+        data_type: number(5,0)
+        description: "Número de sprinklers instalados."
+        tests:
+          - not_null
+      - name: NUM_PRECINTE_BOCA
+        data_type: number(3,0)
+        description: "Número o referencia del precinto de la boca contra incendios."
+        tests:
+          - not_null
+      - name: ID_GRUP_ELEV_EQ_CI
+        data_type: varchar(1)
+        description: "Identificador del grupo de elevación asociado al equipo CI."
+        tests:
+          - not_null
+      - name: ID_VALVULA_MOTOR
+        data_type: varchar(1)
+        description: "Identificador de la válvula motorizada del sistema CI."
+        tests:
+          - not_null
+      - name: TIP_PETIC_RES
+        data_type: varchar(1)
+        description: "Tipo de petición o resolución asociada al servicio CI."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_servei_facturar
+    description: "Calendario de servicios contra incendios a facturar, con cantidades de bocas y sprinklers aplicables al periodo. Granularidad: un registro por póliza de suministro CI y fecha final de facturación."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+              - DATA_FIN_FACT
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: DATA_FIN_FACT
+        data_type: date
+        description: "Fecha final incluida en el periodo de facturación. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: CALCUL_CONSUM_SERV
+        data_type: varchar(2)
+        description: "Método de cálculo del servicio; en el piloto identifica facturación CI sin lectura de contador."
+        tests:
+          - not_null
+      - name: DIES_CONSUM_SERV
+        data_type: number(5,0)
+        description: "Número de días incluidos en el periodo facturable."
+        tests:
+          - not_null
+      - name: NOMB_BOQ_25_SERV
+        data_type: number(3,0)
+        description: "Número de bocas de 25 mm facturadas en el periodo."
+        tests:
+          - not_null
+      - name: NOMB_BOQ_45_SERV
+        data_type: number(3,0)
+        description: "Número de bocas de 45 mm facturadas en el periodo."
+        tests:
+          - not_null
+      - name: NOMB_BOQ_70_SERV
+        data_type: number(3,0)
+        description: "Número de bocas de 70 mm facturadas en el periodo."
+        tests:
+          - not_null
+      - name: NOMB_BOQ_100_SERV
+        data_type: number(3,0)
+        description: "Número de bocas de 100 mm facturadas en el periodo."
+        tests:
+          - not_null
+      - name: NOMB_SPRINCK_SERV
+        data_type: number(5,0)
+        description: "Número de sprinklers facturados en el periodo."
+        tests:
+          - not_null
+      - name: ID_BUTLLETA
+        data_type: varchar(1)
+        description: "Identificador de la boleta o documento operativo que origina la facturación."
+        tests:
+          - not_null
+      - name: ID_LOT_LECT
+        data_type: varchar(3)
+        description: "Identificador del lote de lectura."
+        tests:
+          - not_null
+      - name: ANY_CALENDARI
+        data_type: varchar(2)
+        description: "Año del calendario de facturación, expresado con dos dígitos."
+        tests:
+          - not_null
+      - name: MES_CALENDARI
+        data_type: varchar(2)
+        description: "Mes del calendario de facturación, expresado con dos dígitos."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_conveni_frau
+    description: "Relación vigente de suministros declarados en situación de fraude, con la dirección y el ramal afectados. Granularidad: un registro por póliza de suministro."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - POLISSA_SUBM
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_ramal') }}"
+            local_columns: [POLISSA_RAMAL]
+            field_columns: [POLISSA_RAMAL]
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_municipi_sgab') }}"
+            local_columns: [NUM_MUN_CONV_FRAU]
+            field_columns: [NUM_MUN_SGAB]
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+    columns:
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: NUM_MUN_CONV_FRAU
+        data_type: varchar(2)
+        description: "Código del municipio donde se localiza el fraude. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB."
+        tests:
+          - not_null
+      - name: ADRE_CONV_FRAU
+        data_type: varchar(35)
+        description: "Dirección textual normalizada del suministro fraudulento, derivada de calle, finca y unidad del suministro."
+        tests:
+          - not_null
+      - name: COD_POST_CONV_FRAU
+        data_type: varchar(5)
+        description: "Código postal de la dirección asociada al fraude."
+        tests:
+          - not_null
+      - name: DEL_CREACIO_CONV_F
+        data_type: varchar(2)
+        description: "Delegación que creó o registró el convenio de fraude."
+        tests:
+          - not_null
+      - name: DATA_CREA_C_FRA
+        data_type: date
+        description: "Fecha desde la que el suministro se considera incluido en la situación de fraude."
+        tests:
+          - not_null
+      - name: POLISSA_RAMAL
+        data_type: varchar(10)
+        description: "Identificador de la póliza de ramal o acometida. Forma parte de una clave foránea hacia l4_ramal.POLISSA_RAMAL."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_resum
+    description: "Cabecera e importe agregado de la factura, con periodo, suministro, cliente, consumo por bloques, cobro y atributos de emisión. Granularidad: una factura por empresa, año y número de factura."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_submin_servei') }}"
+            local_columns: [POLISSA_SUBM]
+            field_columns: [POLISSA_SUBM]
+    columns:
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: QL_EMPLEAT_SGAB
+        data_type: varchar(1)
+        description: "Indicador de intervención o tratamiento por personal SGAB."
+        tests:
+          - not_null
+      - name: FREQ_FACT
+        data_type: varchar(1)
+        description: "Frecuencia de facturación aplicada al periodo."
+        tests:
+          - not_null
+      - name: M3_BLOC1
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 1 en la factura."
+        tests:
+          - not_null
+      - name: M3_BLOC2
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 2 en la factura."
+        tests:
+          - not_null
+      - name: M3_BLOC3
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 3 en la factura."
+        tests:
+          - not_null
+      - name: M3_BLOC4
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 4 en la factura."
+        tests:
+          - not_null
+      - name: M3_BLOC5
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 5 en la factura."
+        tests:
+          - not_null
+      - name: IMP_TOTAL_FACT
+        data_type: number(11,2)
+        description: "Importe total final de la factura, incluidos impuestos, conceptos y bonificaciones."
+        tests:
+          - not_null
+      - name: IMP_AIGUA_IVA
+        data_type: number(11,2)
+        description: "Importe total de los componentes monetarios registrados en FACT_AIGUA, incluidos consumo por bloques, cuota de servicio, tasas, saneamiento, alcantarillado, residuos e IVA."
+        tests:
+          - not_null
+      - name: ID_RECUPERACIO
+        data_type: varchar(1)
+        description: "Indicador de que la factura incorpora una recuperación de importes."
+        tests:
+          - not_null
+      - name: ID_REGULARITZACIO
+        data_type: varchar(1)
+        description: "Indicador de que la factura incorpora una regularización."
+        tests:
+          - not_null
+      - name: DATA_CARREC_RECAP
+        data_type: date
+        description: "Fecha de cargo o transferencia de la factura al sistema de recaudación."
+        tests:
+          - not_null
+      - name: IDEN_LOT_LECT_FACT
+        data_type: varchar(3)
+        description: "Identificador del lote de lectura utilizado para facturar."
+        tests:
+          - not_null
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura."
+        tests:
+          - not_null
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador único de la póliza de suministro. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM."
+        tests:
+          - not_null
+      - name: DATA_FIN_FACT
+        data_type: date
+        description: "Fecha final incluida en el periodo de facturación."
+        tests:
+          - not_null
+      - name: ID_LOT_FACT
+        data_type: varchar(3)
+        description: "Identificador del lote de proceso o emisión de facturación."
+        tests:
+          - not_null
+      - name: ANY_CALENDARI
+        data_type: varchar(2)
+        description: "Año del calendario de facturación, expresado con dos dígitos."
+        tests:
+          - not_null
+      - name: MES_CALENDARI
+        data_type: varchar(2)
+        description: "Mes del calendario de facturación, expresado con dos dígitos."
+        tests:
+          - not_null
+      - name: ID_CONCEPTES
+        data_type: varchar(1)
+        description: "Indicador de existencia de líneas adicionales en L4_FACT_CONCEPTE."
+        tests:
+          - not_null
+      - name: ID_DECLARADA
+        data_type: varchar(1)
+        description: "Indicador de factura declarada o comunicada al proceso correspondiente."
+        tests:
+          - not_null
+      - name: DNI_NIF_CLIENT
+        data_type: varchar(9)
+        description: "Documento identificativo fiscal del cliente o titular."
+        tests:
+          - not_null
+      - name: QL_GESTIO_FACT
+        data_type: varchar(1)
+        description: "Indicador de modalidad o calidad de gestión de la factura."
+        tests:
+          - not_null
+      - name: QL_TIP_COBRA
+        data_type: varchar(1)
+        description: "Tipo o modalidad de cobro aplicada a la factura."
+        tests:
+          - not_null
+      - name: NUM_ENTITAT_COBR
+        data_type: varchar(5)
+        description: "Código de entidad bancaria utilizado en la factura."
+        tests:
+          - not_null
+      - name: NUM_AGENCIA_APAR
+        data_type: varchar(4)
+        description: "Código de oficina bancaria utilizado en la factura."
+        tests:
+          - not_null
+      - name: NUM_COMPTE_DEPEN
+        data_type: varchar(10)
+        description: "Número de cuenta dependiente utilizado para el cobro."
+        tests:
+          - not_null
+      - name: DVER_COMPTE_BANC
+        data_type: varchar(2)
+        description: "Dígitos verificadores de la cuenta bancaria."
+        tests:
+          - not_null
+      - name: TIP_FACTURA
+        data_type: varchar(2)
+        description: "Código de clase o modalidad de factura."
+        tests:
+          - not_null
+      - name: DATA_EMISS_FACT
+        data_type: date
+        description: "Fecha de emisión de la factura."
+        tests:
+          - not_null
+      - name: DATA_INI_FACT
+        data_type: date
+        description: "Fecha inicial incluida en el periodo facturado."
+        tests:
+          - not_null
+      - name: QL_RESUM_COMPTABLE
+        data_type: varchar(1)
+        description: "Indicador de inclusión o tratamiento en el resumen contable."
+        tests:
+          - not_null
+      - name: TIP_QTA_SERV_FACT
+        data_type: number(3,0)
+        description: "Tipo de cuota de servicio aplicada en la factura."
+        tests:
+          - not_null
+      - name: ID_CALCUL_DIARI
+        data_type: varchar(1)
+        description: "Indicador de cálculo proporcional por días."
+        tests:
+          - not_null
+      - name: US_AIGUA_SUBM_FACT
+        data_type: varchar(1)
+        description: "Uso del agua vigente y congelado en el momento de la factura."
+        tests:
+          - not_null
+      - name: TIP_HABIT_SUBM_FA
+        data_type: varchar(1)
+        description: "Tipo de vivienda vigente y congelado en el momento de la factura."
+        tests:
+          - not_null
+      - name: NOMB_HABIT_FACT
+        data_type: number(3,0)
+        description: "Número de habitantes considerado para tramos y bonificaciones en la factura."
+        tests:
+          - not_null
+      - name: SIT_SUBM_SERV_FACT
+        data_type: varchar(1)
+        description: "Situación del suministro congelada en la fecha de factura."
+        tests:
+          - not_null
+      - name: QL_IDIOMA_FACT
+        data_type: varchar(1)
+        description: "Idioma utilizado para emitir la factura."
+        tests:
+          - not_null
+      - name: PUBLI_OFI_TARI_FA
+        data_type: varchar(8)
+        description: "Referencia de publicación oficial de la tarifa aplicada."
+        tests:
+          - not_null
+      - name: ID_CARREC_SOCIETAT
+        data_type: varchar(1)
+        description: "Indicador de cargo gestionado por la sociedad."
+        tests:
+          - not_null
+      - name: QL_MONEDA
+        data_type: varchar(1)
+        description: "Código o indicador de la moneda de facturación."
+        tests:
+          - not_null
+      - name: TIP_SUBM_SERV
+        data_type: varchar(1)
+        description: "Tipo de suministro o servicio: D doméstico, I industrial y C contra incendios en el piloto."
+        tests:
+          - not_null
+      - name: NOM_CLIENT
+        data_type: varchar(35)
+        description: "Nombre del cliente impreso o registrado en la factura."
+        tests:
+          - not_null
+      - name: NUM_INDEX
+        data_type: varchar(10)
+        description: "Número o referencia de índice asociada a la lectura o cálculo."
+      - name: APROVADA_FACT
+        data_type: varchar(10)
+        description: "Marca o referencia de aprobación de la factura."
+      - name: QL_TIP_COBRA_INI
+        data_type: varchar(1)
+        description: "Tipo de cobro inicial antes de cambios posteriores."
+        tests:
+          - not_null
+      - name: QL_ENVIO_FACT
+        data_type: varchar(1)
+        description: "Indicador del canal o estado de envío de la factura."
+        tests:
+          - not_null
+      - name: TIP_DOMESTIC
+        data_type: varchar(1)
+        description: "Subtipología doméstica aplicada a la factura."
+        tests:
+          - not_null
+      - name: QL_DCL_CAI
+        data_type: varchar(1)
+        description: "Indicador de declaración del canon del agua."
+        tests:
+          - not_null
+      - name: TIP_FACT_ENV
+        data_type: varchar(2)
+        description: "Modalidad o formato de envío de la factura."
+        tests:
+          - not_null
+      - name: EMISSORA
+        data_type: varchar(3)
+        description: "Código de la entidad o sistema emisor."
+        tests:
+          - not_null
+      - name: NUM_COMPTE_IBAN
+        data_type: varchar(34)
+        description: "Número de cuenta bancaria en formato IBAN."
+        tests:
+          - not_null
+      - name: TIP_FACT_SII
+        data_type: varchar(1)
+        description: "Tipo de factura utilizado para el Suministro Inmediato de Información."
+        tests:
+          - not_null
+      - name: TIPUS_FACTURA
+        data_type: varchar(1)
+        description: "Clasificación adicional de la factura, incluida la identificación de facturas sustitutivas."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_aigua
+    description: "Detalle técnico y económico de agua asociado a una factura, incluyendo contador, cuota de servicio, bloques de consumo, cánones, saneamiento e impuestos. Granularidad: un registro por partición y factura."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_PARTICIO
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_fact_resum') }}"
+            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ID_EMPRESA."
+        tests:
+          - not_null
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA."
+        tests:
+          - not_null
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.NUM_FACTURA."
+        tests:
+          - not_null
+      - name: DIAM_COMP_FACT
+        data_type: number(3,0)
+        description: "Diámetro del contador principal considerado en la factura."
+        tests:
+          - not_null
+      - name: DIAM_COMP_SEC_FACT
+        data_type: number(3,0)
+        description: "Diámetro del contador secundario considerado en la factura."
+        tests:
+          - not_null
+      - name: MARCA_COMP_FACT
+        data_type: varchar(3)
+        description: "Código de marca del contador facturado."
+        tests:
+          - not_null
+      - name: NUM_COMP_FACT
+        data_type: varchar(9)
+        description: "Número de serie o identificador del contador facturado."
+        tests:
+          - not_null
+      - name: PROPIETAT_COMP_FA
+        data_type: varchar(1)
+        description: "Indicador de propiedad del contador en el momento de facturación."
+        tests:
+          - not_null
+      - name: CABAL_NOMINAL_CTE
+        data_type: number(3,1)
+        description: "Caudal nominal contratado utilizado para calcular la cuota de servicio."
+        tests:
+          - not_null
+      - name: IMP_QTA_SERV
+        data_type: number(11,2)
+        description: "Importe de la cuota fija de servicio."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC1_FACT
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 1 en la factura."
+        tests:
+          - not_null
+      - name: IMP_BLOC1
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 1 de la factura."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC2_FACT
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 2 en la factura."
+        tests:
+          - not_null
+      - name: IMP_BLOC2
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 2 de la factura."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC3_FACT
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 3 en la factura."
+        tests:
+          - not_null
+      - name: IMP_BLOC3
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 3 de la factura."
+        tests:
+          - not_null
+      - name: TIP_CT_XBASICA_FAC
+        data_type: varchar(1)
+        description: "Tipo de cálculo aplicado a la cuota o canon de tarifa básica en la factura."
+        tests:
+          - not_null
+      - name: BASE_CT_XBASICA
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de cuota o canon de tarifa básica en la factura."
+        tests:
+          - not_null
+      - name: PREU_CT_XBASICA_FA
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de cuota o canon de tarifa básica en la factura."
+        tests:
+          - not_null
+      - name: IMP_CT_XBASICA
+        data_type: number(11,2)
+        description: "Importe del concepto de cuota o canon de tarifa básica en la factura."
+        tests:
+          - not_null
+      - name: TIP_TCG_SUBM_FACT
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de tarifa o canon general del suministro en la factura."
+        tests:
+          - not_null
+      - name: BASE_TCG_SUBM
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de tarifa o canon general del suministro en la factura."
+        tests:
+          - not_null
+      - name: PREU_TCG_SUBM_FACT
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de tarifa o canon general del suministro en la factura."
+        tests:
+          - not_null
+      - name: IMP_TCG_SUBM
+        data_type: number(11,2)
+        description: "Importe del concepto de tarifa o canon general del suministro en la factura."
+        tests:
+          - not_null
+      - name: TIP_CLAVAG_FACT
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de alcantarillado en la factura."
+        tests:
+          - not_null
+      - name: BASE_CLAVAG
+        data_type: number(11,2)
+        description: "Base de cálculo del concepto de alcantarillado en la factura."
+        tests:
+          - not_null
+      - name: PREU_CLAVAG_FACT
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de alcantarillado en la factura."
+        tests:
+          - not_null
+      - name: IMP_CLAVAG
+        data_type: number(11,2)
+        description: "Importe del concepto de alcantarillado en la factura."
+        tests:
+          - not_null
+      - name: TIP_SANEJA_FACT
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de saneamiento en la factura."
+        tests:
+          - not_null
+      - name: BASE_SANEJA
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de saneamiento en la factura."
+        tests:
+          - not_null
+      - name: PREU_SANEJA_FACT
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de saneamiento en la factura."
+        tests:
+          - not_null
+      - name: IMP_SANEJA
+        data_type: number(11,2)
+        description: "Importe del concepto de saneamiento en la factura."
+        tests:
+          - not_null
+      - name: BASE_IVA_SANEJA
+        data_type: number(11,2)
+        description: "Base imponible de IVA correspondiente al saneamiento."
+        tests:
+          - not_null
+      - name: IMP_IVA_SANEJA
+        data_type: number(11,2)
+        description: "Importe de IVA correspondiente al saneamiento."
+        tests:
+          - not_null
+      - name: BASE_IVA
+        data_type: number(11,2)
+        description: "Base imponible general sometida a IVA."
+        tests:
+          - not_null
+      - name: PERCENT_IVA_FACT
+        data_type: number(5,2)
+        description: "Porcentaje de IVA aplicado a la factura."
+        tests:
+          - not_null
+      - name: IMP_IVA
+        data_type: number(11,2)
+        description: "Importe de IVA calculado sobre la base imponible."
+        tests:
+          - not_null
+      - name: TIP_ERSU_FACT
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de residuos urbanos en la factura."
+        tests:
+          - not_null
+      - name: BASE_ERSU
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de residuos urbanos en la factura."
+        tests:
+          - not_null
+      - name: PREU_ERSU_FACT
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de residuos urbanos en la factura."
+        tests:
+          - not_null
+      - name: IMP_ERSU
+        data_type: number(11,2)
+        description: "Importe del concepto de residuos urbanos en la factura."
+        tests:
+          - not_null
+      - name: TIP_CIH_FACT
+        data_type: varchar(1)
+        description: "Tipo de cálculo del canon o componente de infraestructura hidráulica aplicado en la factura."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC1
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 1 en la factura."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC1_FA
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 1 en la factura."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC1
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 1 en la factura."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC2
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 2 en la factura."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC2_FA
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 2 en la factura."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC2
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 2 en la factura."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC3
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 3 en la factura."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC3_FA
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 3 en la factura."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC3
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 3 en la factura."
+        tests:
+          - not_null
+      - name: CABAL_CTE
+        data_type: number(5,1)
+        description: "Caudal contratado utilizado en cálculos tarifarios."
+        tests:
+          - not_null
+      - name: COEF_CIH_IND_FAC
+        data_type: number(5,3)
+        description: "Coeficiente industrial aplicado al canon o infraestructura hidráulica."
+        tests:
+          - not_null
+      - name: QL_1999_2000
+        data_type: varchar(1)
+        description: "Indicador legado asociado al tratamiento tarifario del cambio 1999-2000."
+        tests:
+          - not_null
+      - name: NOMBRE_PERSONES
+        data_type: number(3,0)
+        description: "Número de personas considerado en el cálculo de tramos."
+        tests:
+          - not_null
+      - name: LIMIT_TRAM1_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo 1."
+        tests:
+          - not_null
+      - name: LIMIT_TRAM2_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo 2."
+        tests:
+          - not_null
+      - name: LIMIT_CAI1_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo de canon 1."
+        tests:
+          - not_null
+      - name: LIMIT_CLAV1_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el primer tramo de alcantarillado."
+        tests:
+          - not_null
+      - name: LIMIT_CAI2_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo de canon 2."
+        tests:
+          - not_null
+      - name: NOMBRE_PER_CAI
+        data_type: number(3,0)
+        description: "Número de personas considerado para los límites del canon del agua."
+        tests:
+          - not_null
+      - name: NOMBRE_PER_TMTR
+        data_type: number(3,0)
+        description: "Número de personas considerado para la tasa metropolitana de residuos."
+        tests:
+          - not_null
+      - name: NUM_COMPT_T_FACT
+        data_type: varchar(12)
+        description: "Identificador del contador totalizador considerado en la factura."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC4_FACT
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 4 en la factura."
+        tests:
+          - not_null
+      - name: IMP_BLOC4
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 4 de la factura."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC5_FACT
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 5 en la factura."
+        tests:
+          - not_null
+      - name: IMP_BLOC5
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 5 de la factura."
+        tests:
+          - not_null
+      - name: LIMIT_TRAM3_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo 3."
+        tests:
+          - not_null
+      - name: LIMIT_TRAM4_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo 4."
+        tests:
+          - not_null
+      - name: LIMIT_CAI3_FACT
+        data_type: number(7,0)
+        description: "Límite de consumo utilizado en la factura para el tramo de canon 3."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_concepte
+    description: "Detalle de conceptos adicionales o explícitos incluidos en una factura. Granularidad: una línea por partición, factura, número de línea y código de concepto."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_PARTICIO
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+              - NUM_LINEA
+              - NUM_CONCEPTE
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_fact_resum') }}"
+            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ID_EMPRESA."
+        tests:
+          - not_null
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA."
+        tests:
+          - not_null
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.NUM_FACTURA."
+        tests:
+          - not_null
+      - name: NUM_LINEA
+        data_type: number(3,0)
+        description: "Número secuencial de la línea dentro de la factura. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: NUM_CONCEPTE
+        data_type: varchar(3)
+        description: "Código del concepto facturado; debe existir en L4_CODIFICACIONS para la familia de conceptos de facturación. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: BASE_CONCEPTE
+        data_type: number(11,2)
+        description: "Cantidad, unidades o base monetaria sobre la que se calcula el concepto."
+        tests:
+          - not_null
+      - name: TIP_TAXA_CONCEP
+        data_type: varchar(1)
+        description: "Tipo de tarifa o tasa aplicada al concepto."
+        tests:
+          - not_null
+      - name: PREU_CONCEPTE
+        data_type: number(11,4)
+        description: "Precio unitario o porcentaje aplicado a la base del concepto."
+        tests:
+          - not_null
+      - name: IMP_CONCEPTE
+        data_type: number(11,2)
+        description: "Importe final de la línea tras aplicar precio, porcentaje y redondeo."
+        tests:
+          - not_null
+      - name: IVA_APLICAT_CONC
+        data_type: number(5,2)
+        description: "Porcentaje de IVA asociado al concepto."
+        tests:
+          - not_null
+      - name: OBSER_CONCEPTE
+        data_type: varchar(80)
+        description: "Texto explicativo o detalle de la línea de concepto."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_regul
+    description: "Detalle económico de una regularización de consumo o tarifas incluida en una factura. Granularidad: un registro por factura y fecha final del periodo de incidencia."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+              - DATA_FIN_PER_INCID
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_fact_resum') }}"
+            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora o suministradora."
+        tests:
+          - not_null
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de emisión de la factura."
+        tests:
+          - not_null
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura."
+        tests:
+          - not_null
+      - name: DATA_FIN_PER_INCID
+        data_type: date
+        description: "Fecha final del periodo afectado por la incidencia que origina la regularización."
+        tests:
+          - not_null
+      - name: M3_BLOC1_RG
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 1 de la regularización."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC1_RG
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 1 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_BLOC1_RG
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 1 de la regularización."
+        tests:
+          - not_null
+      - name: M3_BLOC2_RG
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 2 de la regularización."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC2_RG
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 2 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_BLOC2_RG
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 2 de la regularización."
+        tests:
+          - not_null
+      - name: M3_BLOC3_RG
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 3 de la regularización."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC3_RG
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 3 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_BLOC3_RG
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 3 de la regularización."
+        tests:
+          - not_null
+      - name: TIP_CT_XBASICA_RG
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de cuota o canon de tarifa básica en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CT_XBASICA_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de cuota o canon de tarifa básica en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CT_XBASICA_RG
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de cuota o canon de tarifa básica en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CT_XBASICA_RG
+        data_type: number(11,2)
+        description: "Importe del concepto de cuota o canon de tarifa básica en la regularización."
+        tests:
+          - not_null
+      - name: TIP_TCG_SUBM_RG
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de tarifa o canon general del suministro en la regularización."
+        tests:
+          - not_null
+      - name: BASE_TCG_SUBM_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de tarifa o canon general del suministro en la regularización."
+        tests:
+          - not_null
+      - name: PREU_TCG_SUBM_RG
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de tarifa o canon general del suministro en la regularización."
+        tests:
+          - not_null
+      - name: IMP_TCG_SUBM_RG
+        data_type: number(11,2)
+        description: "Importe del concepto de tarifa o canon general del suministro en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CTG_SUBM_RG
+        data_type: number(11,2)
+        description: "Base monetaria del canon o tasa general del suministro regularizada."
+        tests:
+          - not_null
+      - name: PERCEN_CTG_SUBM_RG
+        data_type: number(5,2)
+        description: "Porcentaje aplicado al canon o tasa general del suministro regularizada."
+        tests:
+          - not_null
+      - name: IMP_CTG_SUBM_RG
+        data_type: number(11,2)
+        description: "Importe resultante del canon o tasa general del suministro regularizada."
+        tests:
+          - not_null
+      - name: IMP_CAN_BAELLS_RG
+        data_type: number(11,2)
+        description: "Importe regularizado del componente histórico vinculado al canon de Baells."
+        tests:
+          - not_null
+      - name: IMP_CAN_TER_RG
+        data_type: number(11,2)
+        description: "Importe regularizado del componente histórico vinculado al canon del Ter."
+        tests:
+          - not_null
+      - name: IMP_PRODUC_BRUT_RG
+        data_type: number(11,2)
+        description: "Importe regularizado asociado a producción bruta."
+        tests:
+          - not_null
+      - name: TIP_CLAVAG_RG
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de alcantarillado en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CLAVAG_RG
+        data_type: number(11,2)
+        description: "Base de cálculo del concepto de alcantarillado en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CLAVAG_RG
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de alcantarillado en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CLAVAG_RG
+        data_type: number(11,2)
+        description: "Importe del concepto de alcantarillado en la regularización."
+        tests:
+          - not_null
+      - name: TIP_SANEJA_RG
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de saneamiento en la regularización."
+        tests:
+          - not_null
+      - name: BASE_SANEJA_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de saneamiento en la regularización."
+        tests:
+          - not_null
+      - name: PREU_SANEJA_RG
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de saneamiento en la regularización."
+        tests:
+          - not_null
+      - name: IMP_SANEJA_RG
+        data_type: number(11,2)
+        description: "Importe del concepto de saneamiento en la regularización."
+        tests:
+          - not_null
+      - name: TIP_ERSU_RG
+        data_type: varchar(1)
+        description: "Tipo de cálculo del concepto de residuos urbanos en la regularización."
+        tests:
+          - not_null
+      - name: BASE_ERSU_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de residuos urbanos en la regularización."
+        tests:
+          - not_null
+      - name: PREU_ERSU_RG
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de residuos urbanos en la regularización."
+        tests:
+          - not_null
+      - name: IMP_ERSU_RG
+        data_type: number(11,2)
+        description: "Importe del concepto de residuos urbanos en la regularización."
+        tests:
+          - not_null
+      - name: TIP_CIH_RG
+        data_type: varchar(1)
+        description: "Tipo de cálculo del canon o componente de infraestructura hidráulica aplicado en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC1_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 1 en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC1_RG
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 1 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC1_RG
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 1 en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC2_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 2 en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC2_RG
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 2 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC2_RG
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 2 en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC3_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 3 en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC3_RG
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 3 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC3_RG
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 3 en la regularización."
+        tests:
+          - not_null
+      - name: TIP_CAI_RG
+        data_type: varchar(1)
+        description: "Tipo de canon del agua aplicado en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CAI_T1_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 1, en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CAI_T1_RG
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 1, en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CAI_T1_RG
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 1, en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CAI_T2_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 2, en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CAI_T2_RG
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 2, en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CAI_T2_RG
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 2, en la regularización."
+        tests:
+          - not_null
+      - name: COEF_CAI_RG
+        data_type: number(5,3)
+        description: "Coeficiente aplicado al canon del agua en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CLA_T2_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del alcantarillado, tramo 2, en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CLA_T2_RG
+        data_type: number(9,4)
+        description: "Precio unitario del alcantarillado, tramo 2, en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CLA_T2_RG
+        data_type: number(11,2)
+        description: "Importe del alcantarillado, tramo 2, en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CAI_T3_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 3, en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CAI_T3_RG
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 3, en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CAI_T3_RG
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 3, en la regularización."
+        tests:
+          - not_null
+      - name: BASE_CAI_T4_RG
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 4, en la regularización."
+        tests:
+          - not_null
+      - name: PREU_CAI_T4_RG
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 4, en la regularización."
+        tests:
+          - not_null
+      - name: IMP_CAI_T4_RG
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 4, en la regularización."
+        tests:
+          - not_null
+      - name: M3_BLOC4_RG
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 4 de la regularización."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC4_RG
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 4 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_BLOC4_RG
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 4 de la regularización."
+        tests:
+          - not_null
+      - name: M3_BLOC5_RG
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 5 de la regularización."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC5_RG
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 5 en la regularización."
+        tests:
+          - not_null
+      - name: IMP_BLOC5_RG
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 5 de la regularización."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_fact_recup
+    description: "Detalle económico de una recuperación de importes o precios incluida en una factura. Granularidad: un registro por factura."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_fact_resum') }}"
+            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora o suministradora."
+        tests:
+          - not_null
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de emisión de la factura."
+        tests:
+          - not_null
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura."
+        tests:
+          - not_null
+      - name: IMP_QTA_SERV_RC
+        data_type: number(11,2)
+        description: "Importe de cuota de servicio incluido en la recuperación."
+        tests:
+          - not_null
+      - name: M3_BLOC1_RC
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 1 de la recuperación."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC1_RC
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 1 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_BLOC1_RC
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 1 de la recuperación."
+        tests:
+          - not_null
+      - name: M3_BLOC2_RC
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 2 de la recuperación."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC2_RC
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 2 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_BLOC2_RC
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 2 de la recuperación."
+        tests:
+          - not_null
+      - name: M3_BLOC3_RC
+        data_type: number(7,0)
+        description: "Volumen de agua, en m³, asignado al bloque tarifario 3 de la recuperación."
+        tests:
+          - not_null
+      - name: PREU_M3_BLOC3_RC
+        data_type: number(9,4)
+        description: "Precio unitario por m³ aplicado al bloque tarifario 3 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_BLOC3_RC
+        data_type: number(11,2)
+        description: "Importe calculado para el bloque tarifario 3 de la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CT_XBASICA_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de cuota o canon de tarifa básica en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CT_XBASICA_RC
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de cuota o canon de tarifa básica en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CT_XBASICA_RC
+        data_type: number(11,2)
+        description: "Importe del concepto de cuota o canon de tarifa básica en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_TCG_SUBM_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de tarifa o canon general del suministro en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_TCG_SUBM_RC
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de tarifa o canon general del suministro en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_TCG_SUBM_RC
+        data_type: number(11,2)
+        description: "Importe del concepto de tarifa o canon general del suministro en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CLAVAG_RC
+        data_type: number(11,2)
+        description: "Base de cálculo del concepto de alcantarillado en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CLAVAG_RC
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de alcantarillado en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CLAVAG_RC
+        data_type: number(11,2)
+        description: "Importe del concepto de alcantarillado en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_SANEJA_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de saneamiento en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_SANEJA_RC
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de saneamiento en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_SANEJA_RC
+        data_type: number(11,2)
+        description: "Importe del concepto de saneamiento en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_ERSU_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del concepto de residuos urbanos en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_ERSU_RC
+        data_type: number(9,4)
+        description: "Precio unitario del concepto de residuos urbanos en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_ERSU_RC
+        data_type: number(11,2)
+        description: "Importe del concepto de residuos urbanos en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC1_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 1 en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC1_RC
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 1 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC1_RC
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 1 en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC2_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 2 en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC2_RC
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 2 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC2_RC
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 2 en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CIH_BLOC3_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del CIH para el bloque 3 en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CIH_BLOC3_RC
+        data_type: number(9,4)
+        description: "Precio unitario del CIH para el bloque 3 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CIH_BLOC3_RC
+        data_type: number(11,2)
+        description: "Importe del CIH para el bloque 3 en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_BONIF_QTA_RC
+        data_type: number(9,2)
+        description: "Importe de bonificación de cuota incluido en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CAI_T1_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 1, en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CAI_T1_RC
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 1, en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CAI_T1_RC
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 1, en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CAI_T2_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 2, en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CAI_T2_RC
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 2, en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CAI_T2_RC
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 2, en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CLA_T2_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del alcantarillado, tramo 2, en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CLA_T2_RC
+        data_type: number(9,4)
+        description: "Precio unitario del alcantarillado, tramo 2, en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CLA_T2_RC
+        data_type: number(11,2)
+        description: "Importe del alcantarillado, tramo 2, en la recuperación."
+        tests:
+          - not_null
+      - name: BASE_CAI_T3_RC
+        data_type: number(7,0)
+        description: "Base de cálculo del canon del agua, tramo 3, en la recuperación."
+        tests:
+          - not_null
+      - name: PREU_CAI_T3_RC
+        data_type: number(9,4)
+        description: "Precio unitario del canon del agua, tramo 3, en la recuperación."
+        tests:
+          - not_null
+      - name: IMP_CAI_T3_RC
+        data_type: number(11,2)
+        description: "Importe del canon del agua, tramo 3, en la recuperación."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_situacio_fact
+    description: "Histórico de transiciones de estado de una factura. Granularidad: un evento de situación por partición, factura y marca temporal del cambio."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NUM_PARTICIO
+              - ID_EMPRESA
+              - ANY_FACTURA
+              - NUM_FACTURA
+              - MOM_SIT_FACT
+      - relationships_compound:
+          arguments:
+            to: "{{ ref('l4_fact_resum') }}"
+            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ID_EMPRESA."
+        tests:
+          - not_null
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA."
+        tests:
+          - not_null
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.NUM_FACTURA."
+        tests:
+          - not_null
+      - name: MOM_SIT_FACT
+        data_type: timestamp
+        description: "Fecha y hora en que la factura alcanzó la situación registrada. Forma parte de la clave primaria."
+        tests:
+          - not_null
+      - name: TIP_SIT_FACT
+        data_type: varchar(2)
+        description: "Código de situación de factura; debe existir en L4_CODIFICACIONS para la familia R01."
+        tests:
+          - not_null
+      - name: CAUSA_SIT_FACT
+        data_type: varchar(2)
+        description: "Código de causa que explica el cambio de situación de la factura."
+        tests:
+          - not_null
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."
+
+  - name: l4_tarifa_facturacio
+    description: "Tabla raw de tarifa_facturacio."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - TIP_TARIFA
+              - SUBTIP_TARIFA
+              - DATA_INI_VIGENCIA
+    columns:
+      - name: TIP_TARIFA
+        data_type: varchar(20)
+        description: "Tipo de tarifa."
+        tests:
+          - not_null
+      - name: SUBTIP_TARIFA
+        data_type: varchar(50)
+        description: "Subtipo de tarifa."
+        tests:
+          - not_null
+      - name: DATA_INI_VIGENCIA
+        data_type: date
+        description: "Fecha de inicio de vigencia."
+        tests:
+          - not_null
+      - name: DATA_FI_VIGENCIA
+        data_type: date
+        description: "Fecha de fin de vigencia."
+      - name: ORDRE
+        data_type: number(3,0)
+        description: "Orden."
+        tests:
+          - not_null
+      - name: VALOR_NUMERIC
+        data_type: number(18,6)
+        description: "Valor numérico."
+        tests:
+          - not_null
+      - name: UNITAT
+        data_type: varchar(20)
+        description: "Unidad."
+        tests:
+          - not_null
+      - name: OBSERVACIONS
+        data_type: varchar(250)
+        description: "Observaciones."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución que incorporó el registro."
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha de extracción del registro en RAW."
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga normalizada a Europe/Madrid."
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de RAW."
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla RAW de procedencia."

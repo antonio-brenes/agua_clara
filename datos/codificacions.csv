@@ -175,7 +175,7 @@ R25;RE   ;REINTEGRAMENT TORNAT                              ;REINTEGRAMENT
 R25;SPR  ;SPRINCKLERS                                       ;SPRINCKLERS         
 R25;TAM  ;TAMGREM (DES DE 1.3.2000)                         ;TAMGREM 2000        
 R25;TER  ;CANON TER (TAXA OBSOLETA DES DE 01.01.1991)       ;CANON TER           
-THL;A    ;TIPUS D'HABITATGE A                               ;*
+THL;A    ;TIPUS D'HABITATGE A                               ;
 THL;B    ;TIPUS D'HABITATGE B                               ;TIPUS D'HABITATGE B 
 THL;C    ;TIPUS D'HABITATGE C                               ;TIPUS D'HABITATGE C 
 THL;D    ;TIPUS D'HABITATGE D                               ;TIPUS D'HABITATGE D 

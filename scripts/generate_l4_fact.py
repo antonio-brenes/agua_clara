@@ -5,11 +5,13 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
+import yaml
+
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DDL_PATH = BASE_DIR / "ddl" / "DDL_AGUA_CLARA.sql"
-RAW_SOURCES_PATH = BASE_DIR / "models" / "agua_clara" / "raw_sicab" / "sources.yml"
-L4_DIR = BASE_DIR / "models" / "agua_clara" / "l4_fact"
+RAW_SOURCES_PATH = BASE_DIR / "models" / "raw_sicab" / "sources.yml"
+L4_DIR = BASE_DIR / "models" / "l4_fact"
 L4_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -35,6 +37,7 @@ TABLE_DESCRIPTIONS = {
     "l4_fact_regul": "Detalle de regularizaciones de facturación; actualmente fuera del alcance del piloto.",
     "l4_fact_recup": "Detalle de recuperaciones de facturación; actualmente fuera del alcance del piloto.",
     "l4_situacio_fact": "Histórico de transiciones de estado de las facturas.",
+    "l4_tarifa_facturacio": "Tabla auxiliar de tarifas y periodos de vigencia de facturación.",
 }
 
 
@@ -53,11 +56,33 @@ FIELD_DESCRIPTIONS = {
     "NUM_CONCEPTE": "Código del concepto facturado.",
     "IMP_TOTAL_FACT": "Importe total de la factura.",
     "IMP_CONCEPTE": "Importe final de la línea de concepto.",
-    "FECHA_EXTRACCION": "Fecha y hora de extracción del registro en la capa RAW.",
+    "FECHA_EXTRACCION": "Fecha de extracción del registro en RAW.",
     "FECHA_CARGA": "Fecha y hora de carga del registro en la capa L4.",
     "SISTEMA_ORIGEN": "Sistema que originó el registro.",
     "TABLA_ORIGEN": "Tabla RAW de procedencia del registro.",
 }
+
+
+def source_metadata() -> dict[str, dict]:
+    source_document = yaml.safe_load(RAW_SOURCES_PATH.read_text(encoding="utf-8"))
+    source = next(item for item in source_document["sources"] if item["name"] == "raw_sicab")
+    return {table["name"]: table for table in source.get("tables", [])}
+
+
+def existing_l4_metadata() -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    schema_path = L4_DIR / "schema.yml"
+    if not schema_path.exists():
+        return {}, {}
+    document = yaml.safe_load(schema_path.read_text(encoding="utf-8")) or {}
+    table_descriptions = {}
+    column_descriptions = {}
+    for model in document.get("models", []):
+        table_descriptions[model["name"]] = model.get("description", "")
+        column_descriptions[model["name"]] = {
+            column["name"]: column.get("description", "")
+            for column in model.get("columns", [])
+        }
+    return table_descriptions, column_descriptions
 
 
 TOKEN_TRANSLATIONS = {
@@ -75,7 +100,13 @@ TOKEN_TRANSLATIONS = {
 }
 
 
-def field_description(column: str) -> str:
+def field_description(column: str, raw_name: str, source_tables: dict[str, dict]) -> str:
+    source_columns = {
+        item["name"]: item.get("description", "")
+        for item in source_tables.get(raw_name, {}).get("columns", [])
+    }
+    if source_columns.get(column):
+        return source_columns[column]
     if column in FIELD_DESCRIPTIONS:
         return FIELD_DESCRIPTIONS[column]
     words = [TOKEN_TRANSLATIONS.get(word, word.lower()) for word in column.split("_")]
@@ -133,24 +164,49 @@ def raw_sources() -> list[str]:
     return re.findall(r"^      - name: (raw_[a-z0-9_]+)$", sources, re.MULTILINE)
 
 
-def expression(column: str, data_type: str, source_columns: set[str]) -> str:
+def expression(
+    column: str,
+    data_type: str,
+    source_columns: set[str],
+    mandatory_columns: set[str],
+) -> str:
+    mandatory = column in mandatory_columns
     if column not in source_columns:
-        return f"CAST(NULL AS {data_type}) AS {column}"
-    raw = f'NULLIF(TRIM(raw."{column}"), \'\')'
-    if data_type == "DATE":
-        return f"TRY_TO_DATE({raw}) AS {column}"
-    if data_type.startswith("TIMESTAMP"):
-        return f"TRY_TO_TIMESTAMP_NTZ({raw}) AS {column}"
-    if data_type.startswith("NUMBER"):
-        number_parts = data_type.removeprefix("NUMBER(").removesuffix(")").split(",")
-        precision = number_parts[0]
-        scale = number_parts[1] if len(number_parts) > 1 else "0"
-        return f"TRY_TO_DECIMAL({raw}, {precision}, {scale}) AS {column}"
-    return f"{raw} AS {column}"
+        value = f"CAST(NULL AS {data_type})"
+    else:
+        raw = f'NULLIF(TRIM(raw."{column}"), \'\')'
+        if data_type == "DATE":
+            value = f"TRY_TO_DATE({raw})"
+        elif data_type.startswith("TIMESTAMP"):
+            value = f"TRY_TO_TIMESTAMP_NTZ({raw})"
+        elif data_type.startswith("NUMBER"):
+            number_parts = data_type.removeprefix("NUMBER(").removesuffix(")").split(",")
+            precision = number_parts[0]
+            scale = number_parts[1] if len(number_parts) > 1 else "0"
+            value = f"TRY_TO_DECIMAL({raw}, {precision}, {scale})"
+        else:
+            value = raw
+
+    if mandatory:
+        if data_type == "DATE":
+            value = f"COALESCE({value}, '0001-01-01'::DATE)"
+        elif data_type.startswith("TIMESTAMP"):
+            value = (
+                f"COALESCE({value}, "
+                "'0001-01-01 00:00:00.000'::TIMESTAMP_NTZ)"
+            )
+        elif data_type.startswith("NUMBER"):
+            value = f"COALESCE({value}, 0)"
+        else:
+            value = f"COALESCE({value}, '^^')"
+
+    return f"{value} AS {column}"
 
 
 tables, primary_keys, not_null_columns, foreign_keys = parse_l4_tables()
-available_sources = set(raw_sources())
+source_tables = source_metadata()
+existing_table_descriptions, existing_column_descriptions = existing_l4_metadata()
+available_sources = set(source_tables) or set(raw_sources())
 generated: list[str] = []
 schema_lines = ["version: 2", "", "models:"]
 
@@ -177,7 +233,11 @@ for table_name, columns in tables.items():
                 name.strip().replace(" ", "_").replace("-", "_").replace("/", "_").replace(".", "")
                 for name in next(csv.reader(source_file, delimiter=";", quotechar=quotechar), [])
             }
-    select_expressions = [expression(name, data_type, source_columns) for name, data_type in columns]
+    mandatory_columns = not_null_columns.get(table_name, set())
+    select_expressions = [
+        expression(name, data_type, source_columns, mandatory_columns)
+        for name, data_type in columns
+    ]
     source_relation = (
         f"from {{{{ source('raw_sicab', '{raw_name}') }}}}"
         if raw_name in available_sources
@@ -195,17 +255,19 @@ for table_name, columns in tables.items():
     )
     select_expressions.extend(
         [
-            "DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_NTZ, raw.FECHA_EXTRACCION) AS ID_CARGA",
+            "DATEDIFF('millisecond', '1970-01-01'::TIMESTAMP_TZ, '{{ run_started_at.isoformat() }}'::TIMESTAMP_TZ) AS ID_CARGA",
             f"{extraction_expression} AS FECHA_EXTRACCION",
-            "CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ AS FECHA_CARGA",
+            "CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP()) AS FECHA_CARGA",
             f"{origin_expression} AS SISTEMA_ORIGEN",
             f"'RAW_{l4_name.upper()}' AS TABLA_ORIGEN",
         ]
     )
     sql = """{{{{ config(
-    materialized='table',
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key={unique_key},
     schema='l4_fact',
-    tags=['l4_fact']
+    tags=['l4_fact', 'l4', 'bronze']
 ) }}}}
 
 with raw as (
@@ -218,6 +280,7 @@ select
 from raw
 """.format(
         raw_name=raw_name,
+        unique_key=repr(primary_keys.get(table_name, [columns[0][0]])),
         source_relation=source_relation,
         select_list=",\n    ".join(select_expressions),
     )
@@ -226,7 +289,7 @@ from raw
 
     schema_lines.append(f"  - name: {model_name}")
     schema_lines.append(
-        f'    description: "{TABLE_DESCRIPTIONS.get(model_name, "Entidad L4 del dominio de facturación de Agua Clara.")}"'
+        f'    description: "{existing_table_descriptions.get(model_name) or source_tables.get(raw_name, {}).get("description") or TABLE_DESCRIPTIONS.get(model_name, "Entidad L4 del dominio de facturación de Agua Clara.")}"'
     )
     schema_lines.append("    tests:")
     schema_lines.append("      - dbt_utils.unique_combination_of_columns:")
@@ -246,18 +309,23 @@ from raw
             ]
         )
     schema_lines.append("    columns:")
-    for name, _ in columns:
+    for name, data_type in columns:
         schema_lines.append(f"      - name: {name}")
-        schema_lines.append(f'        description: "{field_description(name)}"')
-        if name in not_null_columns.get(table_name, set()) or name in primary_keys.get(table_name, []):
+        schema_lines.append(f"        data_type: {data_type.lower()}")
+        description = existing_column_descriptions.get(model_name, {}).get(name)
+        if not description:
+            description = field_description(name, raw_name, source_tables)
+        schema_lines.append(f'        description: "{description}"')
+        if name in not_null_columns.get(table_name, set()):
             schema_lines.append("        tests:")
             schema_lines.append("          - not_null")
     schema_lines.extend(
         [
-            '      - name: ID_CARGA\n        description: "Identificador técnico de la carga."',
-            '      - name: FECHA_CARGA\n        description: "Fecha y hora de carga normalizada a Europe/Madrid."',
-            '      - name: SISTEMA_ORIGEN\n        description: "Sistema de origen heredado de RAW."',
-            '      - name: TABLA_ORIGEN\n        description: "Tabla RAW de procedencia."',
+            '      - name: ID_CARGA\n        data_type: number\n        description: "Identificador técnico del lote o ejecución que incorporó el registro."',
+            '      - name: FECHA_EXTRACCION\n        data_type: timestamp_tz\n        description: "Fecha de extracción del registro en RAW."',
+            '      - name: FECHA_CARGA\n        data_type: timestamp_tz\n        description: "Fecha y hora de carga normalizada a Europe/Madrid."',
+            '      - name: SISTEMA_ORIGEN\n        data_type: varchar(30)\n        description: "Sistema de origen heredado de RAW."',
+            '      - name: TABLA_ORIGEN\n        data_type: varchar(50)\n        description: "Tabla RAW de procedencia."',
         ]
     )
     schema_lines.append("")

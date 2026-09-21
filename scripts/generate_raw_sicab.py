@@ -4,7 +4,7 @@ import re
 
 base = Path(r"C:\Users\abrenes\OneDrive - ALTEN Group\Documents\proyectos\dbt\agua_clara")
 datos_dir = base / "datos"
-raw_dir = base / "models" / "agua_clara" / "raw_sicab"
+raw_dir = base / "models" / "raw_sicab"
 raw_dir.mkdir(parents=True, exist_ok=True)
 ddl_dir = base / "ddl"
 ddl_dir.mkdir(exist_ok=True)
@@ -67,7 +67,7 @@ for csv_path in sorted(datos_dir.glob('*.csv')):
 
     ddl_columns = [f'    "{sanitize_col(col)}" VARCHAR' for col in header]
     ddl_columns.extend([
-        '    FECHA_EXTRACCION TIMESTAMP_NTZ',
+        '    FECHA_EXTRACCION TIMESTAMP_TZ',
         '    SISTEMA_ORIGEN VARCHAR(30)'
     ])
     ddl_sql = (
@@ -90,7 +90,7 @@ for csv_path in sorted(datos_dir.glob('*.csv')):
 FROM (
     SELECT
         {select_columns},
-        CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP())::TIMESTAMP_NTZ AS FECHA_EXTRACCION,
+        CONVERT_TIMEZONE('Europe/Madrid', CURRENT_TIMESTAMP()) AS FECHA_EXTRACCION,
         'SICAB' AS SISTEMA_ORIGEN
     FROM @{RAW_STAGE}/{csv_path.name}
 )
@@ -98,25 +98,6 @@ FROM (
 
 '''
     raw_copy.append(copy_sql)
-
-for empty_table in ("RAW_FACT_REGUL", "RAW_FACT_RECUP"):
-    empty_columns = read_l4_columns(empty_table.replace("RAW_", "L4_"))
-    source_entries.append(
-        f'      - name: {empty_table.lower()}\n'
-        f'        description: "Tabla raw vacía de {empty_table.lower()} pendiente de definición de origen."\n'
-        f'        config:\n'
-        f'          freshness: null'
-    )
-    ddl_columns = [f'    "{column}" VARCHAR' for column in empty_columns]
-    ddl_columns.extend([
-        '    FECHA_EXTRACCION TIMESTAMP_NTZ',
-        '    SISTEMA_ORIGEN VARCHAR(30)',
-    ])
-    raw_ddl.append(
-        f"CREATE OR REPLACE TABLE {empty_table} (\n"
-        + ",\n".join(ddl_columns)
-        + "\n);\n\n"
-    )
 
 source_yml = (
     "version: 2\n\n"

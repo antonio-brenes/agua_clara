@@ -1,0 +1,694 @@
+version: 2
+
+models:
+  - name: s_factura
+    description: >
+      Cabecera analítica de facturación. Granularidad: una fila por factura,
+      identificada por empresa, año y número de factura. Consolida el periodo
+      facturado, el suministro, el consumo total, los importes de cabecera,
+      los indicadores de negocio y los datos necesarios para analizar emisión,
+      cobro y cliente, sin repetir el desglose económico disponible en
+      s_factura_concepto.
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: HK_FACTURA
+        description: "Clave hash de la factura, calculada con ID_EMPRESA, ANY_FACTURA y NUM_FACTURA. Identifica de forma única la fila de S_FACTURA y se utiliza como clave de relación con conceptos y situaciones."
+        data_type: string
+        tests: [not_null, unique]
+      - name: HK_SUBMIN_SERVEI
+        data_type: string
+        description: "Clave hash del suministro facturado, calculada a partir de POLISSA_SUBM. Permite relacionar la factura con el suministro de silver_edw."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('edw_h_submin_servei')
+                field: HK_SUBMIN_SERVEI
+      - name: HK_TIPO_SUMINISTRO
+        data_type: string
+        description: "Clave hash del tipo de suministro, calculada a partir de TIP_SUBM_SERV y relacionada con el hub de tipos de suministro de silver_edw."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('edw_h_tipo_suministro')
+                field: HK_TIPO_SUMINISTRO
+      - name: HK_TIPO_USO_AGUA
+        data_type: string
+        description: "Clave hash del tipo de uso de agua, calculada a partir de US_AIGUA_SUBM_FACT y relacionada con el hub de usos de agua de silver_edw."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('edw_h_tipo_uso_agua')
+                field: HK_TIPO_USO_AGUA
+      - name: HK_TIPO_VIVIENDA
+        data_type: string
+        description: "Clave hash del tipo de vivienda, calculada a partir de TIP_HABIT_SUBM_FA y relacionada con el hub de tipos de vivienda de silver_edw."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('edw_h_tipo_vivienda')
+                field: HK_TIPO_VIVIENDA
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora. Forma parte de la clave natural de la factura."
+        tests: [not_null]
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de numeración de la factura. Forma parte de la clave natural de la factura."
+        tests: [not_null]
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura dentro de la empresa y el año. Forma parte de la clave natural de la factura."
+        tests: [not_null]
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica de la factura, conservado para enlazar con los detalles L4 que lo utilizan."
+        tests: [not_null]
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador de la póliza de suministro a la que corresponde la factura."
+        tests: [not_null]
+      - name: DATA_INI_FACT
+        data_type: date
+        description: "Fecha inicial incluida en el periodo facturado."
+        tests: [not_null]
+      - name: DATA_FIN_FACT
+        data_type: date
+        description: "Fecha final incluida en el periodo facturado."
+        tests: [not_null]
+      - name: DATA_EMISS_FACT
+        data_type: date
+        description: "Fecha en la que se emitió la factura."
+        tests: [not_null]
+      - name: DATA_CARREC_RECAP
+        data_type: date
+        description: "Fecha en la que la factura fue cargada o transferida al proceso de recaudación."
+      - name: ANY_CALENDARI
+        data_type: varchar(2)
+        description: "Año del calendario operativo de facturación asociado al periodo."
+      - name: MES_CALENDARI
+        data_type: varchar(2)
+        description: "Mes del calendario operativo de facturación asociado al periodo."
+      - name: FREQ_FACT
+        data_type: varchar(1)
+        description: "Frecuencia de facturación aplicada al suministro en el periodo."
+      - name: DIES_FACTURATS
+        data_type: number
+        description: "Número de días naturales incluidos en la factura, calculado de forma inclusiva entre DATA_INI_FACT y DATA_FIN_FACT."
+      - name: TIP_SUBM_SERV
+        data_type: varchar(1)
+        description: "Tipo de suministro facturado: D para doméstico, I para industrial y C para servicio contra incendios en el piloto."
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['D', 'I', 'C']
+      - name: US_AIGUA_SUBM_FACT
+        data_type: varchar(1)
+        description: "Código de uso del agua vigente y congelado en el momento de emitir la factura."
+      - name: TIP_HABIT_SUBM_FA
+        data_type: varchar(1)
+        description: "Tipo de vivienda vigente y utilizado en el cálculo de la factura."
+      - name: NOMB_HABIT_FACT
+        data_type: number(3,0)
+        description: "Número de habitantes considerado para límites tarifarios y bonificaciones de la factura."
+      - name: SIT_SUBM_SERV_FACT
+        data_type: varchar(1)
+        description: "Situación del suministro congelada en la fecha de facturación."
+      - name: TIP_DOMESTIC
+        data_type: varchar(1)
+        description: "Subtipología doméstica aplicada a la factura cuando el suministro es doméstico."
+      - name: CONSUM_TOTAL_M3
+        data_type: number
+        description: "Consumo total facturado en metros cúbicos, calculado como suma de los cinco bloques de L4_FACT_RESUM. Para suministros CI debe ser cero."
+        tests: [not_null]
+      - name: IMP_TOTAL_FACT
+        data_type: number(11,2)
+        description: "Importe total final de la factura. Es una medida de cabecera y no debe sumarse después de unir directamente con varias filas de concepto sin controlar la granularidad."
+        tests: [not_null]
+      - name: IMP_AIGUA_IVA
+        data_type: number(11,2)
+        description: "Importe del servicio de agua incluido el IVA correspondiente, informado en la cabecera de factura."
+      - name: ID_RECUPERACIO
+        data_type: varchar(1)
+        description: "Indicador de que la factura incorpora una recuperación de importes."
+      - name: ID_REGULARITZACIO
+        data_type: varchar(1)
+        description: "Indicador de que la factura incorpora una regularización."
+      - name: ID_CONCEPTES
+        data_type: varchar(1)
+        description: "Indicador de existencia de conceptos adicionales asociados a la factura."
+      - name: ID_DECLARADA
+        data_type: varchar(1)
+        description: "Indicador de que la factura ha sido declarada o comunicada al proceso correspondiente."
+      - name: APROVADA_FACT
+        data_type: varchar(10)
+        description: "Marca o referencia de aprobación de la factura."
+      - name: QL_RESUM_COMPTABLE
+        data_type: varchar(1)
+        description: "Indicador de inclusión o tratamiento de la factura en el resumen contable."
+      - name: ID_CALCUL_DIARI
+        data_type: varchar(1)
+        description: "Indicador de cálculo proporcional diario del periodo facturado."
+      - name: QL_DCL_CAI
+        data_type: varchar(1)
+        description: "Indicador relativo a la declaración del canon del agua."
+      - name: TIP_FACTURA
+        data_type: varchar(2)
+        description: "Código de clase o modalidad general de factura."
+      - name: TIPUS_FACTURA
+        data_type: varchar(1)
+        description: "Clasificación adicional de la factura, incluida la identificación de facturas sustitutivas cuando proceda."
+      - name: TIP_FACT_SII
+        data_type: varchar(1)
+        description: "Tipo de factura utilizado para el Suministro Inmediato de Información."
+      - name: QL_MONEDA
+        data_type: varchar(1)
+        description: "Código o indicador de la moneda utilizada en la factura."
+      - name: EMISSORA
+        data_type: varchar(3)
+        description: "Código de la entidad o sistema que emitió la factura."
+      - name: PUBLI_OFI_TARI_FA
+        data_type: varchar(8)
+        description: "Referencia de publicación oficial de la tarifa aplicada."
+      - name: QL_GESTIO_FACT
+        data_type: varchar(1)
+        description: "Indicador de modalidad o calidad de gestión de la factura."
+      - name: QL_EMPLEAT_SGAB
+        data_type: varchar(1)
+        description: "Indicador de intervención o tratamiento por personal SGAB."
+      - name: QL_IDIOMA_FACT
+        data_type: varchar(1)
+        description: "Idioma utilizado para emitir la factura."
+      - name: TIP_FACT_ENV
+        data_type: varchar(2)
+        description: "Modalidad o formato de envío de la factura."
+      - name: QL_ENVIO_FACT
+        data_type: varchar(1)
+        description: "Indicador del canal o estado de envío de la factura."
+      - name: QL_TIP_COBRA
+        data_type: varchar(1)
+        description: "Tipo o modalidad de cobro vigente de la factura."
+      - name: QL_TIP_COBRA_INI
+        data_type: varchar(1)
+        description: "Tipo o modalidad inicial de cobro antes de posibles cambios posteriores."
+      - name: ID_CARREC_SOCIETAT
+        data_type: varchar(1)
+        description: "Indicador de cargo gestionado por la sociedad."
+      - name: NUM_ENTITAT_COBR
+        data_type: varchar(5)
+        description: "Código de la entidad bancaria utilizada para el cobro de la factura."
+      - name: NUM_AGENCIA_APAR
+        data_type: varchar(4)
+        description: "Código de oficina o agencia bancaria utilizado para el cobro."
+      - name: NUM_COMPTE_DEPEN
+        data_type: varchar(10)
+        description: "Número de cuenta dependiente utilizado en el cobro en el formato legado del origen."
+      - name: DVER_COMPTE_BANC
+        data_type: varchar(2)
+        description: "Dígitos verificadores de la cuenta bancaria utilizada para el cobro."
+      - name: NUM_COMPTE_IBAN
+        data_type: varchar(34)
+        description: "Cuenta bancaria en formato IBAN utilizada para el cobro. Contiene información sensible y debe protegerse en capas de consumo."
+      - name: DNI_NIF_CLIENT
+        data_type: varchar(9)
+        description: "Documento identificativo fiscal del cliente facturado. Contiene información sensible."
+      - name: NOM_CLIENT
+        data_type: varchar(35)
+        description: "Nombre del cliente registrado o impreso en la factura. Contiene información personal."
+      - name: IDEN_LOT_LECT_FACT
+        data_type: varchar(3)
+        description: "Identificador del lote de lectura utilizado para generar la factura."
+      - name: ID_LOT_FACT
+        data_type: varchar(3)
+        description: "Identificador del lote de proceso o emisión de facturación."
+      - name: NUM_INDEX
+        data_type: varchar(10)
+        description: "Número o referencia de índice asociada a la lectura o cálculo de la factura."
+      - name: TIP_QTA_SERV_FACT
+        data_type: number(3,0)
+        description: "Tipo de cuota de servicio aplicada en la factura."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote de carga procedente de L4_FACT_RESUM."
+        tests: [not_null]
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha y hora de extracción del registro desde el origen."
+        tests: [not_null]
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de materialización o actualización del registro en silver_fact, expresada en Europe/Madrid."
+        tests: [not_null]
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen del registro, heredado de la capa L4."
+        tests: [not_null]
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla L4 principal de la que procede la cabecera; para este modelo es L4_FACT_RESUM."
+        tests: [not_null]
+
+  - name: s_factura_concepto
+    description: >
+      Desglose normalizado, delgado y alto de los componentes económicos de una
+      factura. Granularidad: una fila por componente económico, factura y
+      partición. Incluye tanto componentes desagregados de L4_FACT_AIGUA, como
+      los cinco bloques de consumo, cuota de servicio, saneamiento, alcantarillado,
+      ERSU, CIH e IVA, como las líneas catalogadas de L4_FACT_CONCEPTE.
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_CONCEPTE
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, NUM_LINEA, TIPUS_CONCEPTE, NUM_CONCEPTE]
+    columns:
+      - name: HK_FACTURA_CONCEPTE
+        description: "Clave hash de la fila de concepto, calculada con la clave de factura, partición, tipo de concepto, número de línea y código de concepto de origen. Identifica de forma única cada componente económico normalizado."
+        data_type: string
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        data_type: string
+        description: "Clave hash de la factura padre, calculada con ID_EMPRESA, ANY_FACTURA y NUM_FACTURA."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('s_factura')
+                field: HK_FACTURA
+      - name: HK_SUBMIN_SERVEI
+        data_type: string
+        description: "Clave hash del suministro al que corresponde la factura."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('edw_h_submin_servei')
+                field: HK_SUBMIN_SERVEI
+      - name: HK_TIPO_SUMINISTRO
+        data_type: string
+        description: "Clave hash del tipo de suministro de la factura, calculada a partir de TIP_SUBM_SERV."
+        tests:
+          - relationships:
+              arguments:
+                to: ref('edw_h_tipo_suministro')
+                field: HK_TIPO_SUMINISTRO
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora. Forma parte de la clave natural de la factura padre."
+        tests: [not_null]
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de la factura padre. Forma parte de su clave natural."
+        tests: [not_null]
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número de la factura padre. Forma parte de su clave natural."
+        tests: [not_null]
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición del detalle dentro de la factura."
+        tests: [not_null]
+      - name: NUM_LINEA
+        data_type: number(3,0)
+        description: "Orden de presentación o número de línea del componente. Para conceptos procedentes de L4_FACT_CONCEPTE conserva NUM_LINEA; para componentes derivados de agua utiliza un orden analítico estable."
+        tests: [not_null]
+      - name: TIPUS_CONCEPTE
+        data_type: string
+        description: "Tipo analítico del componente facturado, por ejemplo AIGUA_BLOC1, QUOTA_SERVEI, CLAVEGUERAM, SANEJAMENT, ERSU, CIH_BLOC1, IVA o CONCEPTE."
+        tests: [not_null]
+      - name: NUM_CONCEPTE
+        data_type: varchar(3)
+        description: "Código de concepto original de L4_FACT_CONCEPTE. Es nulo para los componentes derivados de L4_FACT_AIGUA que no disponen de un código de concepto físico en esa tabla."
+      - name: DESC_CONCEPTE
+        data_type: string
+        description: "Descripción funcional normalizada del componente económico. Para líneas de concepto utiliza la observación disponible o el código de origen."
+        tests: [not_null]
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador de la póliza de suministro facturada."
+        tests: [not_null]
+      - name: DATA_INI_FACT
+        data_type: date
+        description: "Fecha inicial del periodo de la factura a la que pertenece el componente."
+      - name: DATA_FIN_FACT
+        data_type: date
+        description: "Fecha final del periodo de la factura a la que pertenece el componente."
+      - name: DATA_EMISS_FACT
+        data_type: date
+        description: "Fecha de emisión de la factura a la que pertenece el componente."
+      - name: TIP_SUBM_SERV
+        data_type: varchar(1)
+        description: "Tipo de suministro facturado: D doméstico, I industrial o C contra incendios."
+      - name: QUANTITAT
+        data_type: number
+        description: "Cantidad física o número de unidades asociadas al componente. En los bloques de agua representa metros cúbicos; en cuotas puede representar una unidad de factura."
+      - name: UNITAT_MESURA
+        data_type: string
+        description: "Unidad de medida aplicable a QUANTITAT, como M3, FACTURA, BASE, UNITAT o PERCENT."
+      - name: BASE_CALCUL
+        data_type: number
+        description: "Base física o monetaria sobre la que se calcula el componente."
+      - name: TIP_TAXA
+        data_type: string
+        description: "Tipo de tarifa, tasa o procedimiento utilizado para calcular el componente."
+      - name: PREU_UNITARI
+        data_type: number
+        description: "Precio aplicado por unidad. Es nulo cuando el componente se calcula exclusivamente mediante porcentaje."
+      - name: PERCENTATGE
+        data_type: number
+        description: "Porcentaje aplicado a la base de cálculo. Se utiliza principalmente en impuestos o conceptos porcentuales."
+      - name: IMP_CONCEPTE
+        data_type: number(11,2)
+        description: "Importe monetario final del componente económico de la factura. Es la medida aditiva principal de S_FACTURA_CONCEPTO."
+        tests: [not_null]
+      - name: IVA_APLICAT
+        data_type: number
+        description: "Porcentaje de IVA asociado al componente, cuando resulta aplicable."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote de la tabla L4 que originó la fila normalizada."
+        tests: [not_null]
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha y hora de extracción del registro L4 que originó el componente."
+        tests: [not_null]
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de materialización o actualización del componente en silver_fact, expresada en Europe/Madrid."
+        tests: [not_null]
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de la tabla L4 de procedencia."
+        tests: [not_null]
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla que origina el componente: L4_FACT_AIGUA para componentes desagregados de agua o L4_FACT_CONCEPTE para conceptos explícitos."
+        tests: [not_null]
+
+  - name: s_factura_situacion_hist
+    description: >
+      Histórico de transiciones de situación de las facturas. Granularidad: una
+      fila por factura, partición y momento de inicio de la situación. Calcula
+      el final de cada intervalo a partir del siguiente evento, identifica la
+      situación actual y enriquece el código R01 mediante s_situacion_factura.
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_SITUACION
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, MOM_INI_SITUACION]
+    columns:
+      - name: HK_FACTURA_SITUACION
+        description: "Clave hash del evento de situación, calculada con la clave de factura, la partición y MOM_INI_SITUACION. Identifica de forma única cada transición histórica."
+        data_type: string
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        data_type: string
+        description: "Clave hash de la factura padre."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('s_factura')
+                field: HK_FACTURA
+      - name: HK_SITUACION_FACT
+        data_type: string
+        description: "Clave hash de la situación de factura del catálogo R01."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('s_situacion_factura')
+                field: HK_SITUACION_FACT
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de la empresa emisora. Forma parte de la clave natural de la factura."
+        tests: [not_null]
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de la factura. Forma parte de la clave natural de la factura."
+        tests: [not_null]
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número secuencial de la factura. Forma parte de la clave natural de la factura."
+        tests: [not_null]
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica del histórico de situación."
+        tests: [not_null]
+      - name: MOM_INI_SITUACION
+        data_type: timestamp_tz
+        description: "Fecha y hora en la que la factura entra en la situación registrada."
+        tests: [not_null]
+      - name: MOM_FIN_SITUACION
+        data_type: timestamp_tz
+        description: "Fecha y hora de finalización de la situación, calculada como el inicio de la siguiente situación de la misma factura y partición. Es nula para la situación actual."
+      - name: NUM_ORDEN_SITUACION
+        data_type: number
+        description: "Número secuencial que ordena cronológicamente las situaciones de una factura y partición."
+        tests: [not_null]
+      - name: ES_SITUACION_ACTUAL
+        data_type: boolean
+        description: "Indicador booleano de que la fila representa la última situación conocida de la factura y permanece abierta."
+        tests: [not_null]
+      - name: TIP_SIT_FACT
+        data_type: varchar(2)
+        description: "Código de situación de factura perteneciente al catálogo R01."
+        tests: [not_null]
+      - name: DESC_SITUACION
+        data_type: string
+        description: "Descripción completa de la situación, obtenida de S_SITUACION_FACTURA."
+      - name: DESC_BREU_SITUACION
+        data_type: string
+        description: "Descripción breve de la situación, obtenida de S_SITUACION_FACTURA."
+      - name: CAUSA_SIT_FACT
+        data_type: varchar(2)
+        description: "Código de causa que explica el cambio de situación de la factura."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote que incorporó el evento de situación en L4."
+        tests: [not_null]
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha y hora de extracción del evento desde el sistema de origen."
+        tests: [not_null]
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de materialización o actualización del evento en silver_fact, expresada en Europe/Madrid."
+        tests: [not_null]
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen del evento de situación."
+        tests: [not_null]
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla de procedencia del evento; para este modelo es L4_SITUACIO_FACT."
+        tests: [not_null]
+
+  - name: s_factura_recup
+    description: "Importes y consumos recuperados asociados a una factura. Granularidad: una fila por empresa, año y número de factura."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_RECUP
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+    columns:
+      - name: HK_FACTURA_RECUP
+        description: "Clave hash técnica de la recuperación, calculada con la clave natural de L4_FACT_RECUP."
+        data_type: string
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        data_type: string
+        description: "Clave hash de la factura padre."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('s_factura')
+                field: HK_FACTURA
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de empresa. Parte de la clave natural de L4_FACT_RECUP."
+        tests: [not_null]
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de factura. Parte de la clave natural de L4_FACT_RECUP."
+        tests: [not_null]
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número de factura. Parte de la clave natural de L4_FACT_RECUP."
+        tests: [not_null]
+
+  - name: s_factura_regul
+    description: "Importes y consumos de regularización asociados a una factura y periodo de incidencia."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_REGUL
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, DATA_FIN_PER_INCID]
+    columns:
+      - name: HK_FACTURA_REGUL
+        description: "Clave hash técnica de la regularización, calculada con la clave natural de L4_FACT_REGUL."
+        data_type: string
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        data_type: string
+        description: "Clave hash de la factura padre."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('s_factura')
+                field: HK_FACTURA
+      - name: ID_EMPRESA
+        data_type: varchar(2)
+        description: "Código de empresa. Parte de la clave natural de L4_FACT_REGUL."
+        tests: [not_null]
+      - name: ANY_FACTURA
+        data_type: varchar(4)
+        description: "Año de factura. Parte de la clave natural de L4_FACT_REGUL."
+        tests: [not_null]
+      - name: NUM_FACTURA
+        data_type: number(7,0)
+        description: "Número de factura. Parte de la clave natural de L4_FACT_REGUL."
+        tests: [not_null]
+      - name: DATA_FIN_PER_INCID
+        data_type: date
+        description: "Fecha final del periodo de incidencia. Parte de la clave natural de L4_FACT_REGUL."
+        tests: [not_null]
+
+  - name: s_servicio_ci_facturar
+    description: "Datos del servicio contra incendios pendientes de facturación. Granularidad: una fila por póliza y fecha final de factura."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_SERVEI_FACTURAR
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [POLISSA_SUBM, DATA_FIN_FACT]
+    columns:
+      - name: HK_SERVEI_FACTURAR
+        description: "Clave hash técnica del servicio a facturar, calculada con POLISSA_SUBM y DATA_FIN_FACT."
+        data_type: string
+        tests: [not_null, unique]
+      - name: HK_SUBMIN_SERVEI
+        data_type: string
+        description: "Clave hash del suministro asociado."
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('edw_h_submin_servei')
+                field: HK_SUBMIN_SERVEI
+      - name: POLISSA_SUBM
+        data_type: varchar(10)
+        description: "Identificador de la póliza de suministro. Parte de la clave natural de L4_SERVEI_FACTURAR."
+        tests: [not_null]
+      - name: DATA_FIN_FACT
+        data_type: date
+        description: "Fecha final de factura. Parte de la clave natural de L4_SERVEI_FACTURAR."
+        tests: [not_null]
+
+  - name: s_concepto
+    description: >
+      Catálogo funcional de conceptos de facturación de la familia F25.
+      Granularidad: una fila por código de concepto de facturación.
+    config:
+      materialized: table
+    columns:
+      - name: HK_CONCEPTO
+        description: "Clave hash técnica del concepto de facturación, calculada con NUM_CONCEPTE."
+        data_type: string
+        tests: [not_null, unique]
+      - name: NUM_CONCEPTE
+        data_type: varchar(3)
+        description: "Código funcional y único del concepto de facturación de la familia F25."
+        tests: [not_null, unique]
+      - name: DESC_CONCEPTE
+        data_type: string
+        description: "Descripción completa del concepto de facturación."
+        tests: [not_null]
+      - name: DESC_BREU_CONCEPTE
+        data_type: string
+        description: "Descripción breve del concepto de facturación."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución."
+        tests: [not_null]
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha y hora de extracción del registro desde el origen."
+        tests: [not_null]
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga del catálogo en silver_fact."
+        tests: [not_null]
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de L4_CODIFICACIONS."
+        tests: [not_null]
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla L4 de procedencia; para este modelo es L4_CODIFICACIONS."
+        tests: [not_null]
+
+  - name: s_situacion_factura
+    description: >
+      Catálogo funcional de situaciones de factura de la familia R01.
+      Granularidad: una fila por código de situación de factura.
+    config:
+      materialized: table
+    columns:
+      - name: HK_SITUACION_FACT
+        description: "Clave hash técnica de la situación de factura, calculada con TIP_SIT_FACT."
+        data_type: string
+        tests: [not_null, unique]
+      - name: TIP_SIT_FACT
+        data_type: varchar(2)
+        description: "Código funcional y único de situación de factura de la familia R01."
+        tests: [not_null, unique]
+      - name: DESC_SITUACION
+        data_type: string
+        description: "Descripción completa de la situación de factura."
+        tests: [not_null]
+      - name: DESC_BREU_SITUACION
+        data_type: string
+        description: "Descripción breve de la situación de factura."
+      - name: ID_CARGA
+        data_type: number
+        description: "Identificador técnico del lote o ejecución."
+        tests: [not_null]
+      - name: FECHA_EXTRACCION
+        data_type: timestamp_tz
+        description: "Fecha y hora de extracción del registro desde el origen."
+        tests: [not_null]
+      - name: FECHA_CARGA
+        data_type: timestamp_tz
+        description: "Fecha y hora de carga del catálogo en silver_fact."
+        tests: [not_null]
+      - name: SISTEMA_ORIGEN
+        data_type: varchar(30)
+        description: "Sistema de origen heredado de L4_CODIFICACIONS."
+        tests: [not_null]
+      - name: TABLA_ORIGEN
+        data_type: varchar(50)
+        description: "Tabla L4 de procedencia; para este modelo es L4_CODIFICACIONS."
+        tests: [not_null]
