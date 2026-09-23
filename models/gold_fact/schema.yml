@@ -1,0 +1,366 @@
+version: 2
+
+models:
+  - name: g_d_fecha
+    description: "Dimensión calendario conformada con fechas de negocio presentes en Silver."
+    columns:
+      - name: FECHA
+        description: "Fecha de calendario."
+        tests: [not_null, unique]
+      - name: ANYO
+      - name: MES
+      - name: NOMBRE_MES
+      - name: TRIMESTRE
+      - name: DIA
+      - name: DIA_SEMANA
+      - name: NOMBRE_DIA
+      - name: ES_LABORABLE
+
+  - name: g_d_suministro
+    description: "Dimensión de suministro con la versión más reciente del satellite EDW y atributos de cliente utilizables para filtrado, sin crear una dimensión cliente independiente."
+    columns:
+      - name: HK_SUBMIN_SERVEI
+        description: "Clave técnica del suministro."
+        tests: [not_null, unique]
+      - name: POLISSA_SUBM
+        description: "Póliza de suministro."
+        tests: [not_null]
+      - name: TIP_SUBM_SERV
+      - name: SIT_SUBM_SERV
+      - name: US_AIGUA_SUBM
+      - name: TIP_HABIT_SUBM
+      - name: NOMB_HABIT_SUBM
+      - name: DNI_NIF_CLIENT
+      - name: NOM_TITULAR_COMPTE
+      - name: NOM_COMERCIAL
+      - name: ID_QUOTA_SOCIAL
+      - name: ID_TARIFA_SOCIAL
+      - name: IND_SERVEI_SOCIAL
+      - name: IND_POB_ENERG
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_d_geografia
+    description: "Dimensión geográfica canónica del suministro. Cuando existen varias rutas geográficas, conserva una ubicación determinista por suministro para evitar multiplicar hechos."
+    columns:
+      - name: HK_SUBMIN_SERVEI
+        tests: [not_null, unique]
+      - name: HK_MUNICIPI_SGAB
+      - name: NUM_MUN_SGAB
+      - name: HK_CARRER
+      - name: NUM_CARRER
+      - name: HK_FINCA
+      - name: NUM_INI_FINCA
+      - name: COMP_NUM_INI_FINCA
+      - name: NUM_FIN_FINCA
+      - name: COMP_NUM_FIN_FINCA
+      - name: NUM_DTE_MUNI_FINCA
+      - name: NOM_MUN_SGAB
+      - name: NOM_COMPLET_CARRER
+      - name: FECHA_CARGA
+      - name: TABLA_ORIGEN
+
+  - name: g_d_tipo_suministro
+    description: "Catálogo Gold de tipos de suministro procedente del satellite EDW TSS."
+    columns:
+      - name: HK_TIPO_SUMINISTRO
+        tests: [not_null, unique]
+      - name: COD_TIPO_SUMINISTRO
+        tests: [not_null, unique]
+      - name: DES_TIPO_SUMINISTRO
+      - name: DES_ABREV_TIPO_SUMINISTRO
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_d_concepto
+    description: "Catálogo conformado de conceptos explícitos F25 y componentes económicos derivados de agua."
+    columns:
+      - name: CODIGO_CONCEPTO
+        description: "Código prefijado para distinguir conceptos F25 de tipos derivados."
+        tests: [not_null, unique]
+      - name: CODIGO_ORIGEN
+      - name: DESCRIPCION
+      - name: DESCRIPCION_BREVE
+      - name: GRUPO_FUNCIONAL
+      - name: ES_CONSUMO
+      - name: ES_SERVICIO
+      - name: ES_TRIBUTO
+      - name: ES_BONIFICACION
+      - name: ES_IVA
+      - name: ES_ADITIVO
+      - name: FECHA_CARGA
+      - name: TABLA_ORIGEN
+
+  - name: g_d_situacion_factura
+    description: "Catálogo Gold de situaciones R01 de factura."
+    columns:
+      - name: HK_SITUACION_FACT
+        tests: [not_null, unique]
+      - name: TIP_SIT_FACT
+        tests: [not_null, unique]
+      - name: DESC_SITUACION
+      - name: DESC_BREU_SITUACION
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_b_suministro_actividad
+    description: "Puente multivaluado suministro-epígrafe IAE. La sección I identifica actividad industrial principal y la sección S actividad secundaria."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [HK_SUBMIN_SERVEI, HK_EPIGRAF_IAE]
+    columns:
+      - name: HK_SUBMIN_SERVEI
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
+      - name: HK_EPIGRAF_IAE
+        tests: [not_null]
+      - name: SECCIO
+      - name: EPIGRAF_IAE
+      - name: DESCR_IAE
+      - name: ES_ACTIVIDAD_INDUSTRIAL_PRINCIPAL
+      - name: ES_ACTIVIDAD_SERVICIOS_SECUNDARIA
+      - name: TABLA_ORIGEN
+
+  - name: g_b_suministro_colectivo
+    description: "Puente temporal suministro-colectivo social; permite evaluar vulnerabilidad de una factura por fecha final dentro del intervalo histórico."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [HK_SUBMIN_SERVEI, HK_HIST_SS_PE]
+    columns:
+      - name: HK_SUBMIN_SERVEI
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
+      - name: HK_HIST_SS_PE
+        tests: [not_null]
+      - name: TIP_COLECTIVO
+      - name: TS_MOM_IND
+      - name: DATA_INI_IND
+      - name: DATA_FIN_IND
+      - name: OBSERVACIONS
+      - name: TABLA_ORIGEN
+
+  - name: g_h_factura
+    description: "Hecho de cabecera con grano una factura y partición. Las medidas de importe de cabecera no deben sumarse tras unirlo directamente a conceptos."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO]
+    columns:
+      - name: HK_FACTURA
+        tests: [not_null, unique]
+      - name: HK_SUBMIN_SERVEI
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
+      - name: HK_TIPO_SUMINISTRO
+        tests:
+          - relationships:
+              arguments: {to: ref('g_d_tipo_suministro'), field: HK_TIPO_SUMINISTRO}
+      - name: HK_TIPO_USO_AGUA
+      - name: HK_TIPO_VIVIENDA
+      - name: ID_EMPRESA
+      - name: ANY_FACTURA
+      - name: NUM_FACTURA
+      - name: NUM_PARTICIO
+      - name: POLISSA_SUBM
+      - name: DATA_INI_FACT
+      - name: DATA_FIN_FACT
+      - name: DATA_EMISS_FACT
+      - name: DATA_CARREC_RECAP
+      - name: ANY_CALENDARI
+      - name: MES_CALENDARI
+      - name: FREQ_FACT
+      - name: DIES_FACTURATS
+      - name: TIP_SUBM_SERV
+      - name: US_AIGUA_SUBM_FACT
+      - name: TIP_HABIT_SUBM_FA
+      - name: NOMB_HABIT_FACT
+      - name: SIT_SUBM_SERV_FACT
+      - name: TIP_DOMESTIC
+      - name: CONSUM_TOTAL_M3
+        description: "Medida aditiva a grano factura-partición."
+      - name: IMP_TOTAL_FACT
+        description: "Medida de cabecera; aditiva solo a grano factura-partición."
+      - name: IMP_AIGUA_IVA
+      - name: NUM_CONCEPTOS
+      - name: TIENE_RECUPERACION
+      - name: TIENE_REGULARIZACION
+      - name: TIENE_ACTIVIDAD_INDUSTRIAL
+      - name: ES_VULNERABLE
+      - name: ES_FRAUDULENTA
+      - name: ID_CARGA
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_h_factura_concepto
+    description: "Hecho de líneas económicas, una fila por componente de factura y partición. Incluye agua verticalizada y conceptos explícitos."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_CONCEPTE
+    columns:
+      - name: HK_FACTURA_CONCEPTE
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
+      - name: HK_SUBMIN_SERVEI
+        description: "Suministro heredado indirectamente de la factura padre mediante una relación 1:1 por HK_FACTURA."
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
+      - name: CODIGO_CONCEPTO
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_concepto'), field: CODIGO_CONCEPTO}
+      - name: ID_EMPRESA
+      - name: ANY_FACTURA
+      - name: NUM_FACTURA
+      - name: NUM_PARTICIO
+      - name: NUM_LINEA
+      - name: TIPUS_CONCEPTE
+      - name: NUM_CONCEPTE
+      - name: DESC_CONCEPTE
+      - name: POLISSA_SUBM
+      - name: DATA_INI_FACT
+      - name: DATA_FIN_FACT
+      - name: DATA_EMISS_FACT
+      - name: TIP_SUBM_SERV
+      - name: QUANTITAT
+      - name: UNITAT_MESURA
+      - name: BASE_CALCUL
+      - name: TIP_TAXA
+      - name: PREU_UNITARI
+      - name: PERCENTATGE
+      - name: IMP_CONCEPTE
+      - name: IVA_APLICAT
+      - name: ID_CARGA
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_h_factura_situacion
+    description: "Hecho histórico de transiciones de factura, una fila por factura-partición y momento de inicio."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_SITUACION
+    columns:
+      - name: HK_FACTURA_SITUACION
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
+      - name: HK_SITUACION_FACT
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_situacion_factura'), field: HK_SITUACION_FACT}
+      - name: ID_EMPRESA
+      - name: ANY_FACTURA
+      - name: NUM_FACTURA
+      - name: NUM_PARTICIO
+      - name: MOM_INI_SITUACION
+      - name: MOM_FIN_SITUACION
+      - name: NUM_ORDEN_SITUACION
+      - name: ES_SITUACION_ACTUAL
+      - name: TIP_SIT_FACT
+      - name: DESC_SITUACION
+      - name: DESC_BREU_SITUACION
+      - name: CAUSA_SIT_FACT
+      - name: ID_CARGA
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_h_recuperacion
+    description: "Hecho de recuperaciones a grano factura-partición artificial 1. Sus importes no se unen al hecho de conceptos."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_RECUP
+    columns:
+      - name: HK_FACTURA_RECUP
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
+      - name: HK_SUBMIN_SERVEI
+        description: "Suministro heredado indirectamente de la factura padre mediante una relación 1:1 por HK_FACTURA."
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
+      - name: ID_EMPRESA
+      - name: ANY_FACTURA
+      - name: NUM_FACTURA
+      - name: NUM_PARTICIO
+      - name: M3_TOTAL_RECUPERADOS
+      - name: IMP_TOTAL_RECUPERACION
+      - name: ID_CARGA
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN
+
+  - name: g_h_regularizacion
+    description: "Hecho de regularizaciones a grano factura-partición artificial 1 y fecha final de incidencia."
+    config:
+      materialized: incremental
+      incremental_strategy: merge
+      unique_key: HK_FACTURA_REGUL
+    columns:
+      - name: HK_FACTURA_REGUL
+        tests: [not_null, unique]
+      - name: HK_FACTURA
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
+      - name: HK_SUBMIN_SERVEI
+        description: "Suministro heredado indirectamente de la factura padre mediante una relación 1:1 por HK_FACTURA."
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
+      - name: ID_EMPRESA
+      - name: ANY_FACTURA
+      - name: NUM_FACTURA
+      - name: NUM_PARTICIO
+      - name: DATA_FIN_PER_INCID
+      - name: M3_TOTAL_REGULARIZADOS
+      - name: IMP_TOTAL_REGULARIZACION
+      - name: ID_CARGA
+      - name: FECHA_EXTRACCION
+      - name: FECHA_CARGA
+      - name: SISTEMA_ORIGEN
+      - name: TABLA_ORIGEN

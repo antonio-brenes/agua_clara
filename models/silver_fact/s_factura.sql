@@ -17,6 +17,7 @@ WITH source_data AS (
         SHA2_HEX(
             CONCAT_WS(
                 '|',
+                TO_VARCHAR(f.NUM_PARTICIO),
                 UPPER(TRIM(f.ID_EMPRESA)),
                 UPPER(TRIM(f.ANY_FACTURA)),
                 TO_VARCHAR(f.NUM_FACTURA)
@@ -38,10 +39,10 @@ WITH source_data AS (
         SHA2_HEX(UPPER(TRIM(f.TIP_HABIT_SUBM_FA)), 256)
             AS HK_TIPO_VIVIENDA,
 
+        f.NUM_PARTICIO,
         f.ID_EMPRESA,
         f.ANY_FACTURA,
         f.NUM_FACTURA,
-        f.NUM_PARTICIO,
         f.POLISSA_SUBM,
 
         f.DATA_INI_FACT,
@@ -116,10 +117,10 @@ WITH source_data AS (
 
     FROM {{ ref('l4_fact_resum') }} AS f
 
-        WHERE NULLIF(TRIM(f.ID_EMPRESA), '') IS NOT NULL
+        WHERE f.NUM_PARTICIO IS NOT NULL
+          AND NULLIF(TRIM(f.ID_EMPRESA), '') IS NOT NULL
           AND NULLIF(TRIM(f.ANY_FACTURA), '') IS NOT NULL
           AND f.NUM_FACTURA IS NOT NULL
-          AND NULLIF(TRIM(f.POLISSA_SUBM), '') IS NOT NULL
 
 )
 

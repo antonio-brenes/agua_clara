@@ -12,10 +12,10 @@
 WITH factura AS (
 
     SELECT
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         POLISSA_SUBM,
         DATA_INI_FACT,
         DATA_FIN_FACT,
@@ -51,10 +51,10 @@ concepto AS (
 conceptos_agua AS (
 
     SELECT
+        a.NUM_PARTICIO,
         f.ID_EMPRESA,
         f.ANY_FACTURA,
         f.NUM_FACTURA,
-        a.NUM_PARTICIO,
         f.POLISSA_SUBM,
         f.DATA_INI_FACT,
         f.DATA_FIN_FACT,
@@ -82,10 +82,10 @@ conceptos_agua AS (
     FROM factura AS f
 
     INNER JOIN linea_agua AS a
-        ON f.ID_EMPRESA = a.ID_EMPRESA
+        ON f.NUM_PARTICIO = a.NUM_PARTICIO
+       AND f.ID_EMPRESA = a.ID_EMPRESA
        AND f.ANY_FACTURA = a.ANY_FACTURA
        AND f.NUM_FACTURA = a.NUM_FACTURA
-       AND f.NUM_PARTICIO = a.NUM_PARTICIO
 
     CROSS JOIN LATERAL FLATTEN(
         INPUT => ARRAY_CONSTRUCT(
@@ -331,10 +331,10 @@ conceptos_agua_distintos_cero AS (
 conceptos_resto AS (
 
     SELECT
+        c.NUM_PARTICIO,
         c.ID_EMPRESA,
         c.ANY_FACTURA,
         c.NUM_FACTURA,
-        c.NUM_PARTICIO,
         f.POLISSA_SUBM,
         f.DATA_INI_FACT,
         f.DATA_FIN_FACT,
@@ -371,10 +371,10 @@ conceptos_resto AS (
     FROM concepto AS c
 
     INNER JOIN factura AS f
-        ON f.ID_EMPRESA = c.ID_EMPRESA
+        ON f.NUM_PARTICIO = c.NUM_PARTICIO
+       AND f.ID_EMPRESA = c.ID_EMPRESA
        AND f.ANY_FACTURA = c.ANY_FACTURA
        AND f.NUM_FACTURA = c.NUM_FACTURA
-       AND f.NUM_PARTICIO = c.NUM_PARTICIO
 
 ),
 
@@ -390,10 +390,10 @@ SELECT
     SHA2_HEX(
         CONCAT_WS(
             '|',
+            TO_VARCHAR(NUM_PARTICIO),
             UPPER(TRIM(ID_EMPRESA)),
             UPPER(TRIM(ANY_FACTURA)),
             TO_VARCHAR(NUM_FACTURA),
-            TO_VARCHAR(NUM_PARTICIO),
             UPPER(TRIM(TIPUS_CONCEPTE)),
             TO_VARCHAR(NUM_LINEA),
             COALESCE(UPPER(TRIM(NUM_CONCEPTE)), '^^')
@@ -404,6 +404,7 @@ SELECT
     SHA2_HEX(
         CONCAT_WS(
             '|',
+            TO_VARCHAR(NUM_PARTICIO),
             UPPER(TRIM(ID_EMPRESA)),
             UPPER(TRIM(ANY_FACTURA)),
             TO_VARCHAR(NUM_FACTURA)
@@ -419,10 +420,10 @@ SELECT
     SHA2_HEX(UPPER(TRIM(TIP_SUBM_SERV)), 256)
         AS HK_TIPO_SUMINISTRO,
 
+    NUM_PARTICIO,
     ID_EMPRESA,
     ANY_FACTURA,
     NUM_FACTURA,
-    NUM_PARTICIO,
     NUM_LINEA,
     TIPUS_CONCEPTE,
     NUM_CONCEPTE,

@@ -2,13 +2,7 @@ version: 2
 
 models:
   - name: s_factura
-    description: >
-      Cabecera analítica de facturación. Granularidad: una fila por factura,
-      identificada por empresa, año y número de factura. Consolida el periodo
-      facturado, el suministro, el consumo total, los importes de cabecera,
-      los indicadores de negocio y los datos necesarios para analizar emisión,
-      cobro y cliente, sin repetir el desglose económico disponible en
-      s_factura_concepto.
+    description: "Cabecera analítica de facturación. Granularidad: una fila por factura y partición, identificada por empresa, año, número de factura y número de partición. Consolida el periodo facturado, el suministro, el consumo total, los importes de cabecera, los indicadores de negocio y los datos necesarios para analizar emisión, cobro y cliente, sin repetir el desglose económico disponible en s_factura_concepto."
     config:
       materialized: incremental
       incremental_strategy: merge
@@ -16,10 +10,10 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            combination_of_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
       - name: HK_FACTURA
-        description: "Clave hash de la factura, calculada con ID_EMPRESA, ANY_FACTURA y NUM_FACTURA. Identifica de forma única la fila de S_FACTURA y se utiliza como clave de relación con conceptos y situaciones."
+        description: "Clave hash de la factura, calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA y NUM_FACTURA. Identifica de forma única la fila de S_FACTURA y se utiliza como clave de relación con conceptos y situaciones."
         data_type: string
         tests: [not_null, unique]
       - name: HK_SUBMIN_SERVEI
@@ -55,6 +49,10 @@ models:
               arguments:
                 to: ref('edw_h_tipo_vivienda')
                 field: HK_TIPO_VIVIENDA
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave natural de la factura."
+        tests: [not_null]                
       - name: ID_EMPRESA
         data_type: varchar(2)
         description: "Código de la empresa emisora. Forma parte de la clave natural de la factura."
@@ -66,10 +64,6 @@ models:
       - name: NUM_FACTURA
         data_type: number(7,0)
         description: "Número secuencial de la factura dentro de la empresa y el año. Forma parte de la clave natural de la factura."
-        tests: [not_null]
-      - name: NUM_PARTICIO
-        data_type: number(2,0)
-        description: "Número de partición técnica de la factura, conservado para enlazar con los detalles L4 que lo utilizan."
         tests: [not_null]
       - name: POLISSA_SUBM
         data_type: varchar(10)
@@ -269,15 +263,15 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, NUM_LINEA, TIPUS_CONCEPTE, NUM_CONCEPTE]
+            combination_of_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_LINEA, TIPUS_CONCEPTE, NUM_CONCEPTE]
     columns:
       - name: HK_FACTURA_CONCEPTE
-        description: "Clave hash de la fila de concepto, calculada con la clave de factura, partición, tipo de concepto, número de línea y código de concepto de origen. Identifica de forma única cada componente económico normalizado."
+        description: "Clave hash del concepto, calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_LINEA, TIPUS_CONCEPTE y NUM_CONCEPTE. Identifica de forma única cada componente económico normalizado."
         data_type: string
         tests: [not_null, unique]
       - name: HK_FACTURA
         data_type: string
-        description: "Clave hash de la factura padre, calculada con ID_EMPRESA, ANY_FACTURA y NUM_FACTURA."
+        description: "Clave hash de la factura padre, calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA y NUM_FACTURA."
         tests:
           - not_null
           - relationships:
@@ -301,33 +295,33 @@ models:
               arguments:
                 to: ref('edw_h_tipo_suministro')
                 field: HK_TIPO_SUMINISTRO
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave natural del concepto."
+        tests: [not_null]      
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora. Forma parte de la clave natural de la factura padre."
+        description: "Código de la empresa emisora. Forma parte de la clave natural del concepto."
         tests: [not_null]
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de la factura padre. Forma parte de su clave natural."
+        description: "Año de la factura padre. Forma parte de la clave natural del concepto."
         tests: [not_null]
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número de la factura padre. Forma parte de su clave natural."
-        tests: [not_null]
-      - name: NUM_PARTICIO
-        data_type: number(2,0)
-        description: "Número de partición del detalle dentro de la factura."
+        description: "Número de la factura padre.  Forma parte de la clave natural del concepto."
         tests: [not_null]
       - name: NUM_LINEA
         data_type: number(3,0)
-        description: "Orden de presentación o número de línea del componente. Para conceptos procedentes de L4_FACT_CONCEPTE conserva NUM_LINEA; para componentes derivados de agua utiliza un orden analítico estable."
+        description: "Orden de presentación o número de línea del componente. Para conceptos procedentes de L4_FACT_CONCEPTE conserva NUM_LINEA; para componentes derivados de agua utiliza un orden analítico estable. Forma parte de la clave natural del concepto."
         tests: [not_null]
       - name: TIPUS_CONCEPTE
         data_type: string
-        description: "Tipo analítico del componente facturado, por ejemplo AIGUA_BLOC1, QUOTA_SERVEI, CLAVEGUERAM, SANEJAMENT, ERSU, CIH_BLOC1, IVA o CONCEPTE."
+        description: "Tipo analítico del componente facturado, por ejemplo AIGUA_BLOC1, QUOTA_SERVEI, CLAVEGUERAM, SANEJAMENT, ERSU, CIH_BLOC1, IVA o CONCEPTE. Forma parte de la clave natural del concepto."
         tests: [not_null]
       - name: NUM_CONCEPTE
         data_type: varchar(3)
-        description: "Código de concepto original de L4_FACT_CONCEPTE. Es nulo para los componentes derivados de L4_FACT_AIGUA que no disponen de un código de concepto físico en esa tabla."
+        description: "Código de concepto original de L4_FACT_CONCEPTE. Es nulo para los componentes derivados de L4_FACT_AIGUA que no disponen de un código de concepto físico en esa tabla. Forma parte de la clave natural del concepto."
       - name: DESC_CONCEPTE
         data_type: string
         description: "Descripción funcional normalizada del componente económico. Para líneas de concepto utiliza la observación disponible o el código de origen."
@@ -407,10 +401,10 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, MOM_INI_SITUACION]
+            combination_of_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, MOM_INI_SITUACION]
     columns:
       - name: HK_FACTURA_SITUACION
-        description: "Clave hash del evento de situación, calculada con la clave de factura, la partición y MOM_INI_SITUACION. Identifica de forma única cada transición histórica."
+        description: "Clave hash del evento de situación, calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA y MOM_INI_SITUACION. Identifica de forma única cada transición histórica."
         data_type: string
         tests: [not_null, unique]
       - name: HK_FACTURA
@@ -431,25 +425,25 @@ models:
               arguments:
                 to: ref('s_situacion_factura')
                 field: HK_SITUACION_FACT
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave natural de la situación de factura."
+        tests: [not_null]      
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora. Forma parte de la clave natural de la factura."
+        description: "Código de la empresa emisora. Forma parte de la clave natural de la situación de factura."
         tests: [not_null]
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de la factura. Forma parte de la clave natural de la factura."
+        description: "Año de la factura. Forma parte de la clave natural de la situación de factura."
         tests: [not_null]
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número secuencial de la factura. Forma parte de la clave natural de la factura."
-        tests: [not_null]
-      - name: NUM_PARTICIO
-        data_type: number(2,0)
-        description: "Número de partición técnica del histórico de situación."
+        description: "Número secuencial de la factura. Forma parte de la clave natural de la situación de factura."
         tests: [not_null]
       - name: MOM_INI_SITUACION
         data_type: timestamp_tz
-        description: "Fecha y hora en la que la factura entra en la situación registrada."
+        description: "Fecha y hora en la que la factura entra en la situación registrada. Forma parte de la clave natural de la situación de factura."
         tests: [not_null]
       - name: MOM_FIN_SITUACION
         data_type: timestamp_tz
@@ -497,7 +491,7 @@ models:
         tests: [not_null]
 
   - name: s_factura_recup
-    description: "Importes y consumos recuperados asociados a una factura. Granularidad: una fila por empresa, año y número de factura."
+    description: "Importes y consumos recuperados asociados a una factura. Granularidad: una fila por empresa, año, y factura."
     config:
       materialized: incremental
       incremental_strategy: merge
@@ -505,10 +499,10 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            combination_of_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
       - name: HK_FACTURA_RECUP
-        description: "Clave hash técnica de la recuperación, calculada con la clave natural de L4_FACT_RECUP."
+        description: "Clave hash de la recuperación, calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA y NUM_FACTURA."
         data_type: string
         tests: [not_null, unique]
       - name: HK_FACTURA
@@ -520,17 +514,21 @@ models:
               arguments:
                 to: ref('s_factura')
                 field: HK_FACTURA
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave natural de la recuperación de factura."
+        tests: [not_null]                
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de empresa. Parte de la clave natural de L4_FACT_RECUP."
+        description: "Código de empresa. Forma parte de la clave natural de la recuperación de factura."
         tests: [not_null]
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de factura. Parte de la clave natural de L4_FACT_RECUP."
+        description: "Año de factura. Forma parte de la clave natural de la recuperación de factura."
         tests: [not_null]
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número de factura. Parte de la clave natural de L4_FACT_RECUP."
+        description: "Número de factura. Forma parte de la clave natural de la recuperación de factura."
         tests: [not_null]
 
   - name: s_factura_regul
@@ -542,10 +540,10 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, DATA_FIN_PER_INCID]
+            combination_of_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, DATA_FIN_PER_INCID]
     columns:
       - name: HK_FACTURA_REGUL
-        description: "Clave hash técnica de la regularización, calculada con la clave natural de L4_FACT_REGUL."
+        description: "Clave hash de la regularización, calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA y DATA_FIN_PER_INCID."
         data_type: string
         tests: [not_null, unique]
       - name: HK_FACTURA
@@ -557,21 +555,25 @@ models:
               arguments:
                 to: ref('s_factura')
                 field: HK_FACTURA
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave natural de la regularización de factura."
+        tests: [not_null]                
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de empresa. Parte de la clave natural de L4_FACT_REGUL."
+        description: "Código de empresa. Forma parte de la clave natural de la regularización de factura."
         tests: [not_null]
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de factura. Parte de la clave natural de L4_FACT_REGUL."
+        description: "Año de factura. Forma parte de la clave natural de la regularización de factura."
         tests: [not_null]
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número de factura. Parte de la clave natural de L4_FACT_REGUL."
+        description: "Número de factura. Forma parte de la clave natural de la regularización de factura."
         tests: [not_null]
       - name: DATA_FIN_PER_INCID
         data_type: date
-        description: "Fecha final del periodo de incidencia. Parte de la clave natural de L4_FACT_REGUL."
+        description: "Fecha final del periodo de incidencia. Forma parte de la clave natural de la regularización de factura."
         tests: [not_null]
 
   - name: s_servicio_ci_facturar
@@ -586,7 +588,7 @@ models:
             combination_of_columns: [POLISSA_SUBM, DATA_FIN_FACT]
     columns:
       - name: HK_SERVEI_FACTURAR
-        description: "Clave hash técnica del servicio a facturar, calculada con POLISSA_SUBM y DATA_FIN_FACT."
+        description: "Clave hash del servicio a facturar, calculada con POLISSA_SUBM y DATA_FIN_FACT."
         data_type: string
         tests: [not_null, unique]
       - name: HK_SUBMIN_SERVEI
@@ -615,7 +617,7 @@ models:
       materialized: table
     columns:
       - name: HK_CONCEPTO
-        description: "Clave hash técnica del concepto de facturación, calculada con NUM_CONCEPTE."
+        description: "Clave hash del concepto de facturación, calculada con NUM_CONCEPTE."
         data_type: string
         tests: [not_null, unique]
       - name: NUM_CONCEPTE
@@ -658,7 +660,7 @@ models:
       materialized: table
     columns:
       - name: HK_SITUACION_FACT
-        description: "Clave hash técnica de la situación de factura, calculada con TIP_SIT_FACT."
+        description: "Clave hash de la situación de factura, calculada con TIP_SIT_FACT."
         data_type: string
         tests: [not_null, unique]
       - name: TIP_SIT_FACT

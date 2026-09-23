@@ -12,28 +12,28 @@ WITH situaciones AS (
         s.*,
         LEAD(s.MOM_SIT_FACT) OVER (
             PARTITION BY
+                s.NUM_PARTICIO,
                 s.ID_EMPRESA,
                 s.ANY_FACTURA,
-                s.NUM_FACTURA,
-                s.NUM_PARTICIO
+                s.NUM_FACTURA
             ORDER BY s.MOM_SIT_FACT
         ) AS MOM_FIN_SITUACION,
 
         ROW_NUMBER() OVER (
             PARTITION BY
+                s.NUM_PARTICIO,
                 s.ID_EMPRESA,
                 s.ANY_FACTURA,
-                s.NUM_FACTURA,
-                s.NUM_PARTICIO
+                s.NUM_FACTURA
             ORDER BY s.MOM_SIT_FACT
         ) AS NUM_ORDEN_SITUACION,
 
         ROW_NUMBER() OVER (
             PARTITION BY
+                s.NUM_PARTICIO,
                 s.ID_EMPRESA,
                 s.ANY_FACTURA,
-                s.NUM_FACTURA,
-                s.NUM_PARTICIO
+                s.NUM_FACTURA
             ORDER BY s.MOM_SIT_FACT DESC
         ) AS RN_ULTIMA
 
@@ -56,10 +56,10 @@ SELECT
     SHA2_HEX(
         CONCAT_WS(
             '|',
+            TO_VARCHAR(s.NUM_PARTICIO),
             UPPER(TRIM(s.ID_EMPRESA)),
             UPPER(TRIM(s.ANY_FACTURA)),
             TO_VARCHAR(s.NUM_FACTURA),
-            TO_VARCHAR(s.NUM_PARTICIO),
             TO_VARCHAR(s.MOM_SIT_FACT, 'YYYY-MM-DD HH24:MI:SS.FF9')
         ),
         256
@@ -73,6 +73,7 @@ SELECT
     SHA2_HEX(
         CONCAT_WS(
             '|',
+            TO_VARCHAR(s.NUM_PARTICIO),
             UPPER(TRIM(s.ID_EMPRESA)),
             UPPER(TRIM(s.ANY_FACTURA)),
             TO_VARCHAR(s.NUM_FACTURA)
@@ -80,10 +81,10 @@ SELECT
         256
     ) AS HK_FACTURA,
 
+    s.NUM_PARTICIO,
     s.ID_EMPRESA,
     s.ANY_FACTURA,
     s.NUM_FACTURA,
-    s.NUM_PARTICIO,
 
     s.MOM_SIT_FACT AS MOM_INI_SITUACION,
     s.MOM_FIN_SITUACION,
@@ -105,8 +106,8 @@ FROM situaciones AS s
 LEFT JOIN catalogo_estado AS cat
     ON cat.TIP_SIT_FACT = s.TIP_SIT_FACT
 
-WHERE NULLIF(TRIM(s.ID_EMPRESA), '') IS NOT NULL
-    AND NULLIF(TRIM(s.ANY_FACTURA), '') IS NOT NULL
+WHERE s.NUM_PARTICIO IS NOT NULL
+  AND NULLIF(TRIM(s.ID_EMPRESA), '') IS NOT NULL
+  AND NULLIF(TRIM(s.ANY_FACTURA), '') IS NOT NULL
   AND s.NUM_FACTURA IS NOT NULL
-  AND s.NUM_PARTICIO IS NOT NULL
   AND s.MOM_SIT_FACT IS NOT NULL

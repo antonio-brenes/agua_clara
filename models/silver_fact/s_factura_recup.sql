@@ -12,6 +12,7 @@ WITH source_data AS (
         SHA2_HEX(
             CONCAT_WS(
                 '|',
+                TO_VARCHAR(r.NUM_PARTICIO),
                 UPPER(TRIM(r.ID_EMPRESA)),
                 UPPER(TRIM(r.ANY_FACTURA)),
                 TO_VARCHAR(r.NUM_FACTURA)
@@ -22,6 +23,7 @@ WITH source_data AS (
         SHA2_HEX(
             CONCAT_WS(
                 '|',
+                TO_VARCHAR(r.NUM_PARTICIO),
                 UPPER(TRIM(r.ID_EMPRESA)),
                 UPPER(TRIM(r.ANY_FACTURA)),
                 TO_VARCHAR(r.NUM_FACTURA)
@@ -29,6 +31,7 @@ WITH source_data AS (
             256
         ) AS HK_FACTURA,
 
+        r.NUM_PARTICIO,
         r.ID_EMPRESA,
         r.ANY_FACTURA,
         r.NUM_FACTURA,
@@ -110,9 +113,10 @@ WITH source_data AS (
 
     FROM {{ ref('l4_fact_recup') }} AS r
 
-        WHERE NULLIF(TRIM(r.ID_EMPRESA), '') IS NOT NULL
-            AND NULLIF(TRIM(r.ANY_FACTURA), '') IS NOT NULL
-      AND r.NUM_FACTURA IS NOT NULL
+   WHERE r.NUM_PARTICIO IS NOT NULL
+     AND NULLIF(TRIM(r.ID_EMPRESA), '') IS NOT NULL
+     AND NULLIF(TRIM(r.ANY_FACTURA), '') IS NOT NULL
+     AND r.NUM_FACTURA IS NOT NULL
 
 )
 

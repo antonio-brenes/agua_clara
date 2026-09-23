@@ -1,7 +1,7 @@
 {{ config(
     materialized='incremental',
     incremental_strategy='merge',
-    unique_key=['ID_EMPRESA', 'ANY_FACTURA', 'NUM_FACTURA'],
+    unique_key=['NUM_PARTICIO', 'ID_EMPRESA', 'ANY_FACTURA', 'NUM_FACTURA'],
     schema='l4_fact',
     tags=['l4_fact', 'l4', 'bronze']
 ) }}
@@ -12,6 +12,7 @@ with raw as (
 )
 
 select
+    COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NUM_PARTICIO"), ''), 2, 0), 0) AS NUM_PARTICIO,
     COALESCE(NULLIF(TRIM(raw."ID_EMPRESA"), ''), '^^') AS ID_EMPRESA,
     COALESCE(NULLIF(TRIM(raw."ANY_FACTURA"), ''), '^^') AS ANY_FACTURA,
     COALESCE(TRY_TO_DECIMAL(NULLIF(TRIM(raw."NUM_FACTURA"), ''), 7, 0), 0) AS NUM_FACTURA,

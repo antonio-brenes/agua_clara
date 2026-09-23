@@ -1540,6 +1540,7 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
+              - NUM_PARTICIO
               - ID_EMPRESA
               - ANY_FACTURA
               - NUM_FACTURA
@@ -1631,7 +1632,7 @@ models:
           - not_null
       - name: NUM_PARTICIO
         data_type: number(2,0)
-        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura."
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
         tests:
           - not_null
       - name: POLISSA_SUBM
@@ -1864,27 +1865,27 @@ models:
       - relationships_compound:
           arguments:
             to: "{{ ref('l4_fact_resum') }}"
-            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
-            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            local_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
       - name: NUM_PARTICIO
         data_type: number(2,0)
-        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ID_EMPRESA."
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA."
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.NUM_FACTURA."
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: DIAM_COMP_FACT
@@ -2253,27 +2254,27 @@ models:
       - relationships_compound:
           arguments:
             to: "{{ ref('l4_fact_resum') }}"
-            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
-            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            local_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
       - name: NUM_PARTICIO
         data_type: number(2,0)
-        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ID_EMPRESA."
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA."
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.NUM_FACTURA."
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: NUM_LINEA
@@ -2333,11 +2334,12 @@ models:
         description: "Tabla RAW de procedencia."
 
   - name: l4_fact_regul
-    description: "Detalle económico de una regularización de consumo o tarifas incluida en una factura. Granularidad: un registro por factura y fecha final del periodo de incidencia."
+    description: "Histórico de facturas relativas a regularizaciones de consumo en una factura. Registra las regularizaciones de consumo aplicadas cuando existe una incidencia (lectura estimada corregida, cambio de tarifa a mitad de periodo, etc.). Granularidad: un registro por factura y fecha final del periodo de incidencia."
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
+              - NUM_PARTICIO
               - ID_EMPRESA
               - ANY_FACTURA
               - NUM_FACTURA
@@ -2345,27 +2347,32 @@ models:
       - relationships_compound:
           arguments:
             to: "{{ ref('l4_fact_resum') }}"
-            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
-            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            local_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
+        tests:
+          - not_null
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora o suministradora."
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de emisión de la factura."
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número secuencial de la factura."
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: DATA_FIN_PER_INCID
         data_type: date
-        description: "Fecha final del periodo afectado por la incidencia que origina la regularización."
+        description: "Fecha final del periodo afectado por la incidencia que origina la regularización. Forma parte de la clave primaria."
         tests:
           - not_null
       - name: M3_BLOC1_RG
@@ -2725,33 +2732,39 @@ models:
         description: "Tabla RAW de procedencia."
 
   - name: l4_fact_recup
-    description: "Detalle económico de una recuperación de importes o precios incluida en una factura. Granularidad: un registro por factura."
+    description: "Histórico de facturas relativas a recuperaciones de precios (agua o tasas). Registra recuperaciones de importes por cambio retroactivo de precios (agua, canon, tasas) sobre una factura ya emitida. Granularidad: un registro por factura."
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
+              - NUM_PARTICIO
               - ID_EMPRESA
               - ANY_FACTURA
               - NUM_FACTURA
       - relationships_compound:
           arguments:
             to: "{{ ref('l4_fact_resum') }}"
-            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
-            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            local_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
+      - name: NUM_PARTICIO
+        data_type: number(2,0)
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
+        tests:
+          - not_null
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora o suministradora."
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de emisión de la factura."
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número secuencial de la factura."
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: IMP_QTA_SERV_RC
@@ -3019,27 +3032,27 @@ models:
       - relationships_compound:
           arguments:
             to: "{{ ref('l4_fact_resum') }}"
-            local_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
-            field_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            local_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
+            field_columns: [NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA]
     columns:
       - name: NUM_PARTICIO
         data_type: number(2,0)
-        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria."
+        description: "Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ID_EMPRESA
         data_type: varchar(2)
-        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ID_EMPRESA."
+        description: "Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: ANY_FACTURA
         data_type: varchar(4)
-        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA."
+        description: "Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: NUM_FACTURA
         data_type: number(7,0)
-        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum.NUM_FACTURA."
+        description: "Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_fact_resum."
         tests:
           - not_null
       - name: MOM_SIT_FACT

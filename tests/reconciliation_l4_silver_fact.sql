@@ -23,10 +23,10 @@ with
 
 l4_facturas as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         POLISSA_SUBM,
         IMP_TOTAL_FACT
     from {{ ref('l4_fact_resum') }}
@@ -34,10 +34,10 @@ l4_facturas as (
 
 silver_facturas as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         POLISSA_SUBM,
         IMP_TOTAL_FACT
     from {{ ref('s_factura') }}
@@ -45,10 +45,10 @@ silver_facturas as (
 
 l4_agua as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
-        NUM_FACTURA,
-        NUM_PARTICIO
+        NUM_FACTURA        
     from {{ ref('l4_fact_aigua') }}
 ),
 
@@ -57,37 +57,37 @@ l4_agua as (
    Debe utilizar exactamente los mismos tipos de concepto que S_FACTURA_CONCEPTO.
 */
 l4_agua_importes as (
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'AIGUA_BLOC1' as TIPUS_CONCEPTE, coalesce(IMP_BLOC1, 0) as IMPORTE from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'AIGUA_BLOC1' as TIPUS_CONCEPTE, coalesce(IMP_BLOC1, 0) as IMPORTE from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'AIGUA_BLOC2', coalesce(IMP_BLOC2, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'AIGUA_BLOC2', coalesce(IMP_BLOC2, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'AIGUA_BLOC3', coalesce(IMP_BLOC3, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'AIGUA_BLOC3', coalesce(IMP_BLOC3, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'AIGUA_BLOC4', coalesce(IMP_BLOC4, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'AIGUA_BLOC4', coalesce(IMP_BLOC4, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'AIGUA_BLOC5', coalesce(IMP_BLOC5, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA,  'AIGUA_BLOC5', coalesce(IMP_BLOC5, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'QUOTA_SERVEI', coalesce(IMP_QTA_SERV, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'QUOTA_SERVEI', coalesce(IMP_QTA_SERV, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'CT_XBASICA', coalesce(IMP_CT_XBASICA, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'CT_XBASICA', coalesce(IMP_CT_XBASICA, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'TCG_SUBM', coalesce(IMP_TCG_SUBM, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'TCG_SUBM', coalesce(IMP_TCG_SUBM, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'CLAVEGUERAM', coalesce(IMP_CLAVAG, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'CLAVEGUERAM', coalesce(IMP_CLAVAG, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'SANEJAMENT', coalesce(IMP_SANEJA, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'SANEJAMENT', coalesce(IMP_SANEJA, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'ERSU', coalesce(IMP_ERSU, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'ERSU', coalesce(IMP_ERSU, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'CIH_BLOC1', coalesce(IMP_CIH_BLOC1, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'CIH_BLOC1', coalesce(IMP_CIH_BLOC1, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'CIH_BLOC2', coalesce(IMP_CIH_BLOC2, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'CIH_BLOC2', coalesce(IMP_CIH_BLOC2, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'CIH_BLOC3', coalesce(IMP_CIH_BLOC3, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'CIH_BLOC3', coalesce(IMP_CIH_BLOC3, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'IVA_SANEJAMENT', coalesce(IMP_IVA_SANEJA, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'IVA_SANEJAMENT', coalesce(IMP_IVA_SANEJA, 0) from {{ ref('l4_fact_aigua') }}
     union all
-    select ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO, 'IVA', coalesce(IMP_IVA, 0) from {{ ref('l4_fact_aigua') }}
+    select NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, 'IVA', coalesce(IMP_IVA, 0) from {{ ref('l4_fact_aigua') }}
 ),
 
 /*
@@ -102,61 +102,61 @@ l4_agua_importes_aplicables as (
 
 silver_agua_importes as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         TIPUS_CONCEPTE,
         round(sum(coalesce(IMP_CONCEPTE, 0)), 2) as IMPORTE
     from {{ ref('s_factura_concepto') }}
     where TABLA_ORIGEN = 'L4_FACT_AIGUA'
     group by
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         TIPUS_CONCEPTE
 ),
 
 l4_agua_totales as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         round(sum(IMPORTE), 2) as IMPORTE
     from l4_agua_importes
-    group by ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO
+    group by NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA
 ),
 
 silver_agua_totales as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         round(sum(coalesce(IMP_CONCEPTE, 0)), 2) as IMPORTE
     from {{ ref('s_factura_concepto') }}
     where TABLA_ORIGEN = 'L4_FACT_AIGUA'
-    group by ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO
+    group by NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA
 ),
 
 silver_agua_facturas as (
     select distinct
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
-        NUM_FACTURA,
-        NUM_PARTICIO
+        NUM_FACTURA
     from {{ ref('s_factura_concepto') }}
     where TABLA_ORIGEN = 'L4_FACT_AIGUA'
 ),
 
 l4_conceptos as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         NUM_LINEA,
         NUM_CONCEPTE,
         IMP_CONCEPTE
@@ -165,10 +165,10 @@ l4_conceptos as (
 
 silver_conceptos_explicitos as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         NUM_LINEA,
         NUM_CONCEPTE,
         IMP_CONCEPTE
@@ -178,28 +178,29 @@ silver_conceptos_explicitos as (
 
 l4_conceptos_totales as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         round(sum(coalesce(IMP_CONCEPTE, 0)), 2) as IMPORTE
     from l4_conceptos
-    group by ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO
+    group by NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA
 ),
 
 silver_conceptos_totales as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         round(sum(coalesce(IMP_CONCEPTE, 0)), 2) as IMPORTE
     from silver_conceptos_explicitos
-    group by ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO
+    group by NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA
 ),
 
 l4_recuperaciones as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
@@ -233,6 +234,7 @@ l4_recuperaciones as (
 ),
 silver_recuperaciones as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
@@ -242,6 +244,7 @@ silver_recuperaciones as (
 ),
 l4_regularizaciones as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
@@ -283,6 +286,7 @@ l4_regularizaciones as (
 ),
 silver_regularizaciones as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
@@ -293,20 +297,20 @@ silver_regularizaciones as (
 ),
 l4_situaciones as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         MOM_SIT_FACT
     from {{ ref('l4_situacio_fact') }}
 ),
 
 silver_situaciones as (
     select
+        NUM_PARTICIO,
         ID_EMPRESA,
         ANY_FACTURA,
         NUM_FACTURA,
-        NUM_PARTICIO,
         MOM_INI_SITUACION
     from {{ ref('s_factura_situacion_hist') }}
 ),
@@ -334,7 +338,8 @@ controles as (
         'Facturas L4 sin correspondencia por empresa, anyo y numero'
     from l4_facturas as l4
     left join silver_facturas as sf
-        on sf.ID_EMPRESA = l4.ID_EMPRESA
+        on sf.NUM_PARTICIO = l4.NUM_PARTICIO
+       and sf.ID_EMPRESA = l4.ID_EMPRESA
        and sf.ANY_FACTURA = l4.ANY_FACTURA
        and sf.NUM_FACTURA = l4.NUM_FACTURA
     where sf.NUM_FACTURA is null
@@ -351,7 +356,8 @@ controles as (
         'Facturas Silver sin correspondencia en L4'
     from silver_facturas as sf
     left join l4_facturas as l4
-        on l4.ID_EMPRESA = sf.ID_EMPRESA
+        on l4.NUM_PARTICIO = sf.NUM_PARTICIO
+       and l4.ID_EMPRESA = sf.ID_EMPRESA
        and l4.ANY_FACTURA = sf.ANY_FACTURA
        and l4.NUM_FACTURA = sf.NUM_FACTURA
     where l4.NUM_FACTURA is null
@@ -368,7 +374,8 @@ controles as (
         'Facturas cuyo IMP_TOTAL_FACT no coincide'
     from l4_facturas as l4
     inner join silver_facturas as sf
-        on sf.ID_EMPRESA = l4.ID_EMPRESA
+        on sf.NUM_PARTICIO = l4.NUM_PARTICIO
+       and sf.ID_EMPRESA = l4.ID_EMPRESA
        and sf.ANY_FACTURA = l4.ANY_FACTURA
        and sf.NUM_FACTURA = l4.NUM_FACTURA
     where abs(coalesce(sf.IMP_TOTAL_FACT, 0) - coalesce(l4.IMP_TOTAL_FACT, 0)) > 0.01
@@ -386,10 +393,10 @@ controles as (
         'Facturas/particiones de agua sin ningun componente normalizado'
     from l4_agua as la
     left join silver_agua_facturas as sa
-        on sa.ID_EMPRESA = la.ID_EMPRESA
+        on sa.NUM_PARTICIO = la.NUM_PARTICIO
+       and sa.ID_EMPRESA = la.ID_EMPRESA
        and sa.ANY_FACTURA = la.ANY_FACTURA
        and sa.NUM_FACTURA = la.NUM_FACTURA
-       and sa.NUM_PARTICIO = la.NUM_PARTICIO
     where sa.NUM_FACTURA is null
 
     union all
@@ -404,10 +411,10 @@ controles as (
         'Facturas/particiones Silver de agua sin fila padre en L4_FACT_AIGUA'
     from silver_agua_facturas as sa
     left join l4_agua as la
-        on la.ID_EMPRESA = sa.ID_EMPRESA
+        on la.NUM_PARTICIO = sa.NUM_PARTICIO
+       and la.ID_EMPRESA = sa.ID_EMPRESA
        and la.ANY_FACTURA = sa.ANY_FACTURA
        and la.NUM_FACTURA = sa.NUM_FACTURA
-       and la.NUM_PARTICIO = sa.NUM_PARTICIO
     where la.NUM_FACTURA is null
 
     union all
@@ -422,10 +429,10 @@ controles as (
         'Componentes con importe L4 distinto de cero sin concepto de agua equivalente en Silver'
     from l4_agua_importes_aplicables as la
     left join silver_agua_importes as sa
-        on sa.ID_EMPRESA = la.ID_EMPRESA
+        on sa.NUM_PARTICIO = la.NUM_PARTICIO
+       and sa.ID_EMPRESA = la.ID_EMPRESA
        and sa.ANY_FACTURA = la.ANY_FACTURA
        and sa.NUM_FACTURA = la.NUM_FACTURA
-       and sa.NUM_PARTICIO = la.NUM_PARTICIO
        and sa.TIPUS_CONCEPTE = la.TIPUS_CONCEPTE
     where sa.NUM_FACTURA is null
 
@@ -441,10 +448,10 @@ controles as (
         'Conceptos de agua Silver sin componente monetario aplicable en L4_FACT_AIGUA'
     from silver_agua_importes as sa
     left join l4_agua_importes_aplicables as la
-        on la.ID_EMPRESA = sa.ID_EMPRESA
+        on la.NUM_PARTICIO = sa.NUM_PARTICIO
+       and la.ID_EMPRESA = sa.ID_EMPRESA
        and la.ANY_FACTURA = sa.ANY_FACTURA
        and la.NUM_FACTURA = sa.NUM_FACTURA
-       and la.NUM_PARTICIO = sa.NUM_PARTICIO
        and la.TIPUS_CONCEPTE = sa.TIPUS_CONCEPTE
     where la.NUM_FACTURA is null
       and abs(coalesce(sa.IMPORTE, 0)) > 0.005
@@ -461,10 +468,10 @@ controles as (
         'Componentes de agua cuyo importe transformado no coincide con el importe de origen'
     from l4_agua_importes_aplicables as la
     inner join silver_agua_importes as sa
-        on sa.ID_EMPRESA = la.ID_EMPRESA
+        on sa.NUM_PARTICIO = la.NUM_PARTICIO
+       and sa.ID_EMPRESA = la.ID_EMPRESA
        and sa.ANY_FACTURA = la.ANY_FACTURA
        and sa.NUM_FACTURA = la.NUM_FACTURA
-       and sa.NUM_PARTICIO = la.NUM_PARTICIO
        and sa.TIPUS_CONCEPTE = la.TIPUS_CONCEPTE
     where abs(round(la.IMPORTE, 2) - round(sa.IMPORTE, 2)) > 0.01
 
@@ -480,10 +487,10 @@ controles as (
         'Facturas/particiones cuyo total de conceptos de agua no coincide con la suma de importes L4_FACT_AIGUA'
     from l4_agua_totales as la
     full outer join silver_agua_totales as sa
-        on sa.ID_EMPRESA = la.ID_EMPRESA
+        on sa.NUM_PARTICIO = la.NUM_PARTICIO
+       and sa.ID_EMPRESA = la.ID_EMPRESA
        and sa.ANY_FACTURA = la.ANY_FACTURA
        and sa.NUM_FACTURA = la.NUM_FACTURA
-       and sa.NUM_PARTICIO = la.NUM_PARTICIO
     where la.NUM_FACTURA is null
        or sa.NUM_FACTURA is null
        or abs(coalesce(sa.IMPORTE, 0) - coalesce(la.IMPORTE, 0)) > 0.01
@@ -522,10 +529,10 @@ controles as (
         'Lineas L4_FACT_CONCEPTE no normalizadas en Silver'
     from l4_conceptos as lc
     left join silver_conceptos_explicitos as sc
-        on sc.ID_EMPRESA = lc.ID_EMPRESA
+        on sc.NUM_PARTICIO = lc.NUM_PARTICIO
+       and sc.ID_EMPRESA = lc.ID_EMPRESA
        and sc.ANY_FACTURA = lc.ANY_FACTURA
        and sc.NUM_FACTURA = lc.NUM_FACTURA
-       and sc.NUM_PARTICIO = lc.NUM_PARTICIO
        and sc.NUM_LINEA = lc.NUM_LINEA
        and sc.NUM_CONCEPTE = lc.NUM_CONCEPTE
     where sc.NUM_FACTURA is null
@@ -542,10 +549,10 @@ controles as (
         'Lineas Silver marcadas como L4_FACT_CONCEPTE sin fila fuente'
     from silver_conceptos_explicitos as sc
     left join l4_conceptos as lc
-        on lc.ID_EMPRESA = sc.ID_EMPRESA
+        on lc.NUM_PARTICIO = sc.NUM_PARTICIO
+       and lc.ID_EMPRESA = sc.ID_EMPRESA
        and lc.ANY_FACTURA = sc.ANY_FACTURA
        and lc.NUM_FACTURA = sc.NUM_FACTURA
-       and lc.NUM_PARTICIO = sc.NUM_PARTICIO
        and lc.NUM_LINEA = sc.NUM_LINEA
        and lc.NUM_CONCEPTE = sc.NUM_CONCEPTE
     where lc.NUM_FACTURA is null
@@ -562,10 +569,10 @@ controles as (
         'Lineas explicitas cuyo importe no coincide por factura, particion, linea y concepto'
     from l4_conceptos as lc
     inner join silver_conceptos_explicitos as sc
-        on sc.ID_EMPRESA = lc.ID_EMPRESA
+        on sc.NUM_PARTICIO = lc.NUM_PARTICIO
+       and sc.ID_EMPRESA = lc.ID_EMPRESA
        and sc.ANY_FACTURA = lc.ANY_FACTURA
        and sc.NUM_FACTURA = lc.NUM_FACTURA
-       and sc.NUM_PARTICIO = lc.NUM_PARTICIO
        and sc.NUM_LINEA = lc.NUM_LINEA
        and sc.NUM_CONCEPTE = lc.NUM_CONCEPTE
     where abs(round(coalesce(sc.IMP_CONCEPTE, 0), 2)
@@ -583,10 +590,10 @@ controles as (
         'Facturas/particiones cuyo total de conceptos explicitos no coincide entre L4 y Silver'
     from l4_conceptos_totales as lc
     full outer join silver_conceptos_totales as sc
-        on sc.ID_EMPRESA = lc.ID_EMPRESA
+        on sc.NUM_PARTICIO = lc.NUM_PARTICIO
+       and sc.ID_EMPRESA = lc.ID_EMPRESA
        and sc.ANY_FACTURA = lc.ANY_FACTURA
        and sc.NUM_FACTURA = lc.NUM_FACTURA
-       and sc.NUM_PARTICIO = lc.NUM_PARTICIO
     where lc.NUM_FACTURA is null
        or sc.NUM_FACTURA is null
        or abs(coalesce(sc.IMPORTE, 0) - coalesce(lc.IMPORTE, 0)) > 0.01
@@ -625,10 +632,10 @@ controles as (
         'Eventos L4 sin correspondencia por factura, particion y momento'
     from l4_situaciones as ls
     left join silver_situaciones as ss
-        on ss.ID_EMPRESA = ls.ID_EMPRESA
+        on ss.NUM_PARTICIO = ls.NUM_PARTICIO
+       and ss.ID_EMPRESA = ls.ID_EMPRESA
        and ss.ANY_FACTURA = ls.ANY_FACTURA
        and ss.NUM_FACTURA = ls.NUM_FACTURA
-       and ss.NUM_PARTICIO = ls.NUM_PARTICIO
        and ss.MOM_INI_SITUACION = ls.MOM_SIT_FACT
     where ss.NUM_FACTURA is null
 
@@ -653,7 +660,8 @@ controles as (
         'Recuperaciones L4 sin correspondencia por empresa, anyo y factura'
     from l4_recuperaciones as l4
     left join silver_recuperaciones as sr
-        on sr.ID_EMPRESA = l4.ID_EMPRESA
+        on sr.NUM_PARTICIO = l4.NUM_PARTICIO
+       and sr.ID_EMPRESA = l4.ID_EMPRESA
        and sr.ANY_FACTURA = l4.ANY_FACTURA
        and sr.NUM_FACTURA = l4.NUM_FACTURA
     where sr.NUM_FACTURA is null
@@ -668,7 +676,8 @@ controles as (
         'Recuperaciones Silver sin fila fuente en L4'
     from silver_recuperaciones as sr
     left join l4_recuperaciones as l4
-        on l4.ID_EMPRESA = sr.ID_EMPRESA
+        on l4.NUM_PARTICIO = sr.NUM_PARTICIO
+       and l4.ID_EMPRESA = sr.ID_EMPRESA
        and l4.ANY_FACTURA = sr.ANY_FACTURA
        and l4.NUM_FACTURA = sr.NUM_FACTURA
     where l4.NUM_FACTURA is null
@@ -683,7 +692,8 @@ controles as (
         'Recuperaciones cuyo importe total o volumen total derivado no coincide'
     from l4_recuperaciones as l4
     inner join silver_recuperaciones as sr
-        on sr.ID_EMPRESA = l4.ID_EMPRESA
+        on sr.NUM_PARTICIO = l4.NUM_PARTICIO
+       and sr.ID_EMPRESA = l4.ID_EMPRESA
        and sr.ANY_FACTURA = l4.ANY_FACTURA
        and sr.NUM_FACTURA = l4.NUM_FACTURA
     where abs(sr.IMP_TOTAL_RECUPERACION - l4.IMP_TOTAL_RECUPERACION) > 0.01
@@ -708,7 +718,8 @@ controles as (
         'Regularizaciones L4 sin correspondencia por factura y fin de incidencia'
     from l4_regularizaciones as l4
     left join silver_regularizaciones as sr
-        on sr.ID_EMPRESA = l4.ID_EMPRESA
+        on sr.NUM_PARTICIO = l4.NUM_PARTICIO
+       and sr.ID_EMPRESA = l4.ID_EMPRESA
        and sr.ANY_FACTURA = l4.ANY_FACTURA
        and sr.NUM_FACTURA = l4.NUM_FACTURA
        and sr.DATA_FIN_PER_INCID = l4.DATA_FIN_PER_INCID
@@ -724,7 +735,8 @@ controles as (
         'Regularizaciones Silver sin fila fuente en L4'
     from silver_regularizaciones as sr
     left join l4_regularizaciones as l4
-        on l4.ID_EMPRESA = sr.ID_EMPRESA
+        on l4.NUM_PARTICIO = sr.NUM_PARTICIO
+       and l4.ID_EMPRESA = sr.ID_EMPRESA
        and l4.ANY_FACTURA = sr.ANY_FACTURA
        and l4.NUM_FACTURA = sr.NUM_FACTURA
        and l4.DATA_FIN_PER_INCID = sr.DATA_FIN_PER_INCID
@@ -740,7 +752,8 @@ controles as (
         'Regularizaciones cuyo importe total o volumen total derivado no coincide'
     from l4_regularizaciones as l4
     inner join silver_regularizaciones as sr
-        on sr.ID_EMPRESA = l4.ID_EMPRESA
+        on sr.NUM_PARTICIO = l4.NUM_PARTICIO
+       and sr.ID_EMPRESA = l4.ID_EMPRESA
        and sr.ANY_FACTURA = l4.ANY_FACTURA
        and sr.NUM_FACTURA = l4.NUM_FACTURA
        and sr.DATA_FIN_PER_INCID = l4.DATA_FIN_PER_INCID

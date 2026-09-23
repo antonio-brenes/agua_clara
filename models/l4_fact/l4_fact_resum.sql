@@ -1,7 +1,7 @@
 {{ config(
     materialized='incremental',
     incremental_strategy='merge',
-    unique_key=['ID_EMPRESA', 'ANY_FACTURA', 'NUM_FACTURA'],
+    unique_key=['NUM_PARTICIO', 'ID_EMPRESA', 'ANY_FACTURA', 'NUM_FACTURA'],
     schema='l4_fact',
     tags=['l4_fact', 'l4', 'bronze']
 ) }}

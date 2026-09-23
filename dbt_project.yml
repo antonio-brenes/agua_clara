@@ -33,3 +33,21 @@ models:
 
 flags:
   require_generic_test_arguments_property: true
+
+seeds:
+  agua_clara:
+    gold:
+      +schema: gold_fact
+      +quote_columns: false
+      g_s_concepto_clasificacion:
+        +column_types:
+          CODIGO_CONCEPTO: varchar(50)
+          CODIGO_ORIGEN: varchar(30)
+          TABLA_ORIGEN: varchar(50)
+          GRUPO_FUNCIONAL: varchar(50)
+          ES_CONSUMO: boolean
+          ES_SERVICIO: boolean
+          ES_TRIBUTO: boolean
+          ES_BONIFICACION: boolean
+          ES_IVA: boolean
+          ES_ADITIVO: boolean  
