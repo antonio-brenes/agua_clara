@@ -1,23 +1,23 @@
 version: 2
-
 exposures:
   - name: power_bi_facturacion_agua_clara
     label: Power BI Facturacion Agua Clara
     type: dashboard
     maturity: medium
+    description: "Modelo semantico Gold. Contacto ficticio para el piloto. Power BI se alimentara mediante vistas materializadas de perspectiva bruta, actual y fin de mes."
     owner:
       name: Equipo Agua Clara
       email: datos@agua-clara.local
-    description: "Modelo semantico dimensional Gold para el analisis de facturas, conceptos, situaciones, recuperaciones y regularizaciones."
     depends_on:
       - ref('g_d_fecha')
+      - ref('g_d_cliente')
       - ref('g_d_suministro')
       - ref('g_d_geografia')
       - ref('g_d_tipo_suministro')
       - ref('g_d_concepto')
       - ref('g_d_situacion_factura')
-      - ref('g_b_suministro_actividad')
-      - ref('g_b_suministro_colectivo')
+      - ref('g_d_actividad_economica')
+      - ref('g_d_colectivo')
       - ref('g_h_factura')
       - ref('g_h_factura_concepto')
       - ref('g_h_factura_situacion')

@@ -1,366 +1,1977 @@
 version: 2
-
 models:
-  - name: g_d_fecha
-    description: "Dimensión calendario conformada con fechas de negocio presentes en Silver."
-    columns:
-      - name: FECHA
-        description: "Fecha de calendario."
-        tests: [not_null, unique]
-      - name: ANYO
-      - name: MES
-      - name: NOMBRE_MES
-      - name: TRIMESTRE
-      - name: DIA
-      - name: DIA_SEMANA
-      - name: NOMBRE_DIA
-      - name: ES_LABORABLE
-
-  - name: g_d_suministro
-    description: "Dimensión de suministro con la versión más reciente del satellite EDW y atributos de cliente utilizables para filtrado, sin crear una dimensión cliente independiente."
-    columns:
-      - name: HK_SUBMIN_SERVEI
-        description: "Clave técnica del suministro."
-        tests: [not_null, unique]
-      - name: POLISSA_SUBM
-        description: "Póliza de suministro."
-        tests: [not_null]
-      - name: TIP_SUBM_SERV
-      - name: SIT_SUBM_SERV
-      - name: US_AIGUA_SUBM
-      - name: TIP_HABIT_SUBM
-      - name: NOMB_HABIT_SUBM
-      - name: DNI_NIF_CLIENT
-      - name: NOM_TITULAR_COMPTE
-      - name: NOM_COMERCIAL
-      - name: ID_QUOTA_SOCIAL
-      - name: ID_TARIFA_SOCIAL
-      - name: IND_SERVEI_SOCIAL
-      - name: IND_POB_ENERG
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_d_geografia
-    description: "Dimensión geográfica canónica del suministro. Cuando existen varias rutas geográficas, conserva una ubicación determinista por suministro para evitar multiplicar hechos."
-    columns:
-      - name: HK_SUBMIN_SERVEI
-        tests: [not_null, unique]
-      - name: HK_MUNICIPI_SGAB
-      - name: NUM_MUN_SGAB
-      - name: HK_CARRER
-      - name: NUM_CARRER
-      - name: HK_FINCA
-      - name: NUM_INI_FINCA
-      - name: COMP_NUM_INI_FINCA
-      - name: NUM_FIN_FINCA
-      - name: COMP_NUM_FIN_FINCA
-      - name: NUM_DTE_MUNI_FINCA
-      - name: NOM_MUN_SGAB
-      - name: NOM_COMPLET_CARRER
-      - name: FECHA_CARGA
-      - name: TABLA_ORIGEN
-
-  - name: g_d_tipo_suministro
-    description: "Catálogo Gold de tipos de suministro procedente del satellite EDW TSS."
-    columns:
-      - name: HK_TIPO_SUMINISTRO
-        tests: [not_null, unique]
-      - name: COD_TIPO_SUMINISTRO
-        tests: [not_null, unique]
-      - name: DES_TIPO_SUMINISTRO
-      - name: DES_ABREV_TIPO_SUMINISTRO
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_d_concepto
-    description: "Catálogo conformado de conceptos explícitos F25 y componentes económicos derivados de agua."
-    columns:
-      - name: CODIGO_CONCEPTO
-        description: "Código prefijado para distinguir conceptos F25 de tipos derivados."
-        tests: [not_null, unique]
-      - name: CODIGO_ORIGEN
-      - name: DESCRIPCION
-      - name: DESCRIPCION_BREVE
-      - name: GRUPO_FUNCIONAL
-      - name: ES_CONSUMO
-      - name: ES_SERVICIO
-      - name: ES_TRIBUTO
-      - name: ES_BONIFICACION
-      - name: ES_IVA
-      - name: ES_ADITIVO
-      - name: FECHA_CARGA
-      - name: TABLA_ORIGEN
-
-  - name: g_d_situacion_factura
-    description: "Catálogo Gold de situaciones R01 de factura."
-    columns:
-      - name: HK_SITUACION_FACT
-        tests: [not_null, unique]
-      - name: TIP_SIT_FACT
-        tests: [not_null, unique]
-      - name: DESC_SITUACION
-      - name: DESC_BREU_SITUACION
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_b_suministro_actividad
-    description: "Puente multivaluado suministro-epígrafe IAE. La sección I identifica actividad industrial principal y la sección S actividad secundaria."
+- name: g_d_fecha
+  description: 'Dimensión calendario conformada y continua. Granularidad: una fila por día natural desde 2020-01-01 hasta 2026-12-31. Está diseñada
+    para analizar los hechos Gold por fecha de emisión, inicio y fin de periodo, cargo, situación e incidencia. Power BI puede crear relaciones
+    de rol activas o inactivas según la perspectiva analítica.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por fecha
+  columns:
+  - name: FECHA
+    data_type: date
+    description: Fecha de calendario y clave natural de la dimensión.
     tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns: [HK_SUBMIN_SERVEI, HK_EPIGRAF_IAE]
-    columns:
-      - name: HK_SUBMIN_SERVEI
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
-      - name: HK_EPIGRAF_IAE
-        tests: [not_null]
-      - name: SECCIO
-      - name: EPIGRAF_IAE
-      - name: DESCR_IAE
-      - name: ES_ACTIVIDAD_INDUSTRIAL_PRINCIPAL
-      - name: ES_ACTIVIDAD_SERVICIOS_SECUNDARIA
-      - name: TABLA_ORIGEN
-
-  - name: g_b_suministro_colectivo
-    description: "Puente temporal suministro-colectivo social; permite evaluar vulnerabilidad de una factura por fecha final dentro del intervalo histórico."
+    - not_null
+    - unique
+  - name: ANYO
+    data_type: number(4,0)
+    description: Año natural de la fecha.
     tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns: [HK_SUBMIN_SERVEI, HK_HIST_SS_PE]
-    columns:
-      - name: HK_SUBMIN_SERVEI
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
-      - name: HK_HIST_SS_PE
-        tests: [not_null]
-      - name: TIP_COLECTIVO
-      - name: TS_MOM_IND
-      - name: DATA_INI_IND
-      - name: DATA_FIN_IND
-      - name: OBSERVACIONS
-      - name: TABLA_ORIGEN
-
-  - name: g_h_factura
-    description: "Hecho de cabecera con grano una factura y partición. Las medidas de importe de cabecera no deben sumarse tras unirlo directamente a conceptos."
-    config:
-      materialized: incremental
-      incremental_strategy: merge
-      unique_key: HK_FACTURA
+    - not_null
+  - name: MES
+    data_type: number(2,0)
+    description: Número de mes natural entre 1 y 12.
     tests:
-      - dbt_utils.unique_combination_of_columns:
-          arguments:
-            combination_of_columns: [ID_EMPRESA, ANY_FACTURA, NUM_FACTURA, NUM_PARTICIO]
-    columns:
-      - name: HK_FACTURA
-        tests: [not_null, unique]
-      - name: HK_SUBMIN_SERVEI
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
-      - name: HK_TIPO_SUMINISTRO
-        tests:
-          - relationships:
-              arguments: {to: ref('g_d_tipo_suministro'), field: HK_TIPO_SUMINISTRO}
-      - name: HK_TIPO_USO_AGUA
-      - name: HK_TIPO_VIVIENDA
-      - name: ID_EMPRESA
-      - name: ANY_FACTURA
-      - name: NUM_FACTURA
-      - name: NUM_PARTICIO
-      - name: POLISSA_SUBM
-      - name: DATA_INI_FACT
-      - name: DATA_FIN_FACT
-      - name: DATA_EMISS_FACT
-      - name: DATA_CARREC_RECAP
-      - name: ANY_CALENDARI
-      - name: MES_CALENDARI
-      - name: FREQ_FACT
-      - name: DIES_FACTURATS
-      - name: TIP_SUBM_SERV
-      - name: US_AIGUA_SUBM_FACT
-      - name: TIP_HABIT_SUBM_FA
-      - name: NOMB_HABIT_FACT
-      - name: SIT_SUBM_SERV_FACT
-      - name: TIP_DOMESTIC
-      - name: CONSUM_TOTAL_M3
-        description: "Medida aditiva a grano factura-partición."
-      - name: IMP_TOTAL_FACT
-        description: "Medida de cabecera; aditiva solo a grano factura-partición."
-      - name: IMP_AIGUA_IVA
-      - name: NUM_CONCEPTOS
-      - name: TIENE_RECUPERACION
-      - name: TIENE_REGULARIZACION
-      - name: TIENE_ACTIVIDAD_INDUSTRIAL
-      - name: ES_VULNERABLE
-      - name: ES_FRAUDULENTA
-      - name: ID_CARGA
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_h_factura_concepto
-    description: "Hecho de líneas económicas, una fila por componente de factura y partición. Incluye agua verticalizada y conceptos explícitos."
+    - not_null
+  - name: MES_NUMERO
+    data_type: varchar(2)
+    description: Número de mes con dos posiciones, útil para ordenación y presentación.
+    tests:
+    - not_null
+  - name: NOMBRE_MES
+    data_type: varchar
+    description: Nombre abreviado del mes devuelto por Snowflake.
+  - name: ANYO_MES
+    data_type: varchar(6)
+    description: Clave cronológica año-mes con formato YYYYMM, apta para ordenar periodos mensuales.
+    tests:
+    - not_null
+  - name: MES_ANYO
+    data_type: varchar(7)
+    description: Etiqueta mensual con formato MM/YYYY para visualización.
+    tests:
+    - not_null
+  - name: TRIMESTRE
+    data_type: number(1,0)
+    description: Trimestre natural entre 1 y 4.
+    tests:
+    - not_null
+  - name: DIA
+    data_type: number(2,0)
+    description: Día del mes.
+    tests:
+    - not_null
+  - name: DIA_SEMANA
+    data_type: number(1,0)
+    description: 'Número ISO del día de la semana: 1 lunes y 7 domingo.'
+    tests:
+    - not_null
+  - name: NOMBRE_DIA
+    data_type: varchar
+    description: Nombre abreviado del día de la semana.
+  - name: SEMANA_ISO
+    data_type: number(2,0)
+    description: Número de semana según calendario ISO.
+    tests:
+    - not_null
+  - name: ANYO_SEMANA
+    data_type: varchar(6)
+    description: Clave año-semana ISO con formato YYYYWw sin separador.
+    tests:
+    - not_null
+  - name: DIA_ANYO
+    data_type: number(3,0)
+    description: Número ordinal del día dentro del año.
+    tests:
+    - not_null
+  - name: ES_FIN_SEMANA
+    data_type: boolean
+    description: Indicador de sábado o domingo.
+    tests:
+    - not_null
+  - name: ES_LABORABLE
+    data_type: boolean
+    description: Indicador simplificado de día laborable para el piloto. Es verdadero cuando ES_FIN_SEMANA es falso; no contempla festivos.
+    tests:
+    - not_null
+  - name: INICIO_MES
+    data_type: date
+    description: Primer día del mes de FECHA.
+    tests:
+    - not_null
+  - name: FIN_MES
+    data_type: date
+    description: Último día del mes de FECHA.
+    tests:
+    - not_null
+  - name: INICIO_TRIMESTRE
+    data_type: date
+    description: Primer día del trimestre de FECHA.
+    tests:
+    - not_null
+  - name: FIN_TRIMESTRE
+    data_type: date
+    description: Último día del trimestre de FECHA.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente CALENDARIO_GENERADO. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente CALENDARIO_GENERADO. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de CALENDARIO_GENERADO. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_cliente
+  description: 'Dimensión conformada de clientes identificados en la facturación. Granularidad: una fila por documento fiscal DNI_NIF_CLIENT,
+    más un miembro desconocido estable. Consolida el nombre facturado y los atributos básicos de cliente disponibles en Silver. La relación con
+    el suministro se realiza mediante HK_CLIENTE en g_d_suministro.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por cliente
+  columns:
+  - name: HK_CLIENTE
+    data_type: string
+    description: Clave técnica estable del cliente calculada a partir de DNI_NIF_CLIENT. El miembro desconocido utiliza una hash determinista
+      específica.
+    tests:
+    - not_null
+    - unique
+  - name: DNI_NIF_CLIENT
+    data_type: varchar(9)
+    description: Documento fiscal del cliente. Actúa como clave natural; contiene información sensible y debe protegerse en las vistas de consumo.
+    tests:
+    - not_null
+    - unique
+  - name: NOM_CLIENT
+    data_type: varchar(35)
+    description: Nombre del cliente observado en la factura más reciente seleccionada para la dimensión. Contiene información personal.
+  - name: NOM_TITULAR
+    data_type: varchar(35)
+    description: Nombre normalizado del titular utilizado para análisis de cliente.
+  - name: NOM_COMERCIAL
+    data_type: varchar(50)
+    description: Nombre comercial del cliente cuando está disponible en la fuente.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA. Para miembros desconocidos o filas generadas en Gold se informa
+      con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_geografia
+  description: 'Dimensión geográfica conformada a grano finca. Granularidad: una fila por HK_FINCA, más un miembro desconocido estable. Reúne
+    la finca, calle y municipio relacionados en Silver EDW. g_d_suministro incorpora HK_GEOGRAFIA para navegar desde el suministro hasta la ubicación
+    física.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por finca
+  columns:
+  - name: HK_GEOGRAFIA
+    data_type: string
+    description: Clave técnica de la geografía. Para ubicaciones conocidas coincide con HK_FINCA; el miembro desconocido utiliza una hash determinista.
+    tests:
+    - not_null
+    - unique
+  - name: HK_FINCA
+    data_type: string
+    description: Clave hash de la finca que determina el grano geográfico.
+    tests:
+    - not_null
+  - name: HK_CARRER
+    data_type: string
+    description: Clave hash de la calle asociada a la finca.
+  - name: HK_MUNICIPI_SGAB
+    data_type: string
+    description: Clave hash del municipio SGAB asociado a la calle.
+  - name: NUM_MUN_SGAB
+    data_type: varchar(2)
+    description: Código interno SGAB del municipio.
+  - name: NOM_MUN_SGAB
+    data_type: varchar(20)
+    description: Nombre del municipio SGAB.
+  - name: NUM_CARRER
+    data_type: number(6,0)
+    description: Número interno de la calle dentro del municipio.
+  - name: NOM_COMPLET_CARRER
+    data_type: varchar(44)
+    description: Nombre completo normalizado de la calle.
+  - name: NUM_INI_FINCA
+    data_type: varchar(4)
+    description: Número inicial del rango postal que identifica la finca.
+  - name: COMP_NUM_INI_FINCA
+    data_type: varchar(1)
+    description: Complemento del número inicial de finca.
+  - name: NUM_FIN_FINCA
+    data_type: varchar(4)
+    description: Número final del rango postal de la finca.
+  - name: COMP_NUM_FIN_FINCA
+    data_type: varchar(1)
+    description: Complemento del número final de finca.
+  - name: NUM_DTE_MUNI_FINCA
+    data_type: varchar(2)
+    description: Código del distrito municipal asociado a la finca.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_S_FINCA. Para miembros desconocidos o filas generadas en Gold se informa
+      con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_S_FINCA. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_S_FINCA. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_suministro
+  description: 'Dimensión de suministro con la última versión disponible del satélite operativo. Granularidad: una fila por HK_SUBMIN_SERVEI,
+    más un miembro desconocido estable. Conserva el tipo y situación actuales del suministro y las claves hacia cliente y geografía. Los atributos
+    congelados en fecha de factura permanecen en g_h_factura.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por suministro
+  columns:
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave hash del suministro, calculada en Silver EDW a partir de POLISSA_SUBM.
+    tests:
+    - not_null
+    - unique
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Identificador natural de la póliza de suministro.
+    tests:
+    - not_null
+    - unique
+  - name: HK_CLIENTE
+    data_type: string
+    description: Clave foránea del cliente asociado actualmente al suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_cliente'') }}'
+          field: HK_CLIENTE
+  - name: HK_GEOGRAFIA
+    data_type: string
+    description: Clave foránea de la finca o ubicación geográfica asociada al suministro mediante suministro, ramal y finca.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_geografia'') }}'
+          field: HK_GEOGRAFIA
+  - name: TIP_SUBM_SERV
+    data_type: varchar(1)
+    description: 'Tipo actual del suministro: D doméstico, I industrial o C contra incendios.'
+    tests:
+    - accepted_values:
+        arguments:
+          values:
+          - D
+          - I
+          - C
+          - DESCONOCIDO
+  - name: SIT_SUBM_SERV
+    data_type: varchar(1)
+    description: Situación operativa actual del suministro.
+  - name: US_AIGUA_SUBM
+    data_type: varchar(1)
+    description: Código actual de uso del agua del suministro.
+  - name: TIP_HABIT_SUBM
+    data_type: varchar(1)
+    description: Tipo actual de vivienda asociado al suministro.
+  - name: NOMB_HABIT_SUBM
+    data_type: number(3,0)
+    description: Número actual de habitantes asociado al suministro.
+  - name: DNI_NIF_CLIENT
+    data_type: varchar(9)
+    description: Documento fiscal del cliente asociado al suministro. Se conserva para trazabilidad; contiene información sensible.
+  - name: ID_QUOTA_SOCIAL
+    data_type: varchar(1)
+    description: Indicador actual de cuota social.
+  - name: ID_TARIFA_SOCIAL
+    data_type: varchar(1)
+    description: Indicador actual de tarifa social.
+  - name: IND_SERVEI_SOCIAL
+    data_type: varchar(1)
+    description: Indicador actual de intervención o reconocimiento por servicios sociales.
+  - name: IND_POB_ENERG
+    data_type: varchar(1)
+    description: Indicador actual de pobreza energética.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_S_SUBMIN_SERVEI. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_S_SUBMIN_SERVEI. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_S_SUBMIN_SERVEI. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_tipo_suministro
+  description: 'Dimensión de negocio para los tipos de suministro del catálogo TSS. Granularidad: una fila por HK_TIPO_SUMINISTRO, más un miembro
+    desconocido estable. Se relaciona directamente con el tipo de suministro congelado en g_h_factura para filtrar la facturación por la clasificación
+    vigente en el momento de emisión.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por tipo de suministro
+  columns:
+  - name: HK_TIPO_SUMINISTRO
+    data_type: string
+    description: Clave hash del tipo de suministro.
+    tests:
+    - not_null
+    - unique
+  - name: COD_TIPO_SUMINISTRO
+    data_type: varchar
+    description: Código funcional del tipo de suministro.
+    tests:
+    - not_null
+    - unique
+  - name: DES_TIPO_SUMINISTRO
+    data_type: varchar
+    description: Descripción completa del tipo de suministro.
+    tests:
+    - not_null
+  - name: DES_ABREV_TIPO_SUMINISTRO
+    data_type: varchar
+    description: Descripción abreviada del tipo de suministro.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_S_TIPO_SUMINISTRO. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_S_TIPO_SUMINISTRO. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_S_TIPO_SUMINISTRO. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_situacion_factura
+  description: 'Dimensión de situaciones de factura procedente del catálogo R01 de Silver Fact. Granularidad: una fila por situación, más un miembro
+    desconocido estable. Permite describir los eventos de g_h_factura_situacion.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por situacion de factura
+  columns:
+  - name: HK_SITUACION_FACT
+    data_type: string
+    description: Clave hash de la situación de factura.
+    tests:
+    - not_null
+    - unique
+  - name: TIP_SIT_FACT
+    data_type: varchar(2)
+    description: Código funcional de la situación de factura.
+    tests:
+    - not_null
+    - unique
+  - name: DESC_SITUACION
+    data_type: varchar
+    description: Descripción completa de la situación.
+    tests:
+    - not_null
+  - name: DESC_BREU_SITUACION
+    data_type: varchar
+    description: Descripción breve de la situación.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_SITUACION_FACTURA. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_SITUACION_FACTURA. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_SITUACION_FACTURA. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_actividad_economica
+  description: 'Dimensión conformada de actividad económica basada en los epígrafes IAE. Granularidad: una fila por HK_EPIGRAF_IAE, más un miembro
+    desconocido estable. Se relaciona con los suministros mediante g_b_suministro_actividad.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por actividad economica
+  columns:
+  - name: HK_ACTIVIDAD_ECONOMICA
+    data_type: string
+    description: Clave técnica Gold de la actividad económica; para registros conocidos coincide con HK_EPIGRAF_IAE.
+    tests:
+    - not_null
+    - unique
+  - name: HK_EPIGRAF_IAE
+    data_type: string
+    description: Clave hash del epígrafe IAE de Silver EDW.
+    tests:
+    - not_null
+  - name: SECCIO
+    data_type: varchar(1)
+    description: Sección que agrupa el epígrafe IAE.
+  - name: EPIGRAF_IAE
+    data_type: varchar(4)
+    description: Código del epígrafe IAE.
+  - name: DESCR_IAE
+    data_type: varchar(50)
+    description: Descripción de la actividad económica.
+  - name: TIP_TARIFA
+    data_type: varchar(1)
+    description: Código de tipo de tarifa asociado a la actividad.
+  - name: TIP_QUOTA_TAMGREM
+    data_type: varchar(3)
+    description: Tipo de cuota TAMGREM asociado a la actividad.
+  - name: NIV_GEN_RES
+    data_type: varchar(1)
+    description: Nivel de generación de residuos.
+  - name: COD_GEN_RES
+    data_type: varchar(1)
+    description: Código de categoría de generación de residuos.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_S_EPIGRAF_IAE. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_S_EPIGRAF_IAE. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_S_EPIGRAF_IAE. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_colectivo
+  description: 'Dimensión conformada de colectivos sociales observados en el histórico de servicios sociales y pobreza energética. Granularidad:
+    una fila por TIP_COLECTIVO, más un miembro desconocido estable. Los periodos de pertenencia se mantienen en g_b_suministro_colectivo.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por colectivo social
+  columns:
+  - name: HK_COLECTIVO
+    data_type: string
+    description: Clave técnica estable calculada a partir de TIP_COLECTIVO.
+    tests:
+    - not_null
+    - unique
+  - name: TIP_COLECTIVO
+    data_type: varchar(2)
+    description: Código funcional del colectivo social.
+    tests:
+    - not_null
+    - unique
+  - name: DESC_COLECTIVO
+    data_type: varchar
+    description: Descripción de presentación del colectivo social.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_S_HIST_SS_PE. Para miembros desconocidos o filas generadas en Gold se
+      informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_S_HIST_SS_PE. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_S_HIST_SS_PE. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_d_concepto
+  description: 'Dimensión conformada de conceptos económicos de factura. Granularidad: una fila por CODIGO_CONCEPTO, más un miembro desconocido
+    estable. Unifica componentes verticalizados de agua, prefijados con AIGUA:, y conceptos explícitos, prefijados con CONCEPTE:. La clasificación
+    funcional procede de la seed g_s_concepto_clasificacion.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por concepto conformado
+  columns:
+  - name: CODIGO_CONCEPTO
+    data_type: varchar(50)
+    description: Clave conformada del concepto. Usa AIGUA:<TIPUS_CONCEPTE> para componentes de L4_FACT_AIGUA y CONCEPTE:<NUM_CONCEPTE> para conceptos
+      explícitos.
+    tests:
+    - not_null
+    - unique
+  - name: CODIGO_ORIGEN
+    data_type: varchar(30)
+    description: Código original del concepto antes de aplicar el prefijo conformado.
+    tests:
+    - not_null
+  - name: DESCRIPCION
+    data_type: varchar
+    description: Descripción funcional completa del concepto.
+    tests:
+    - not_null
+  - name: DESCRIPCION_BREVE
+    data_type: varchar
+    description: Descripción breve utilizada en informes y segmentadores.
+  - name: GRUPO_FUNCIONAL
+    data_type: varchar(50)
+    description: Agrupación analítica del concepto, por ejemplo CONSUMO_AGUA, CUOTA_SERVICIO, CANON_AGUA, IVA o BONIFICACION.
+    tests:
+    - not_null
+  - name: ES_CONSUMO
+    data_type: boolean
+    description: Indica que el concepto representa consumo físico de agua.
+    tests:
+    - not_null
+  - name: ES_SERVICIO
+    data_type: boolean
+    description: Indica que el concepto representa un servicio facturado.
+    tests:
+    - not_null
+  - name: ES_TRIBUTO
+    data_type: boolean
+    description: Indica que el concepto tiene naturaleza tributaria o de tasa.
+    tests:
+    - not_null
+  - name: ES_BONIFICACION
+    data_type: boolean
+    description: Indica que el concepto representa una bonificación; su importe puede ser negativo.
+    tests:
+    - not_null
+  - name: ES_IVA
+    data_type: boolean
+    description: Indica que el concepto representa IVA.
+    tests:
+    - not_null
+  - name: ES_ADITIVO
+    data_type: boolean
+    description: Indica que el importe del concepto forma parte de la suma que reconstruye IMP_TOTAL_FACT.
+    tests:
+    - not_null
+  - name: ORIGEN_CONCEPTO
+    data_type: varchar(50)
+    description: 'Procedencia funcional original del concepto: L4_FACT_AIGUA, L4_FACT_CONCEPTE o GOLD para el miembro desconocido.'
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA_CONCEPTO. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA_CONCEPTO. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA_CONCEPTO. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_b_suministro_actividad
+  description: 'Bridge multivaluado entre suministros y actividades económicas. Granularidad: una fila por combinación HK_SUBMIN_SERVEI y HK_ACTIVIDAD_ECONOMICA.
+    Permite representar varios epígrafes por suministro sin duplicar los hechos de factura. No se expone inicialmente en el dataset principal
+    de Power BI.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: bridge
+      grain: una fila por suministro y actividad economica
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_ACTIVIDAD_ECONOMICA
+  columns:
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave del suministro participante en la relación.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_suministro'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_ACTIVIDAD_ECONOMICA
+    data_type: string
+    description: Clave de la actividad económica participante en la relación.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_actividad_economica'') }}'
+          field: HK_ACTIVIDAD_ECONOMICA
+  - name: HK_EPIGRAF_IAE
+    data_type: string
+    description: Clave hash original del epígrafe IAE.
+  - name: SECCIO
+    data_type: varchar(1)
+    description: Sección IAE asociada a la relación.
+  - name: EPIGRAF_IAE
+    data_type: varchar(4)
+    description: Código del epígrafe IAE asociado.
+  - name: ES_ACTIVIDAD_INDUSTRIAL_PRINCIPAL
+    data_type: boolean
+    description: Indicador derivado de sección I en el piloto.
+    tests:
+    - not_null
+  - name: ES_ACTIVIDAD_SERVICIOS_SECUNDARIA
+    data_type: boolean
+    description: Indicador derivado de sección S en el piloto.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_L_SUBMIN_IAE. Para miembros desconocidos o filas generadas en Gold se
+      informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_L_SUBMIN_IAE. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_L_SUBMIN_IAE. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_b_suministro_colectivo
+  description: 'Bridge temporal entre suministros y colectivos sociales. Granularidad: una fila por combinación HK_SUBMIN_SERVEI y HK_HIST_SS_PE.
+    Mantiene el intervalo de vigencia del colectivo para determinar la vulnerabilidad de una factura en su fecha final. No se expone inicialmente
+    en el dataset principal de Power BI.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: bridge
+      grain: una fila por suministro y episodio historico de colectivo
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_HIST_SS_PE
+  columns:
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave del suministro asociado al periodo social.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_suministro'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_COLECTIVO
+    data_type: string
+    description: Clave del colectivo social.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_colectivo'') }}'
+          field: HK_COLECTIVO
+  - name: HK_HIST_SS_PE
+    data_type: string
+    description: Clave hash del episodio histórico de servicios sociales.
+    tests:
+    - not_null
+  - name: TIP_COLECTIVO
+    data_type: varchar(2)
+    description: Código del colectivo social.
+  - name: TS_MOM_IND
+    data_type: timestamp
+    description: Marca temporal que identifica el episodio histórico.
+  - name: DATA_INI_IND
+    data_type: date
+    description: Fecha inicial de vigencia del indicador social.
+  - name: DATA_FIN_IND
+    data_type: date
+    description: Fecha final de vigencia; es nula cuando el periodo permanece abierto.
+  - name: OBSERVACIONS
+    data_type: varchar
+    description: Observaciones asociadas al episodio social.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente EDW_L_SUBMIN_HIST_SS_PE. Para miembros desconocidos o filas generadas en
+      Gold se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente EDW_L_SUBMIN_HIST_SS_PE. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de EDW_L_SUBMIN_HIST_SS_PE. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_h_factura
+  description: 'Hecho de cabecera de factura. Granularidad: una fila por NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA y NUM_FACTURA. Conserva las medidas
+    de cabecera, el tipo de suministro congelado, indicadores analíticos y claves dimensionales. IMP_TOTAL_FACT e IMP_AIGUA_IVA solo deben agregarse
+    a grano factura y no después de unir directamente la cabecera con múltiples líneas de concepto.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: fact
+      grain: una fila por particion, empresa, anyo y numero de factura
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_PARTICIO
+        - ID_EMPRESA
+        - ANY_FACTURA
+        - NUM_FACTURA
+  columns:
+  - name: HK_FACTURA
+    data_type: string
+    description: Clave hash de la factura calculada con NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA y NUM_FACTURA.
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave foránea al suministro facturado.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_suministro'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_TIPO_SUMINISTRO
+    data_type: string
+    description: Clave foránea del tipo de suministro congelado en la factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_tipo_suministro'') }}'
+          field: HK_TIPO_SUMINISTRO
+  - name: HK_TIPO_USO_AGUA
+    data_type: string
+    description: Clave hash del uso del agua congelado en la factura.
+  - name: HK_TIPO_VIVIENDA
+    data_type: string
+    description: Clave hash del tipo de vivienda congelado en la factura.
+  - name: NUM_PARTICIO
+    data_type: number(2,0)
+    description: Número de partición técnica. Primera columna de la clave natural.
+    tests:
+    - not_null
+  - name: ID_EMPRESA
+    data_type: varchar(2)
+    description: Empresa emisora. Segunda columna de la clave natural.
+    tests:
+    - not_null
+  - name: ANY_FACTURA
+    data_type: varchar(4)
+    description: Año de numeración. Tercera columna de la clave natural.
+    tests:
+    - not_null
+  - name: NUM_FACTURA
+    data_type: number(7,0)
+    description: Número secuencial. Cuarta columna de la clave natural.
+    tests:
+    - not_null
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Póliza de suministro facturada.
+    tests:
+    - not_null
+  - name: DATA_INI_FACT
+    data_type: date
+    description: Fecha inicial del periodo facturado.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: DATA_FIN_FACT
+    data_type: date
+    description: Fecha final del periodo facturado.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: DATA_EMISS_FACT
+    data_type: date
+    description: Fecha de emisión de la factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: DATA_CARREC_RECAP
+    data_type: date
+    description: Fecha de cargo o transferencia a recaudación.
+    tests:
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: ANY_CALENDARI
+    data_type: varchar(2)
+    description: Año del calendario operativo de facturación.
+  - name: MES_CALENDARI
+    data_type: varchar(2)
+    description: Mes del calendario operativo de facturación.
+  - name: FREQ_FACT
+    data_type: varchar(1)
+    description: Frecuencia de facturación.
+  - name: DIES_FACTURATS
+    data_type: number
+    description: Número inclusivo de días facturados.
+  - name: TIP_SUBM_SERV_FACTURA
+    data_type: varchar(1)
+    description: 'Tipo de suministro congelado en la factura: D, I o C.'
+    tests:
+    - accepted_values:
+        arguments:
+          values:
+          - D
+          - I
+          - C
+  - name: US_AIGUA_SUBM_FACT
+    data_type: varchar(1)
+    description: Uso del agua congelado en el momento de facturación.
+  - name: TIP_HABIT_SUBM_FA
+    data_type: varchar(1)
+    description: Tipo de vivienda congelado en la factura.
+  - name: NOMB_HABIT_FACT
+    data_type: number(3,0)
+    description: Número de habitantes considerado en la factura.
+  - name: SIT_SUBM_SERV_FACT
+    data_type: varchar(1)
+    description: Situación del suministro congelada en la factura.
+  - name: TIP_DOMESTIC
+    data_type: varchar(1)
+    description: Subtipología doméstica aplicada.
+  - name: CONSUM_TOTAL_M3
+    data_type: number
+    description: Consumo total en m3. Medida aditiva a grano factura-partición.
+    tests:
+    - not_null
     config:
-      materialized: incremental
-      incremental_strategy: merge
-      unique_key: HK_FACTURA_CONCEPTE
-    columns:
-      - name: HK_FACTURA_CONCEPTE
-        tests: [not_null, unique]
-      - name: HK_FACTURA
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
-      - name: HK_SUBMIN_SERVEI
-        description: "Suministro heredado indirectamente de la factura padre mediante una relación 1:1 por HK_FACTURA."
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
-      - name: CODIGO_CONCEPTO
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_concepto'), field: CODIGO_CONCEPTO}
-      - name: ID_EMPRESA
-      - name: ANY_FACTURA
-      - name: NUM_FACTURA
-      - name: NUM_PARTICIO
-      - name: NUM_LINEA
-      - name: TIPUS_CONCEPTE
-      - name: NUM_CONCEPTE
-      - name: DESC_CONCEPTE
-      - name: POLISSA_SUBM
-      - name: DATA_INI_FACT
-      - name: DATA_FIN_FACT
-      - name: DATA_EMISS_FACT
-      - name: TIP_SUBM_SERV
-      - name: QUANTITAT
-      - name: UNITAT_MESURA
-      - name: BASE_CALCUL
-      - name: TIP_TAXA
-      - name: PREU_UNITARI
-      - name: PERCENTATGE
-      - name: IMP_CONCEPTE
-      - name: IVA_APLICAT
-      - name: ID_CARGA
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_h_factura_situacion
-    description: "Hecho histórico de transiciones de factura, una fila por factura-partición y momento de inicio."
+      meta:
+        measure_type: additive
+        unit: m3
+  - name: IMP_TOTAL_FACT
+    data_type: number(11,2)
+    description: Importe total final de la factura. Debe cuadrar con la suma de conceptos aditivos.
+    tests:
+    - not_null
     config:
-      materialized: incremental
-      incremental_strategy: merge
-      unique_key: HK_FACTURA_SITUACION
-    columns:
-      - name: HK_FACTURA_SITUACION
-        tests: [not_null, unique]
-      - name: HK_FACTURA
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
-      - name: HK_SITUACION_FACT
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_situacion_factura'), field: HK_SITUACION_FACT}
-      - name: ID_EMPRESA
-      - name: ANY_FACTURA
-      - name: NUM_FACTURA
-      - name: NUM_PARTICIO
-      - name: MOM_INI_SITUACION
-      - name: MOM_FIN_SITUACION
-      - name: NUM_ORDEN_SITUACION
-      - name: ES_SITUACION_ACTUAL
-      - name: TIP_SIT_FACT
-      - name: DESC_SITUACION
-      - name: DESC_BREU_SITUACION
-      - name: CAUSA_SIT_FACT
-      - name: ID_CARGA
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_h_recuperacion
-    description: "Hecho de recuperaciones a grano factura-partición artificial 1. Sus importes no se unen al hecho de conceptos."
+      meta:
+        measure_type: additive_at_invoice_grain
+        currency: EUR
+  - name: IMP_AIGUA_IVA
+    data_type: number(11,2)
+    description: Suma de los componentes monetarios procedentes de FACT_AIGUA, incluido el IVA correspondiente.
+    tests:
+    - not_null
     config:
-      materialized: incremental
-      incremental_strategy: merge
-      unique_key: HK_FACTURA_RECUP
-    columns:
-      - name: HK_FACTURA_RECUP
-        tests: [not_null, unique]
-      - name: HK_FACTURA
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
-      - name: HK_SUBMIN_SERVEI
-        description: "Suministro heredado indirectamente de la factura padre mediante una relación 1:1 por HK_FACTURA."
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
-      - name: ID_EMPRESA
-      - name: ANY_FACTURA
-      - name: NUM_FACTURA
-      - name: NUM_PARTICIO
-      - name: M3_TOTAL_RECUPERADOS
-      - name: IMP_TOTAL_RECUPERACION
-      - name: ID_CARGA
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
-
-  - name: g_h_regularizacion
-    description: "Hecho de regularizaciones a grano factura-partición artificial 1 y fecha final de incidencia."
+      meta:
+        measure_type: additive_at_invoice_grain
+        currency: EUR
+  - name: NUM_CONCEPTOS_TOTAL
+    data_type: number
+    description: Número total de líneas económicas normalizadas de la factura.
+    tests:
+    - not_null
+  - name: NUM_CONCEPTOS_AGUA
+    data_type: number
+    description: Número de líneas derivadas de L4_FACT_AIGUA.
+    tests:
+    - not_null
+  - name: NUM_CONCEPTOS_EXPLICITOS
+    data_type: number
+    description: Número de líneas procedentes de L4_FACT_CONCEPTE.
+    tests:
+    - not_null
+  - name: TIENE_RECUPERACION
+    data_type: boolean
+    description: Indicador explícito de recuperación, verdadero cuando ID_RECUPERACIO es S. Se valida contra la existencia de g_h_recuperacion.
+    tests:
+    - not_null
+  - name: TIENE_REGULARIZACION
+    data_type: boolean
+    description: Indicador explícito de regularización, verdadero cuando ID_REGULARITZACIO es S. Se valida contra la existencia de g_h_regularizacion.
+    tests:
+    - not_null
+  - name: TIENE_ACTIVIDAD_INDUSTRIAL
+    data_type: boolean
+    description: Indica que el suministro posee al menos una actividad marcada como industrial principal.
+    tests:
+    - not_null
+  - name: ES_VULNERABLE
+    data_type: boolean
+    description: Indica que la fecha final de factura pertenece a un intervalo social vigente.
+    tests:
+    - not_null
+  - name: ES_FRAUDULENTA
+    data_type: boolean
+    description: Indica que la factura es posterior o igual a DATA_CREA_C_FRA de la última versión canónica del convenio de fraude mientras el
+      suministro permanezca en la tabla.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA. Para miembros desconocidos o filas generadas en Gold se informa
+      con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_h_factura_concepto
+  description: 'Hecho de líneas económicas de factura. Granularidad: una fila por componente económico normalizado, factura y partición. Incluye
+    componentes verticalizados de agua y conceptos explícitos. ORIGEN_CONCEPTO conserva la procedencia funcional L4, mientras TABLA_ORIGEN identifica
+    la fuente Silver inmediata.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: fact
+      grain: una fila por componente economico normalizado de factura
+  columns:
+  - name: HK_FACTURA_CONCEPTE
+    data_type: string
+    description: Clave hash única de la línea económica normalizada.
+    tests:
+    - not_null
+    - unique
+  - name: HK_FACTURA
+    data_type: string
+    description: Clave de la factura padre.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_h_factura'') }}'
+          field: HK_FACTURA
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave del suministro facturado.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_suministro'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: CODIGO_CONCEPTO
+    data_type: varchar(50)
+    description: 'Clave foránea conformada del concepto, con prefijo AIGUA: o CONCEPTE:.'
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_concepto'') }}'
+          field: CODIGO_CONCEPTO
+  - name: ORIGEN_CONCEPTO
+    data_type: varchar(50)
+    description: 'Procedencia funcional original: L4_FACT_AIGUA o L4_FACT_CONCEPTE.'
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - L4_FACT_AIGUA
+          - L4_FACT_CONCEPTE
+  - name: NUM_PARTICIO
+    data_type: number(2,0)
+    description: Número de partición de la factura. Primera columna de la clave natural.
+    tests:
+    - not_null
+  - name: ID_EMPRESA
+    data_type: varchar(2)
+    description: Empresa emisora. Segunda columna de la clave natural.
+    tests:
+    - not_null
+  - name: ANY_FACTURA
+    data_type: varchar(4)
+    description: Año de factura. Tercera columna de la clave natural.
+    tests:
+    - not_null
+  - name: NUM_FACTURA
+    data_type: number(7,0)
+    description: Número de factura. Cuarta columna de la clave natural.
+    tests:
+    - not_null
+  - name: NUM_LINEA
+    data_type: number(3,0)
+    description: Orden estable de la línea dentro de la factura.
+    tests:
+    - not_null
+  - name: TIPUS_CONCEPTE
+    data_type: varchar
+    description: Tipo analítico del componente.
+  - name: NUM_CONCEPTE
+    data_type: varchar(3)
+    description: Código original del concepto explícito; es nulo para componentes derivados de agua.
+  - name: DESC_CONCEPTE
+    data_type: varchar
+    description: Descripción funcional de la línea económica.
+    tests:
+    - not_null
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Póliza de suministro facturada.
+    tests:
+    - not_null
+  - name: DATA_INI_FACT
+    data_type: date
+    description: Fecha inicial del periodo de la factura.
+    tests:
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: DATA_FIN_FACT
+    data_type: date
+    description: Fecha final del periodo de la factura.
+    tests:
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: DATA_EMISS_FACT
+    data_type: date
+    description: Fecha de emisión de la factura.
+    tests:
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: TIP_SUBM_SERV_FACTURA
+    data_type: varchar(1)
+    description: Tipo de suministro congelado en la factura.
+  - name: QUANTITAT
+    data_type: number
+    description: Cantidad física o unidades asociadas al componente.
     config:
-      materialized: incremental
-      incremental_strategy: merge
-      unique_key: HK_FACTURA_REGUL
-    columns:
-      - name: HK_FACTURA_REGUL
-        tests: [not_null, unique]
-      - name: HK_FACTURA
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_h_factura'), field: HK_FACTURA}
-      - name: HK_SUBMIN_SERVEI
-        description: "Suministro heredado indirectamente de la factura padre mediante una relación 1:1 por HK_FACTURA."
-        tests:
-          - not_null
-          - relationships:
-              arguments: {to: ref('g_d_suministro'), field: HK_SUBMIN_SERVEI}
-      - name: ID_EMPRESA
-      - name: ANY_FACTURA
-      - name: NUM_FACTURA
-      - name: NUM_PARTICIO
-      - name: DATA_FIN_PER_INCID
-      - name: M3_TOTAL_REGULARIZADOS
-      - name: IMP_TOTAL_REGULARIZACION
-      - name: ID_CARGA
-      - name: FECHA_EXTRACCION
-      - name: FECHA_CARGA
-      - name: SISTEMA_ORIGEN
-      - name: TABLA_ORIGEN
+      meta:
+        measure_type: additive_when_applicable
+  - name: UNITAT_MESURA
+    data_type: varchar
+    description: Unidad de medida de QUANTITAT.
+  - name: BASE_CALCUL
+    data_type: number
+    description: Base física o monetaria utilizada en el cálculo.
+  - name: TIP_TAXA
+    data_type: varchar
+    description: Tipo de tarifa, tasa o procedimiento de cálculo.
+  - name: PREU_UNITARI
+    data_type: number
+    description: Precio aplicado por unidad.
+  - name: PERCENTATGE
+    data_type: number
+    description: Porcentaje aplicado a la base.
+  - name: IMP_CONCEPTE
+    data_type: number(11,2)
+    description: Importe monetario final de la línea. Medida aditiva principal del hecho.
+    tests:
+    - not_null
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IVA_APLICAT
+    data_type: number
+    description: Porcentaje de IVA asociado al componente.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA_CONCEPTO. Para miembros desconocidos o filas generadas en Gold
+      se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA_CONCEPTO. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA_CONCEPTO. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_h_factura_situacion
+  description: 'Hecho histórico de situaciones de factura. Granularidad: una fila por NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA, NUM_FACTURA y MOM_INI_SITUACION.
+    Permite reconstruir la secuencia de estados y determinar la situación vigente.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: fact
+      grain: una fila por factura y momento inicial de situacion
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_PARTICIO
+        - ID_EMPRESA
+        - ANY_FACTURA
+        - NUM_FACTURA
+        - MOM_INI_SITUACION
+  columns:
+  - name: HK_FACTURA_SITUACION
+    data_type: string
+    description: Clave hash única del intervalo de situación.
+    tests:
+    - not_null
+    - unique
+  - name: HK_FACTURA
+    data_type: string
+    description: Clave de la factura padre.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_h_factura'') }}'
+          field: HK_FACTURA
+  - name: HK_SITUACION_FACT
+    data_type: string
+    description: Clave de la situación descrita.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_situacion_factura'') }}'
+          field: HK_SITUACION_FACT
+  - name: NUM_PARTICIO
+    data_type: number(2,0)
+    description: Número de partición. Primera columna de la clave natural.
+    tests:
+    - not_null
+  - name: ID_EMPRESA
+    data_type: varchar(2)
+    description: Empresa emisora. Segunda columna de la clave natural.
+    tests:
+    - not_null
+  - name: ANY_FACTURA
+    data_type: varchar(4)
+    description: Año de factura. Tercera columna de la clave natural.
+    tests:
+    - not_null
+  - name: NUM_FACTURA
+    data_type: number(7,0)
+    description: Número de factura. Cuarta columna de la clave natural.
+    tests:
+    - not_null
+  - name: MOM_INI_SITUACION
+    data_type: timestamp_tz
+    description: Momento de inicio de la situación y quinta columna de la clave natural.
+    tests:
+    - not_null
+  - name: MOM_FIN_SITUACION
+    data_type: timestamp_tz
+    description: Momento final calculado como el inicio del siguiente estado; nulo para la situación actual.
+  - name: NUM_ORDEN_SITUACION
+    data_type: number
+    description: Orden cronológico dentro de la factura.
+    tests:
+    - not_null
+  - name: ES_SITUACION_ACTUAL
+    data_type: boolean
+    description: Indica que la fila representa la última situación conocida.
+    tests:
+    - not_null
+  - name: TIP_SIT_FACT
+    data_type: varchar(2)
+    description: Código funcional de situación.
+    tests:
+    - not_null
+  - name: DESC_SITUACION
+    data_type: varchar
+    description: Descripción completa de la situación.
+  - name: DESC_BREU_SITUACION
+    data_type: varchar
+    description: Descripción breve de la situación.
+  - name: CAUSA_SIT_FACT
+    data_type: varchar(2)
+    description: Código de causa del cambio de situación.
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA_SITUACION_HIST. Para miembros desconocidos o filas generadas en
+      Gold se informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA_SITUACION_HIST. Puede ser nula únicamente en miembros técnicos generados
+      directamente en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA_SITUACION_HIST. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_h_recuperacion
+  description: 'Hecho de recuperaciones asociadas a factura. Granularidad: una fila por NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA y NUM_FACTURA. Conserva
+    el volumen, importe total y componentes recuperados sin mezclarlos con las líneas ordinarias de factura.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: fact
+      grain: una fila por particion, empresa, anyo y numero de factura
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_PARTICIO
+        - ID_EMPRESA
+        - ANY_FACTURA
+        - NUM_FACTURA
+  columns:
+  - name: HK_FACTURA_RECUP
+    data_type: string
+    description: Clave hash única de la recuperación.
+    tests:
+    - not_null
+    - unique
+  - name: HK_FACTURA
+    data_type: string
+    description: Clave de la factura padre.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_h_factura'') }}'
+          field: HK_FACTURA
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave del suministro de la factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_suministro'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: NUM_PARTICIO
+    data_type: number(2,0)
+    description: Número de partición. Primera columna de la clave natural.
+    tests:
+    - not_null
+  - name: ID_EMPRESA
+    data_type: varchar(2)
+    description: Empresa. Segunda columna de la clave natural.
+    tests:
+    - not_null
+  - name: ANY_FACTURA
+    data_type: varchar(4)
+    description: Año de factura. Tercera columna de la clave natural.
+    tests:
+    - not_null
+  - name: NUM_FACTURA
+    data_type: number(7,0)
+    description: Número de factura. Cuarta columna de la clave natural.
+    tests:
+    - not_null
+  - name: M3_TOTAL_RECUPERADOS
+    data_type: number
+    description: Volumen total recuperado en m3.
+    tests:
+    - not_null
+    config:
+      meta:
+        measure_type: additive
+        unit: m3
+  - name: IMP_TOTAL_RECUPERACION
+    data_type: number(11,2)
+    description: Importe total derivado de los componentes de recuperación.
+    tests:
+    - not_null
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_QTA_SERV_RC
+    data_type: number(11,2)
+    description: Cuota de servicio recuperada.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC1_RC
+    data_type: number(11,2)
+    description: Importe recuperado del bloque 1.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC2_RC
+    data_type: number(11,2)
+    description: Importe recuperado del bloque 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC3_RC
+    data_type: number(11,2)
+    description: Importe recuperado del bloque 3.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CT_XBASICA_RC
+    data_type: number(11,2)
+    description: Importe recuperado de CT_XBASICA.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_TCG_SUBM_RC
+    data_type: number(11,2)
+    description: Importe recuperado de TCG_SUBM.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CLAVAG_RC
+    data_type: number(11,2)
+    description: Importe recuperado de alcantarillado.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_SANEJA_RC
+    data_type: number(11,2)
+    description: Importe recuperado de saneamiento.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_ERSU_RC
+    data_type: number(11,2)
+    description: Importe recuperado de residuos urbanos.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CIH_BLOC1_RC
+    data_type: number(11,2)
+    description: Importe recuperado de CIH bloque 1.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CIH_BLOC2_RC
+    data_type: number(11,2)
+    description: Importe recuperado de CIH bloque 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CIH_BLOC3_RC
+    data_type: number(11,2)
+    description: Importe recuperado de CIH bloque 3.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BONIF_QTA_RC
+    data_type: number(11,2)
+    description: Importe de bonificación de cuota recuperada.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T1_RC
+    data_type: number(11,2)
+    description: Importe recuperado de canon tramo 1.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T2_RC
+    data_type: number(11,2)
+    description: Importe recuperado de canon tramo 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CLA_T2_RC
+    data_type: number(11,2)
+    description: Importe recuperado de alcantarillado tramo 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T3_RC
+    data_type: number(11,2)
+    description: Importe recuperado de canon tramo 3.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA_RECUP. Para miembros desconocidos o filas generadas en Gold se
+      informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA_RECUP. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA_RECUP. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+- name: g_h_regularizacion
+  description: 'Hecho de regularizaciones asociadas a factura e incidencia. Granularidad: una fila por NUM_PARTICIO, ID_EMPRESA, ANY_FACTURA,
+    NUM_FACTURA y DATA_FIN_PER_INCID. Conserva el volumen, importe total y componentes regularizados sin mezclarlos con las líneas ordinarias
+    de factura.'
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: fact
+      grain: una fila por factura y fecha final del periodo de incidencia
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - NUM_PARTICIO
+        - ID_EMPRESA
+        - ANY_FACTURA
+        - NUM_FACTURA
+        - DATA_FIN_PER_INCID
+  columns:
+  - name: HK_FACTURA_REGUL
+    data_type: string
+    description: Clave hash única de la regularización.
+    tests:
+    - not_null
+    - unique
+  - name: HK_FACTURA
+    data_type: string
+    description: Clave de la factura padre.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_h_factura'') }}'
+          field: HK_FACTURA
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Clave del suministro de la factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_suministro'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: NUM_PARTICIO
+    data_type: number(2,0)
+    description: Número de partición. Primera columna de la clave natural.
+    tests:
+    - not_null
+  - name: ID_EMPRESA
+    data_type: varchar(2)
+    description: Empresa. Segunda columna de la clave natural.
+    tests:
+    - not_null
+  - name: ANY_FACTURA
+    data_type: varchar(4)
+    description: Año de factura. Tercera columna de la clave natural.
+    tests:
+    - not_null
+  - name: NUM_FACTURA
+    data_type: number(7,0)
+    description: Número de factura. Cuarta columna de la clave natural.
+    tests:
+    - not_null
+  - name: DATA_FIN_PER_INCID
+    data_type: date
+    description: Fecha final del periodo de incidencia. Quinta columna de la clave natural.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_fecha'') }}'
+          field: FECHA
+  - name: M3_TOTAL_REGULARIZADOS
+    data_type: number
+    description: Volumen total regularizado en m3.
+    tests:
+    - not_null
+    config:
+      meta:
+        measure_type: additive
+        unit: m3
+  - name: IMP_TOTAL_REGULARIZACION
+    data_type: number(11,2)
+    description: Importe total derivado de los componentes de regularización.
+    tests:
+    - not_null
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC1_RG
+    data_type: number(11,2)
+    description: Importe regularizado del bloque 1.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC2_RG
+    data_type: number(11,2)
+    description: Importe regularizado del bloque 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC3_RG
+    data_type: number(11,2)
+    description: Importe regularizado del bloque 3.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC4_RG
+    data_type: number(11,2)
+    description: Importe regularizado del bloque 4.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_BLOC5_RG
+    data_type: number(11,2)
+    description: Importe regularizado del bloque 5.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CT_XBASICA_RG
+    data_type: number(11,2)
+    description: Importe regularizado de CT_XBASICA.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_TCG_SUBM_RG
+    data_type: number(11,2)
+    description: Importe regularizado de TCG_SUBM.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CTG_SUBM_RG
+    data_type: number(11,2)
+    description: Importe regularizado de CTG_SUBM.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAN_BAELLS_RG
+    data_type: number(11,2)
+    description: Importe regularizado del canon de Baells.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAN_TER_RG
+    data_type: number(11,2)
+    description: Importe regularizado del canon del Ter.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_PRODUC_BRUT_RG
+    data_type: number(11,2)
+    description: Importe regularizado de producción bruta.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CLAVAG_RG
+    data_type: number(11,2)
+    description: Importe regularizado de alcantarillado.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_SANEJA_RG
+    data_type: number(11,2)
+    description: Importe regularizado de saneamiento.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_ERSU_RG
+    data_type: number(11,2)
+    description: Importe regularizado de residuos urbanos.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CIH_BLOC1_RG
+    data_type: number(11,2)
+    description: Importe regularizado de CIH bloque 1.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CIH_BLOC2_RG
+    data_type: number(11,2)
+    description: Importe regularizado de CIH bloque 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CIH_BLOC3_RG
+    data_type: number(11,2)
+    description: Importe regularizado de CIH bloque 3.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T1_RG
+    data_type: number(11,2)
+    description: Importe regularizado de canon tramo 1.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T2_RG
+    data_type: number(11,2)
+    description: Importe regularizado de canon tramo 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CLA_T2_RG
+    data_type: number(11,2)
+    description: Importe regularizado de alcantarillado tramo 2.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T3_RG
+    data_type: number(11,2)
+    description: Importe regularizado de canon tramo 3.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: IMP_CAI_T4_RG
+    data_type: number(11,2)
+    description: Importe regularizado de canon tramo 4.
+    config:
+      meta:
+        measure_type: additive
+        currency: EUR
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador técnico del lote heredado de la fuente S_FACTURA_REGUL. Para miembros desconocidos o filas generadas en Gold se
+      informa con un valor técnico controlado.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha y hora de extracción heredada de la fuente S_FACTURA_REGUL. Puede ser nula únicamente en miembros técnicos generados directamente
+      en Gold.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha y hora de materialización del registro en Gold, calculada con la fecha del sistema en la zona horaria Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado de S_FACTURA_REGUL. Para miembros técnicos generados en Gold se informa como GOLD.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla Silver principal utilizada como fuente inmediata del registro Gold. Para filas técnicas generadas se conserva el nombre
+      lógico de la fuente o del proceso generador.
+    tests:
+    - not_null
+seeds:
+- name: g_s_concepto_clasificacion
+  description: 'Seed Gold que clasifica funcionalmente los conceptos empleados por g_d_concepto. Granularidad: una fila por CODIGO_CONCEPTO conformado.
+    Debe actualizarse cuando el test gold_fact_conceptos_sin_clasificar detecte un código nuevo.'
+  columns:
+  - name: CODIGO_CONCEPTO
+    data_type: varchar(50)
+    description: 'Clave conformada con prefijo AIGUA: o CONCEPTE:.'
+    tests:
+    - not_null
+    - unique
+  - name: CODIGO_ORIGEN
+    data_type: varchar(30)
+    description: Código original sin prefijo.
+    tests:
+    - not_null
+  - name: ORIGEN_CONCEPTO
+    data_type: varchar(50)
+    description: Procedencia funcional esperada.
+    tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values:
+          - L4_FACT_AIGUA
+          - L4_FACT_CONCEPTE
+  - name: GRUPO_FUNCIONAL
+    data_type: varchar(50)
+    description: Grupo funcional utilizado en análisis.
+    tests:
+    - not_null
+  - name: ES_CONSUMO
+    data_type: boolean
+    description: Indicador de concepto de consumo.
+    tests:
+    - not_null
+  - name: ES_SERVICIO
+    data_type: boolean
+    description: Indicador de servicio.
+    tests:
+    - not_null
+  - name: ES_TRIBUTO
+    data_type: boolean
+    description: Indicador de tributo o tasa.
+    tests:
+    - not_null
+  - name: ES_BONIFICACION
+    data_type: boolean
+    description: Indicador de bonificación.
+    tests:
+    - not_null
+  - name: ES_IVA
+    data_type: boolean
+    description: Indicador de IVA.
+    tests:
+    - not_null
+  - name: ES_ADITIVO
+    data_type: boolean
+    description: Indicador de inclusión en el total aditivo.
+    tests:
+    - not_null
+  config:
+    meta:
+      layer: gold_fact
+      entity_type: seed
+      grain: una fila por concepto conformado
