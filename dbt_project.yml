@@ -7,6 +7,7 @@ profile: agua_clara
 seed-paths: ["seeds"]
 model-paths: ["models"]
 macro-paths: ["macros"]
+analysis-paths: ["analysis"]
 clean-targets:
   - "target"
   - "dbt_packages"
@@ -55,4 +56,20 @@ seeds:
           ES_TRIBUTO: boolean
           ES_BONIFICACION: boolean
           ES_IVA: boolean
-          ES_ADITIVO: boolean          
+          ES_ADITIVO: boolean
+
+    l4_fact:
+      +schema: l4_fact
+      +quote_columns: false
+      s_tip_conceptos_agua:
+        +column_types:
+          ORDEN: integer
+          NUM_CONCEPTO: varchar(50)
+          DESC_CONCEPTO: varchar(255)
+          CANTIDAD: varchar(50)
+          UNIDAD_MEDIDA: varchar(50)
+          BASE_CALCULO: varchar(50)
+          TIPO_TASA: varchar(30)
+          PRECIO_UNITARIO: varchar(50)
+          PORCENTAJE: varchar(50)
+          IMP_CONCEPTO: varchar(50)

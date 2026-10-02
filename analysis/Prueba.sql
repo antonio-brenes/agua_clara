@@ -1,10 +1,4 @@
-{{ config(
-    materialized='incremental',
-    incremental_strategy='merge',
-    unique_key='HK_FACTURA_CONCEPTO',
-    schema='silver_fact',
-    tags=['silver_fact', 'facturacion']
-) }}
+-- depends_on: {{ ref('s_factura_concepto') }}
 
 {% set query -%}
     select * from {{ ref('s_tip_conceptos_agua') -}} 

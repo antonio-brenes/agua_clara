@@ -1,0 +1,52 @@
+version: 2
+
+seeds:
+
+  - name: s_tip_conceptos_agua
+    description: >
+      Datos maestros de tipos de conceptos de agua.
+
+    columns:
+
+      - name: ORDEN
+        description: Orden del tipo de concepto de agua.
+        tests:
+          - not_null
+          - unique
+
+      - name: TIPUS_CONCEPTE
+        description: Tipo de concepto de agua.
+
+      - name: NUM_CONCEPTO
+        description: Código funcional del concepto sintético.
+
+      - name: DESC_CONCEPTE
+        description: Descripción larga del tipo de concepto.
+
+      - name: QUANTITAT
+        description: Cantidad asociada al tipo de concepto.
+
+      - name: UNITAT_MESURA
+        description: Unidad de medida de la cantidad.
+
+      - name: BASE_CALCUL
+        description: Base de cálculo del tipo de concepto.
+
+      - name: TIP_TAXA
+        description: Tipo de tasa aplicable al tipo de concepto.
+
+      - name: PREU_UNITARI
+        description: Precio unitario del tipo de concepto.
+
+      - name: PERCENTATGE
+        description: Porcentaje aplicable al tipo de concepto.
+
+      - name: IMP_CONCEPTE
+        description: Importe del tipo de concepto.
+
+    config:
+      meta:
+        layer: l4_fact
+        entity_type: seed
+        grain: una fila por tipo de concepto de agua       
+
