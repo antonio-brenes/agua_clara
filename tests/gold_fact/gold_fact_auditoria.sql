@@ -4,7 +4,7 @@ with checks as (
  where coalesce(g.ID_CARGA,-1)<>coalesce(s.ID_CARGA,-1) or coalesce(g.FECHA_EXTRACCION,'1900-01-01'::timestamp_tz)<>coalesce(s.FECHA_EXTRACCION,'1900-01-01'::timestamp_tz)
     or coalesce(g.SISTEMA_ORIGEN,'^^')<>coalesce(s.SISTEMA_ORIGEN,'^^') or g.TABLA_ORIGEN<>'S_FACTURA' or g.FECHA_CARGA is null
  union all
- select 'G_H_FACTURA_CONCEPTO',g.HK_FACTURA_CONCEPTE from {{ ref('g_h_factura_concepto') }} g join {{ ref('s_factura_concepto') }} s using(HK_FACTURA_CONCEPTE)
+ select 'G_H_FACTURA_CONCEPTO',g.HK_FACTURA_CONCEPTO from {{ ref('g_h_factura_concepto') }} g join {{ ref('s_factura_concepto') }} s using(HK_FACTURA_CONCEPTO)
  where coalesce(g.ID_CARGA,-1)<>coalesce(s.ID_CARGA,-1) or coalesce(g.FECHA_EXTRACCION,'1900-01-01'::timestamp_tz)<>coalesce(s.FECHA_EXTRACCION,'1900-01-01'::timestamp_tz)
     or coalesce(g.SISTEMA_ORIGEN,'^^')<>coalesce(s.SISTEMA_ORIGEN,'^^') or g.TABLA_ORIGEN<>'S_FACTURA_CONCEPTO' or g.FECHA_CARGA is null
  union all

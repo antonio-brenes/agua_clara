@@ -1,0 +1,17 @@
+NUM_CONCEPTO,DESC_CONCEPTO,DESC_BREVE_CONCEPTO
+A001,Consum d'aigua bloc 1,AIGUA BLOC 1
+A002,Consum d'aigua bloc 2,AIGUA BLOC 2
+A003,Consum d'aigua bloc 3,AIGUA BLOC 3
+A004,Consum d'aigua bloc 4,AIGUA BLOC 4
+A005,Consum d'aigua bloc 5,AIGUA BLOC 5
+A010,Quota de servei,QUOTA SERVEI
+A011,Quota o cànon de tarifa bàsica,CÀNON TARIFA BÀSICA
+A012,Tarifa o cànon general del subministrament,CÀNON GENERAL SUBMINISTRAMENT
+A020,Clavegueram,CLAVEGUERAM
+A021,Sanejament,SANEJAMENT
+A022,Entrada de Residus Sòlids Urbans,ERSU
+C001,Cànon d'infraestructura hidràulica bloc 1,CIH BLOC 1
+C002,Cànon d'infraestructura hidràulica bloc 2,CIH BLOC 2
+C003,Cànon d'infraestructura hidràulica bloc 3,CIH BLOC 3
+I001,IVA de sanejament,IVA SANEJAMENT
+I002,IVA de l'aigua,IVA AIGUA

@@ -1,57 +1,1230 @@
 version: 2
-
 sources:
-  - name: raw_sicab
-    description: "Tablas RAW de origen SICAB para el piloto Agua Clara"
-    database: des_agua_clara
-    schema: raw_sicab
-    config:
-      loaded_at_field: FECHA_EXTRACCION
-      freshness:
-        warn_after: {count: 7, period: day}
-        error_after: {count: 15, period: day}
-    tables:
-      - name: raw_carrer
-        description: "Tabla raw de carrer."
-      - name: raw_codificacions
-        description: "Tabla raw de codificacions."
-      - name: raw_conveni_frau
-        description: "Tabla raw de conveni_frau."
-      - name: raw_dte_municipal
-        description: "Tabla raw de dte_municipal."
-      - name: raw_epigraf_iae
-        description: "Tabla raw de epigraf_iae."
-      - name: raw_fact_aigua
-        description: "Tabla raw de fact_aigua."
-      - name: raw_fact_concepte
-        description: "Tabla raw de fact_concepte."
-      - name: raw_fact_recup
-        description: "Tabla raw de fact_recup."
-      - name: raw_fact_regul
-        description: "Tabla raw de fact_regul."
-      - name: raw_fact_resum
-        description: "Tabla raw de fact_resum."
-      - name: raw_finca
-        description: "Tabla raw de finca."
-      - name: raw_hist_ss_pe
-        description: "Tabla raw de hist_ss_pe."
-      - name: raw_municipi_sgab
-        description: "Tabla raw de municipi_sgab."
-      - name: raw_padro_tamgrem
-        description: "Tabla raw de padro_tamgrem."
-      - name: raw_padro_trr
-        description: "Tabla raw de padro_trr."
-      - name: raw_ramal
-        description: "Tabla raw de ramal."
-      - name: raw_servei_eq_ci
-        description: "Tabla raw de servei_eq_ci."
-      - name: raw_servei_facturar
-        description: "Tabla raw de servei_facturar."
-      - name: raw_situacio_fact
-        description: "Tabla raw de situacio_fact."
-      - name: raw_submin_iae
-        description: "Tabla raw de submin_iae."
-      - name: raw_submin_servei
-        description: "Tabla raw de submin_servei."
-      - name: raw_tarifa_facturacio
-        description: "Tabla raw de tarifa_facturacio."
+- name: raw_sicab
+  description: Tablas RAW de origen SICAB para el piloto Agua Clara
+  database: des_agua_clara
+  schema: raw_sicab
+  config:
+    loaded_at_field: FECHA_EXTRACCION
+    freshness:
+      warn_after:
+        count: 7
+        period: day
+      error_after:
+        count: 15
+        period: day
+  tables:
+  - name: raw_carrer
+    description: 'Maestro de vías públicas de los municipios gestionados. Granularidad: un registro por combinación de municipio
+      SGAB y número de calle.'
+    columns:
+    - name: NUM_MUN_SGAB
+      description: Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB.
+    - name: NUM_CARRER
+      description: Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria.
+    - name: CLASSE_CARRER
+      description: Clase o categoría administrativa de la vía.
+    - name: NOM_ABREUJ_CARRER
+      description: Nombre abreviado de la vía, destinado a formatos de espacio limitado.
+    - name: TIP_DENOMIN_CARRER
+      description: Tipo de denominación de la vía, como calle, avenida o paseo.
+    - name: NOM_COMPLET_CARRER
+      description: Nombre completo normalizado de la vía.
+    - name: ID_CARRER_SAP
+      description: Identificador equivalente de la vía en SAP.
+    - name: QL_CARRER
+      description: Indicador de calidad, validez o tratamiento del registro de calle.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_codificacions
+    description: "Maestro de códigos. Granularidad: un registro por código."
+    columns:
+    - name: TIP_CODI
+      description: Tipo de código. Parte de la clave primaria.
+    - name: CLAU_CODI
+      description: Clave de código. Parte de la clave primaria.
+    - name: DESC_CODI
+      description: "Descripción completa del código."
+    - name: DESC_BREU
+      description: Descripción breve del código.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_conveni_frau
+    description: 'Relación vigente de suministros declarados en situación de fraude, con la dirección y el ramal afectados.
+      Granularidad: un registro por póliza de suministro.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: NUM_MUN_CONV_FRAU
+      description: Código del municipio donde se localiza el fraude. Forma parte de una clave foránea hacia l4_municipi_sgab.NUM_MUN_SGAB.
+    - name: ADRE_CONV_FRAU
+      description: Dirección textual normalizada del suministro fraudulento, derivada de calle, finca y unidad del suministro.
+    - name: COD_POST_CONV_FRAU
+      description: Código postal de la dirección asociada al fraude.
+    - name: DEL_CREACIO_CONV_F
+      description: Delegación que creó o registró el convenio de fraude.
+    - name: DATA_CREA_C_FRA
+      description: Fecha desde la que el suministro se considera incluido en la situación de fraude.
+    - name: POLISSA_RAMAL
+      description: Identificador de la póliza de ramal o acometida. Forma parte de una clave foránea hacia l4_ramal.POLISSA_RAMAL.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_dte_municipal
+    description: 'Maestro de distritos o demarcaciones municipales. Granularidad: un registro por combinación de municipio
+      SGAB y distrito municipal.'
+    columns:
+    - name: NUM_MUN_SGAB
+      description: Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea
+        hacia l4_municipi_sgab.NUM_MUN_SGAB.
+    - name: NUM_DTE_MUNI
+      description: Código del distrito o demarcación dentro del municipio. Forma parte de la clave primaria.
+    - name: NOM_DTE_MUNI
+      description: Nombre descriptivo del distrito o demarcación municipal.
+    - name: NUM_DEL_SGAB
+      description: Código de la delegación SGAB responsable.
+    - name: NUM_AGENCIA_SGAB
+      description: Código de la agencia SGAB responsable.
+    - name: CODI_AREA_SD
+      description: Código del área de servicio o distribución asignada al distrito.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_epigraf_iae
+    description: 'Catálogo de epígrafes del Impuesto sobre Actividades Económicas utilizados para clasificar la actividad
+      del suministro y parametrizar tarifas y tasas. Granularidad: un registro por sección y epígrafe IAE.'
+    columns:
+    - name: SECCIO
+      description: Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de la clave primaria.
+    - name: EPIGRAF_IAE
+      description: Código del epígrafe IAE que identifica la actividad económica. Forma parte de la clave primaria.
+    - name: DESCR_IAE
+      description: Descripción de la actividad económica correspondiente al epígrafe IAE.
+    - name: TIP_TARIFA
+      description: Código de tipo de tarifa asociado a la actividad económica.
+    - name: TIP_QUOTA_TAMGREM
+      description: Tipo de cuota TAMGREM aplicable a la actividad o padrón.
+    - name: NIV_GEN_RES
+      description: Nivel de generación de residuos asignado a la actividad.
+    - name: COD_GEN_RES
+      description: Código de categoría de generación de residuos.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_fact_aigua
+    description: 'Detalle técnico y económico de agua asociado a una factura, incluyendo contador, cuota de servicio, bloques
+      de consumo, cánones, saneamiento e impuestos. Granularidad: un registro por partición y factura.'
+    columns:
+    - name: NUM_PARTICIO
+      description: Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de
+        la clave primaria.
+    - name: ID_EMPRESA
+      description: Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_fact_resum.ID_EMPRESA.
+    - name: ANY_FACTURA
+      description: Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma
+        parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA.
+    - name: NUM_FACTURA
+      description: Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte
+        de una clave foránea hacia l4_fact_resum.NUM_FACTURA.
+    - name: DIAM_COMP_FACT
+      description: Diámetro del contador principal considerado en la factura.
+    - name: DIAM_COMP_SEC_FACT
+      description: Diámetro del contador secundario considerado en la factura.
+    - name: MARCA_COMP_FACT
+      description: Código de marca del contador facturado.
+    - name: NUM_COMP_FACT
+      description: Número de serie o identificador del contador facturado.
+    - name: PROPIETAT_COMP_FA
+      description: Indicador de propiedad del contador en el momento de facturación.
+    - name: CABAL_NOMINAL_CTE
+      description: Caudal nominal contratado utilizado para calcular la cuota de servicio.
+    - name: IMP_QTA_SERV
+      description: Importe de la cuota fija de servicio.
+    - name: PREU_M3_BLOC1_FACT
+      description: Precio unitario por m³ aplicado al bloque tarifario 1 en la factura.
+    - name: IMP_BLOC1
+      description: Importe calculado para el bloque tarifario 1 de la factura.
+    - name: PREU_M3_BLOC2_FACT
+      description: Precio unitario por m³ aplicado al bloque tarifario 2 en la factura.
+    - name: IMP_BLOC2
+      description: Importe calculado para el bloque tarifario 2 de la factura.
+    - name: PREU_M3_BLOC3_FACT
+      description: Precio unitario por m³ aplicado al bloque tarifario 3 en la factura.
+    - name: IMP_BLOC3
+      description: Importe calculado para el bloque tarifario 3 de la factura.
+    - name: TIP_CT_XBASICA_FAC
+      description: Tipo de cálculo aplicado a la cuota o canon de tarifa básica en la factura.
+    - name: BASE_CT_XBASICA
+      description: Base de cálculo del concepto de cuota o canon de tarifa básica en la factura.
+    - name: PREU_CT_XBASICA_FA
+      description: Precio unitario del concepto de cuota o canon de tarifa básica en la factura.
+    - name: IMP_CT_XBASICA
+      description: Importe del concepto de cuota o canon de tarifa básica en la factura.
+    - name: TIP_TCG_SUBM_FACT
+      description: Tipo de cálculo del concepto de tarifa o canon general del suministro en la factura.
+    - name: BASE_TCG_SUBM
+      description: Base de cálculo del concepto de tarifa o canon general del suministro en la factura.
+    - name: PREU_TCG_SUBM_FACT
+      description: Precio unitario del concepto de tarifa o canon general del suministro en la factura.
+    - name: IMP_TCG_SUBM
+      description: Importe del concepto de tarifa o canon general del suministro en la factura.
+    - name: TIP_CLAVAG_FACT
+      description: Tipo de cálculo del concepto de alcantarillado en la factura.
+    - name: BASE_CLAVAG
+      description: Base de cálculo del concepto de alcantarillado en la factura.
+    - name: PREU_CLAVAG_FACT
+      description: Precio unitario del concepto de alcantarillado en la factura.
+    - name: IMP_CLAVAG
+      description: Importe del concepto de alcantarillado en la factura.
+    - name: TIP_SANEJA_FACT
+      description: Tipo de cálculo del concepto de saneamiento en la factura.
+    - name: BASE_SANEJA
+      description: Base de cálculo del concepto de saneamiento en la factura.
+    - name: PREU_SANEJA_FACT
+      description: Precio unitario del concepto de saneamiento en la factura.
+    - name: IMP_SANEJA
+      description: Importe del concepto de saneamiento en la factura.
+    - name: BASE_IVA_SANEJA
+      description: Base imponible de IVA correspondiente al saneamiento.
+    - name: IMP_IVA_SANEJA
+      description: Importe de IVA correspondiente al saneamiento.
+    - name: BASE_IVA
+      description: Base imponible general sometida a IVA.
+    - name: PERCENT_IVA_FACT
+      description: Porcentaje de IVA aplicado a la factura.
+    - name: IMP_IVA
+      description: Importe de IVA calculado sobre la base imponible.
+    - name: TIP_ERSU_FACT
+      description: Tipo de cálculo del concepto de residuos urbanos en la factura.
+    - name: BASE_ERSU
+      description: Base de cálculo del concepto de residuos urbanos en la factura.
+    - name: PREU_ERSU_FACT
+      description: Precio unitario del concepto de residuos urbanos en la factura.
+    - name: IMP_ERSU
+      description: Importe del concepto de residuos urbanos en la factura.
+    - name: TIP_CIH_FACT
+      description: Tipo de cálculo del canon o componente de infraestructura hidráulica aplicado en la factura.
+    - name: BASE_CIH_BLOC1
+      description: Base de cálculo del CIH para el bloque 1 en la factura.
+    - name: PREU_CIH_BLOC1_FA
+      description: Precio unitario del CIH para el bloque 1 en la factura.
+    - name: IMP_CIH_BLOC1
+      description: Importe del CIH para el bloque 1 en la factura.
+    - name: BASE_CIH_BLOC2
+      description: Base de cálculo del CIH para el bloque 2 en la factura.
+    - name: PREU_CIH_BLOC2_FA
+      description: Precio unitario del CIH para el bloque 2 en la factura.
+    - name: IMP_CIH_BLOC2
+      description: Importe del CIH para el bloque 2 en la factura.
+    - name: BASE_CIH_BLOC3
+      description: Base de cálculo del CIH para el bloque 3 en la factura.
+    - name: PREU_CIH_BLOC3_FA
+      description: Precio unitario del CIH para el bloque 3 en la factura.
+    - name: IMP_CIH_BLOC3
+      description: Importe del CIH para el bloque 3 en la factura.
+    - name: CABAL_CTE
+      description: Caudal contratado utilizado en cálculos tarifarios.
+    - name: COEF_CIH_IND_FAC
+      description: Coeficiente industrial aplicado al canon o infraestructura hidráulica.
+    - name: QL_1999_2000
+      description: Indicador legado asociado al tratamiento tarifario del cambio 1999-2000.
+    - name: NOMBRE_PERSONES
+      description: Número de personas considerado en el cálculo de tramos.
+    - name: LIMIT_TRAM1_FACT
+      description: Límite de consumo utilizado en la factura para el tramo 1.
+    - name: LIMIT_TRAM2_FACT
+      description: Límite de consumo utilizado en la factura para el tramo 2.
+    - name: LIMIT_CAI1_FACT
+      description: Límite de consumo utilizado en la factura para el tramo de canon 1.
+    - name: LIMIT_CLAV1_FACT
+      description: Límite de consumo utilizado en la factura para el primer tramo de alcantarillado.
+    - name: LIMIT_CAI2_FACT
+      description: Límite de consumo utilizado en la factura para el tramo de canon 2.
+    - name: NOMBRE_PER_CAI
+      description: Número de personas considerado para los límites del canon del agua.
+    - name: NOMBRE_PER_TMTR
+      description: Número de personas considerado para la tasa metropolitana de residuos.
+    - name: NUM_COMPT_T_FACT
+      description: Identificador del contador totalizador considerado en la factura.
+    - name: PREU_M3_BLOC4_FACT
+      description: Precio unitario por m³ aplicado al bloque tarifario 4 en la factura.
+    - name: IMP_BLOC4
+      description: Importe calculado para el bloque tarifario 4 de la factura.
+    - name: PREU_M3_BLOC5_FACT
+      description: Precio unitario por m³ aplicado al bloque tarifario 5 en la factura.
+    - name: IMP_BLOC5
+      description: Importe calculado para el bloque tarifario 5 de la factura.
+    - name: LIMIT_TRAM3_FACT
+      description: Límite de consumo utilizado en la factura para el tramo 3.
+    - name: LIMIT_TRAM4_FACT
+      description: Límite de consumo utilizado en la factura para el tramo 4.
+    - name: LIMIT_CAI3_FACT
+      description: Límite de consumo utilizado en la factura para el tramo de canon 3.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_fact_concepte
+    description: 'Detalle de conceptos adicionales o explícitos incluidos en una factura. Granularidad: una línea por partición,
+      factura, número de línea y código de concepto.'
+    columns:
+    - name: NUM_PARTICIO
+      description: Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de
+        la clave primaria.
+    - name: ID_EMPRESA
+      description: Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_fact_resum.ID_EMPRESA.
+    - name: ANY_FACTURA
+      description: Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma
+        parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA.
+    - name: NUM_FACTURA
+      description: Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte
+        de una clave foránea hacia l4_fact_resum.NUM_FACTURA.
+    - name: NUM_LINEA
+      description: Número secuencial de la línea dentro de la factura. Forma parte de la clave primaria.
+    - name: NUM_CONCEPTE
+      description: Código del concepto facturado; debe existir en L4_CODIFICACIONS para la familia de conceptos de facturación.
+        Forma parte de la clave primaria.
+    - name: BASE_CONCEPTE
+      description: Cantidad, unidades o base monetaria sobre la que se calcula el concepto.
+    - name: TIP_TAXA_CONCEP
+      description: Tipo de tarifa o tasa aplicada al concepto.
+    - name: PREU_CONCEPTE
+      description: Precio unitario o porcentaje aplicado a la base del concepto.
+    - name: IMP_CONCEPTE
+      description: Importe final de la línea tras aplicar precio, porcentaje y redondeo.
+    - name: IVA_APLICAT_CONC
+      description: Porcentaje de IVA asociado al concepto.
+    - name: OBSER_CONCEPTE
+      description: Texto explicativo o detalle de la línea de concepto.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_fact_resum
+    description: 'Cabecera e importe agregado de la factura, con periodo, suministro, cliente, consumo por bloques, cobro
+      y atributos de emisión. Granularidad: una factura por empresa, año y número de factura.'
+    columns:
+    - name: ID_EMPRESA
+      description: Código de la empresa emisora o suministradora. Forma parte de la clave primaria.
+    - name: ANY_FACTURA
+      description: Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria.
+    - name: NUM_FACTURA
+      description: Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria.
+    - name: QL_EMPLEAT_SGAB
+      description: Indicador de intervención o tratamiento por personal SGAB.
+    - name: FREQ_FACT
+      description: Frecuencia de facturación aplicada al periodo.
+    - name: M3_BLOC1
+      description: Volumen de agua, en m³, asignado al bloque tarifario 1 en la factura.
+    - name: M3_BLOC2
+      description: Volumen de agua, en m³, asignado al bloque tarifario 2 en la factura.
+    - name: M3_BLOC3
+      description: Volumen de agua, en m³, asignado al bloque tarifario 3 en la factura.
+    - name: M3_BLOC4
+      description: Volumen de agua, en m³, asignado al bloque tarifario 4 en la factura.
+    - name: M3_BLOC5
+      description: Volumen de agua, en m³, asignado al bloque tarifario 5 en la factura.
+    - name: IMP_TOTAL_FACT
+      description: Importe total final de la factura, incluidos impuestos, conceptos y bonificaciones.
+    - name: IMP_AIGUA_IVA
+      description: Importe correspondiente al servicio de agua incluido el IVA aplicable.
+    - name: ID_RECUPERACIO
+      description: Indicador de que la factura incorpora una recuperación de importes.
+    - name: ID_REGULARITZACIO
+      description: Indicador de que la factura incorpora una regularización.
+    - name: DATA_CARREC_RECAP
+      description: Fecha de cargo o transferencia de la factura al sistema de recaudación.
+    - name: IDEN_LOT_LECT_FACT
+      description: Identificador del lote de lectura utilizado para facturar.
+    - name: NUM_PARTICIO
+      description: Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria.
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de una clave foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: DATA_FIN_FACT
+      description: Fecha final incluida en el periodo de facturación.
+    - name: ID_LOT_FACT
+      description: Identificador del lote de proceso o emisión de facturación.
+    - name: ANY_CALENDARI
+      description: Año del calendario de facturación, expresado con dos dígitos.
+    - name: MES_CALENDARI
+      description: Mes del calendario de facturación, expresado con dos dígitos.
+    - name: ID_CONCEPTES
+      description: Indicador de existencia de líneas adicionales en L4_FACT_CONCEPTE.
+    - name: ID_DECLARADA
+      description: Indicador de factura declarada o comunicada al proceso correspondiente.
+    - name: DNI_NIF_CLIENT
+      description: Documento identificativo fiscal del cliente o titular.
+    - name: QL_GESTIO_FACT
+      description: Indicador de modalidad o calidad de gestión de la factura.
+    - name: QL_TIP_COBRA
+      description: Tipo o modalidad de cobro aplicada a la factura.
+    - name: NUM_ENTITAT_COBR
+      description: Código de entidad bancaria utilizado en la factura.
+    - name: NUM_AGENCIA_APAR
+      description: Código de oficina bancaria utilizado en la factura.
+    - name: NUM_COMPTE_DEPEN
+      description: Número de cuenta dependiente utilizado para el cobro.
+    - name: DVER_COMPTE_BANC
+      description: Dígitos verificadores de la cuenta bancaria.
+    - name: TIP_FACTURA
+      description: Código de clase o modalidad de factura.
+    - name: DATA_EMISS_FACT
+      description: Fecha de emisión de la factura.
+    - name: DATA_INI_FACT
+      description: Fecha inicial incluida en el periodo facturado.
+    - name: QL_RESUM_COMPTABLE
+      description: Indicador de inclusión o tratamiento en el resumen contable.
+    - name: TIP_QTA_SERV_FACT
+      description: Tipo de cuota de servicio aplicada en la factura.
+    - name: ID_CALCUL_DIARI
+      description: Indicador de cálculo proporcional por días.
+    - name: US_AIGUA_SUBM_FACT
+      description: Uso del agua vigente y congelado en el momento de la factura.
+    - name: TIP_HABIT_SUBM_FA
+      description: Tipo de vivienda vigente y congelado en el momento de la factura.
+    - name: NOMB_HABIT_FACT
+      description: Número de habitantes considerado para tramos y bonificaciones en la factura.
+    - name: SIT_SUBM_SERV_FACT
+      description: Situación del suministro congelada en la fecha de factura.
+    - name: QL_IDIOMA_FACT
+      description: Idioma utilizado para emitir la factura.
+    - name: PUBLI_OFI_TARI_FA
+      description: Referencia de publicación oficial de la tarifa aplicada.
+    - name: ID_CARREC_SOCIETAT
+      description: Indicador de cargo gestionado por la sociedad.
+    - name: QL_MONEDA
+      description: Código o indicador de la moneda de facturación.
+    - name: TIP_SUBM_SERV
+      description: 'Tipo de suministro o servicio: D doméstico, I industrial y C contra incendios en el piloto.'
+    - name: NOM_CLIENT
+      description: Nombre del cliente impreso o registrado en la factura.
+    - name: NUM_INDEX
+      description: Número o referencia de índice asociada a la lectura o cálculo.
+    - name: APROVADA_FACT
+      description: Marca o referencia de aprobación de la factura.
+    - name: QL_TIP_COBRA_INI
+      description: Tipo de cobro inicial antes de cambios posteriores.
+    - name: QL_ENVIO_FACT
+      description: Indicador del canal o estado de envío de la factura.
+    - name: TIP_DOMESTIC
+      description: Subtipología doméstica aplicada a la factura.
+    - name: QL_DCL_CAI
+      description: Indicador de declaración del canon del agua.
+    - name: TIP_FACT_ENV
+      description: Modalidad o formato de envío de la factura.
+    - name: EMISSORA
+      description: Código de la entidad o sistema emisor.
+    - name: NUM_COMPTE_IBAN
+      description: Número de cuenta bancaria en formato IBAN.
+    - name: TIP_FACT_SII
+      description: Tipo de factura utilizado para el Suministro Inmediato de Información.
+    - name: TIPUS_FACTURA
+      description: Clasificación adicional de la factura, incluida la identificación de facturas sustitutivas.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_finca
+    description: 'Maestro de fincas o rangos de numeración postal, con atributos territoriales, técnicos y de planificación
+      de lectura. Granularidad: un registro por clave completa de finca dentro de una calle y municipio.'
+    columns:
+    - name: NUM_MUN_SGAB
+      description: Código interno del municipio en SGAB. Forma parte de la clave primaria. Forma parte de una clave foránea
+        hacia l4_carrer.NUM_MUN_SGAB.
+    - name: NUM_CARRER
+      description: Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria. Forma parte
+        de una clave foránea hacia l4_carrer.NUM_CARRER.
+    - name: NUM_INI_FINCA
+      description: Número inicial del rango postal que identifica la finca. Forma parte de la clave primaria.
+    - name: COMP_NUM_INI_FINCA
+      description: Complemento al número inicial de finca, como letra o sufijo. Forma parte de la clave primaria.
+    - name: NUM_FIN_FINCA
+      description: Número final del rango postal de la finca. Forma parte de la clave primaria.
+    - name: COMP_NUM_FIN_FINCA
+      description: Complemento al número final de finca. Forma parte de la clave primaria.
+    - name: SIT_FINCA_ESPEC
+      description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de
+        la clave primaria.
+    - name: ORD_FINCA_ESPEC
+      description: Ordinal que distingue fincas especiales con igual dirección base. Forma parte de la clave primaria.
+    - name: NUM_TORN_LECT_MENS
+      description: Turno mensual de lectura asignado a la finca; permite derivar el ciclo operativo 1, 11 o 21.
+    - name: ORD_FINCA_TORN_MEN
+      description: Orden de visita de la finca dentro del turno mensual de lectura.
+    - name: NUM_DTE_POST_FINCA
+      description: Código del distrito postal de la finca.
+    - name: ESTAT_FINCA
+      description: Estado operativo o administrativo de la finca.
+    - name: ID_GRUP_ELEV_FINCA
+      description: Identificador del grupo de elevación o presión al que pertenece la finca.
+    - name: PRES_XARXA_FINCA
+      description: Presión de red asociada a la finca.
+    - name: CAT_FISCAL_FINCA
+      description: Categoría fiscal asignada a la finca.
+    - name: ALTURA_FINCA
+      description: Altura o número de plantas considerado para la finca.
+    - name: ID_FINCA_RENDA_LIM
+      description: Indicador de finca acogida a un régimen de renta limitada.
+    - name: NUM_EXP_RENDA_LIM
+      description: Número de expediente del régimen de renta limitada.
+    - name: NUM_ZONA_RECOR
+      description: Código de la zona del recorrido de lectura.
+    - name: NUM_TRAVES
+      description: Número de travesía o secuencia dentro del recorrido.
+    - name: CASA_RECOR_PERIOD
+      description: Identificador o secuencia de la finca dentro del recorrido periódico.
+    - name: NUM_NUS_XARXA
+      description: Identificador del nodo de red asociado a la finca.
+    - name: ID_LOT_LECT
+      description: Identificador del lote de lectura.
+    - name: OBS_ADRE_INCOMPLET
+      description: Observación sobre una dirección incompleta o pendiente de normalización.
+    - name: PARTICULARIT_FINCA
+      description: Descripción de particularidades físicas u operativas de la finca.
+    - name: LOCAL_CLAUS_FINCA
+      description: Ubicación o referencia del lugar donde se custodian llaves de acceso.
+    - name: QL_COMPT_ELECTRON
+      description: Indicador de disponibilidad o tratamiento de contadores electrónicos.
+    - name: NUM_DTE_MUNI_FINCA
+      description: Código del distrito municipal al que pertenece la finca.
+    - name: QL_BATERIA_CABLE
+      description: Indicador de batería de contadores cableada o preparada para telelectura.
+    - name: CODI_UBICACIO_SAP
+      description: Código de ubicación técnica de la finca en SAP.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_hist_ss_pe
+    description: 'Histórico de periodos de vulnerabilidad, servicio social o pobreza energética asociados al suministro. Granularidad:
+      un registro por póliza, colectivo y momento de declaración del indicador.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: TS_MOM_IND
+      description: Marca temporal de registro o modificación del indicador social. Forma parte de la clave primaria.
+    - name: TIP_COLECTIVO
+      description: Código del colectivo social o supuesto de vulnerabilidad reconocido. Forma parte de la clave primaria.
+    - name: DATA_INI_IND
+      description: Fecha de inicio de vigencia del indicador social.
+    - name: DATA_FIN_IND
+      description: Fecha de fin de vigencia del indicador social.
+    - name: OBSERVACIONS
+      description: Observaciones funcionales asociadas al registro.
+    - name: NUM_EMPLEAT
+      description: Número de empleado que gestionó el indicador.
+    - name: INFORME_SS
+      description: Referencia o indicador del informe de servicios sociales.
+    - name: DATA_ENVIA_ACA
+      description: Fecha de envío de la información a la Agencia Catalana del Agua.
+    - name: NOM_ACA_FITXER
+      description: Nombre del fichero remitido a la Agencia Catalana del Agua.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_municipi_sgab
+    description: "Maestro de municipios de SGAB. Granularidad: un registro por municipio."
+    columns:
+    - name: NUM_MUN_SGAB
+      description: Número de municipio de SGAB. Clave primaria.
+    - name: NOM_MUN_SGAB
+      description: Nombre del municipio de SGAB.
+    - name: QL_CRITERI_FACT
+      description: "Criterio de facturación."
+    - name: ID_MUN_CP_UNIC
+      description: Código postal único del municipio.
+    - name: CP_PROVINCIA
+      description: Código postal de la provincia.
+    - name: UNITAT_REPARTIMENT
+      description: Unitad de reparto.
+    - name: NUM_DTE_POST
+      description: Número de distrito postal.
+    - name: NUM_DEL_SGAB
+      description: Número de Número de Delegación de SGAB.
+    - name: NUM_AGENCIA_SGAB
+      description: Número de agencia de SGAB.
+    - name: ID_AREA_LECT
+      description: Identificador del área de lectura.
+    - name: ID_EMPRESA
+      description: Identificador de la empresa suministradora.
+    - name: DELEGA_CO
+      description: Código de delegación.
+    - name: QL_GEST_DTE
+      description: Gestión de calidad del distrito.
+    - name: ID_MUNI_ENT_MET
+      description: Indicador de Área Metropolitana de Barcelona.
+    - name: NOMB_DIES_ANS
+      description: Número de dias de antelación.
+    - name: MUNI_GENERALITAT
+      description: Municipio de la Generalitat.
+    - name: CODI_PROV
+      description: Código de la provincia.
+    - name: CODI_MUNI
+      description: Código del municipio de 4 dígitos, estándar de Explotación Operativa (SGAB).
+    - name: QL_TIPUS_VENDA
+      description: Calidad del tipo de venta.
+    - name: CODI_MUNICIPI
+      description: Código del municipio de 3 dígitos, estándar oficial (INE / Idescat).
+    - name: NOMB_DIES_INDEMN
+      description: Número de días que la empresa debe abonar o compensar al cliente en caso de cortes de servicio no programados que superen el límite legal establecido en el reglamento.
+    - name: NOMB_DIES_SENSE_AUT
+      description: Número de días sin autorización. Alude a los días en los que un suministro ha estado activo de manera irregular.
+    - name: ADHERIT_L24
+      description: Adherido a L24 (Ley 24/2015, de 29 de julio, de medidas urgentes para afrontar la emergencia en el ámbito de la vivienda y la pobreza energética).
+    - name: CARTA_CIRER
+      description: Carta CIRER. Es un modelo de carta de notificación de deuda, siendo la primera carta de aviso de impago que se envía al cliente tras vencer el recibo.
+    - name: NUM_CAIPS
+      description: Número de CAIPS.
+    - name: NUM_DIAS_ENV_CAIPS
+      description: Número de días de envío a CAIPS. Número de días de margen que el sistema espera desde que se genera la deuda (o desde la primera notificación) hasta que los datos se exportan y envían a la plataforma/proveedor CAIPS (módulo centralizado de gestión de impagos o centro de impresión que emite la notificación física de suspensión).
+    - name: CARTA_CIRER_2
+      description: Carta CIRER 2. Es un modelo de carta de notificación de deuda, siendo la segunda carta de aviso de impago (frecuentemente la carta certificada o burofax que sirve como preaviso legal obligatorio antes de interrumpir el servicio).
+    - name: NUM_DIAS_CIRER_2
+      description: Número de días de espera entre el primer y el segundo aviso de impago.
+    - name: NUM_DIAS_GENERA_CORTE
+      description: El plazo legal/operativo en días que debe transcurrir tras las cartas de aviso para que el sistema genere automáticamente la orden física de corte de suministro (suspensión por impago).
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_padro_tamgrem
+    description: 'Histórico del padrón TAMGREM para actividades económicas sujetas a la tasa, incluyendo cuota, superficie
+      y bonificaciones. Granularidad: una versión del padrón por póliza de suministro y marca temporal.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: TS_PADRO_TAMGREM
+      description: Marca temporal que identifica la versión del padrón TAMGREM. Forma parte de la clave primaria.
+    - name: TIP_TAXA_TAMGREM
+      description: Tipo de tasa TAMGREM aplicable al suministro.
+    - name: NOMB_HABIT_SUBM
+      description: Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas.
+    - name: CONSUM_MES_BASE
+      description: Consumo mensual de referencia utilizado en el padrón o cálculo de la tasa.
+    - name: TIP_QUOTA_TAMGREM
+      description: Tipo de cuota TAMGREM aplicable a la actividad o padrón.
+    - name: CONSUM_MIG_DIA
+      description: Consumo medio diario de referencia.
+    - name: NUMERO_EMPLEAT
+      description: Número de empleado que registró o gestionó el padrón.
+    - name: SECCIO
+      description: Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de una clave foránea hacia l4_epigraf_iae.SECCIO.
+    - name: EPIGRAF_IAE
+      description: Código del epígrafe IAE que identifica la actividad económica. Forma parte de una clave foránea hacia l4_epigraf_iae.EPIGRAF_IAE.
+    - name: PERC_BONIF_TAMGREM
+      description: Porcentaje de bonificación aplicado a TAMGREM.
+    - name: IMP_CUOTA
+      description: Importe de cuota calculado o asignado al padrón.
+    - name: SUPERFICIE_REAL
+      description: Superficie real del establecimiento, en la unidad utilizada por la tasa.
+    - name: SUPERFICIE_POND
+      description: Superficie ponderada utilizada para calcular la cuota.
+    - name: NIV_GEN_RES
+      description: Nivel de generación de residuos asignado a la actividad.
+    - name: COD_GEN_RES
+      description: Código de categoría de generación de residuos.
+    - name: ORIGEN
+      description: Origen funcional o procedimiento de alta del registro en el padrón.
+    - name: ID_BONIF_DECGER
+      description: Indicador de bonificación vinculada a la declaración o gestión de residuos.
+    - name: ID_LIMIT
+      description: Indicador de aplicación de límites en el cálculo de la cuota.
+    - name: SUBTIP_TAXA_TAMGREM
+      description: Subtipo de tasa TAMGREM aplicable.
+    - name: OBSERVACIONS
+      description: Observaciones funcionales asociadas al registro.
+    - name: TS_ALTA
+      description: Marca temporal de alta efectiva del registro.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_padro_trr
+    description: 'Histórico del padrón de la tasa de recogida o tratamiento de residuos (TRR) aplicable a cada suministro.
+      Granularidad: una versión del padrón por póliza de suministro y marca temporal.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: TS_PADRO_TRR
+      description: Marca temporal que identifica la versión del padrón TRR. Forma parte de la clave primaria.
+    - name: TIP_TAXA_TRR
+      description: Tipo de tasa TRR aplicable al suministro.
+    - name: NOMB_HABIT_SUBM
+      description: Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas.
+    - name: CONSUM_MES_BASE
+      description: Consumo mensual de referencia utilizado en el padrón o cálculo de la tasa.
+    - name: TIP_QUOTA_TRR
+      description: Tipo de cuota TRR asignada al suministro.
+    - name: CONSUM_MIG_DIA
+      description: Consumo medio diario de referencia.
+    - name: NUMERO_EMPLEAT
+      description: Número de empleado que registró o gestionó el padrón.
+    - name: SECCIO
+      description: Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de una clave foránea hacia l4_epigraf_iae.SECCIO.
+    - name: EPIGRAF_IAE
+      description: Código del epígrafe IAE que identifica la actividad económica. Forma parte de una clave foránea hacia l4_epigraf_iae.EPIGRAF_IAE.
+    - name: PERC_BONIF_TRR
+      description: Porcentaje de bonificación aplicado a la cuota TRR.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_ramal
+    description: 'Maestro de ramales o acometidas que conectan la red con una finca y sirven de soporte técnico a uno o varios
+      suministros. Granularidad: un registro por póliza de ramal.'
+    columns:
+    - name: POLISSA_RAMAL
+      description: Identificador de la póliza de ramal o acometida. Forma parte de la clave primaria.
+    - name: DVER_POLISSA_RAMAL
+      description: Dígitos o valor de verificación de la póliza de ramal.
+    - name: SIT_RAMAL
+      description: Situación operativa del ramal, por ejemplo activo o de baja.
+    - name: TIP_OPER_RAMAL
+      description: Tipo de operación o modalidad técnica del ramal.
+    - name: US_RAMAL
+      description: Uso principal asignado al ramal.
+    - name: MATERIAL_RAMAL
+      description: Material de fabricación del ramal.
+    - name: DATA_INST_RAMAL
+      description: Fecha de instalación o puesta en servicio del ramal.
+    - name: DIAMETRE_RAMAL
+      description: Diámetro nominal del ramal.
+    - name: SIT_CLAU_PAS
+      description: Situación o disponibilidad de la llave de paso del ramal.
+    - name: DATA_SIG_CTE_RAMAL
+      description: Fecha efectiva desde la que aplican las características técnicas actuales del ramal.
+    - name: TIP_SUBM_CTE_RAMAL
+      description: Tipo de suministro considerado en la configuración técnica vigente del ramal.
+    - name: NOMB_JOC_CLAUS_CTE
+      description: Número de juegos de llaves asociados a la configuración vigente.
+    - name: DATA_PART_INST_RAM
+      description: Fecha del parte de instalación del ramal.
+    - name: NUM_PART_INST_RAM
+      description: Número identificador del parte de instalación.
+    - name: QL_ARQUETA_ARMARI
+      description: Indicador de ubicación del conjunto en arqueta o armario.
+    - name: ESTAT_ARQUETA_ARM
+      description: Estado de conservación de la arqueta o armario.
+    - name: ID_CIR_RECUP_AIGUA
+      description: Indicador de circuito de recuperación o reutilización de agua.
+    - name: NUM_SOL_LIC_AFEC
+      description: Número de solicitud o licencia relacionada con una afección del ramal.
+    - name: DATA_SOL_BAIXA_RAM
+      description: Fecha de solicitud de baja del ramal.
+    - name: DNI_NIF_CLIENT
+      description: Documento identificativo fiscal del cliente o titular.
+    - name: NUM_MUN_SGAB
+      description: Código interno del municipio en SGAB. Forma parte de una clave foránea hacia l4_finca.NUM_MUN_SGAB.
+    - name: NUM_CARRER
+      description: Número interno que identifica la vía dentro del municipio. Forma parte de una clave foránea hacia l4_finca.NUM_CARRER.
+    - name: NUM_INI_FINCA
+      description: Número inicial del rango postal que identifica la finca. Forma parte de una clave foránea hacia l4_finca.NUM_INI_FINCA.
+    - name: COMP_NUM_INI_FINCA
+      description: Complemento al número inicial de finca, como letra o sufijo. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_INI_FINCA.
+    - name: NUM_FIN_FINCA
+      description: Número final del rango postal de la finca. Forma parte de una clave foránea hacia l4_finca.NUM_FIN_FINCA.
+    - name: COMP_NUM_FIN_FINCA
+      description: Complemento al número final de finca. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_FIN_FINCA.
+    - name: SIT_FINCA_ESPEC
+      description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de
+        una clave foránea hacia l4_finca.SIT_FINCA_ESPEC.
+    - name: ORD_FINCA_ESPEC
+      description: Ordinal que distingue fincas especiales con igual dirección base. Forma parte de una clave foránea hacia
+        l4_finca.ORD_FINCA_ESPEC.
+    - name: NUM_ORD_RAMAL
+      description: Número ordinal del ramal dentro de la finca.
+    - name: POLISSA_RAMAL_AFEC
+      description: Póliza de otro ramal relacionado o afectado por la operación.
+    - name: DNI_NIF_CLIENT_ORI
+      description: Documento fiscal del cliente originario asociado al ramal.
+    - name: OBS_PRESA_RAMAL
+      description: Observaciones sobre la toma o conexión del ramal.
+    - name: RAMAL_CO
+      description: Código complementario o identificador corporativo del ramal.
+    - name: QL_TIPUS_DADES_C
+      description: Indicador del tipo o calidad de los datos complementarios del ramal.
+    - name: QL_ANOT
+      description: Indicador de existencia o tratamiento de anotaciones.
+    - name: SECCIO_CENSAL
+      description: Código de sección censal de la ubicación del ramal.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_servei_eq_ci
+    description: 'Inventario actual de equipos de protección contra incendios asociados a un suministro CI. Granularidad:
+      un registro por póliza de suministro contra incendios.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: NOMB_BOQUES_25
+      description: Número de bocas contra incendios de 25 mm instaladas.
+    - name: NOMB_BOQUES_45
+      description: Número de bocas contra incendios de 45 mm instaladas.
+    - name: NOMB_BOQUES_70
+      description: Número de bocas contra incendios de 70 mm instaladas.
+    - name: NOMB_BOQUES_100
+      description: Número de bocas contra incendios de 100 mm instaladas.
+    - name: NOMB_SPRINCKLERS
+      description: Número de sprinklers instalados.
+    - name: NUM_PRECINTE_BOCA
+      description: Número o referencia del precinto de la boca contra incendios.
+    - name: ID_GRUP_ELEV_EQ_CI
+      description: Identificador del grupo de elevación asociado al equipo CI.
+    - name: ID_VALVULA_MOTOR
+      description: Identificador de la válvula motorizada del sistema CI.
+    - name: TIP_PETIC_RES
+      description: Tipo de petición o resolución asociada al servicio CI.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_servei_facturar
+    description: 'Calendario de servicios contra incendios a facturar, con cantidades de bocas y sprinklers aplicables al
+      periodo. Granularidad: un registro por póliza de suministro CI y fecha final de facturación.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: DATA_FIN_FACT
+      description: Fecha final incluida en el periodo de facturación. Forma parte de la clave primaria.
+    - name: CALCUL_CONSUM_SERV
+      description: Método de cálculo del servicio; en el piloto identifica facturación CI sin lectura de contador.
+    - name: DIES_CONSUM_SERV
+      description: Número de días incluidos en el periodo facturable.
+    - name: NOMB_BOQ_25_SERV
+      description: Número de bocas de 25 mm facturadas en el periodo.
+    - name: NOMB_BOQ_45_SERV
+      description: Número de bocas de 45 mm facturadas en el periodo.
+    - name: NOMB_BOQ_70_SERV
+      description: Número de bocas de 70 mm facturadas en el periodo.
+    - name: NOMB_BOQ_100_SERV
+      description: Número de bocas de 100 mm facturadas en el periodo.
+    - name: NOMB_SPRINCK_SERV
+      description: Número de sprinklers facturados en el periodo.
+    - name: ID_BUTLLETA
+      description: Identificador de la boleta o documento operativo que origina la facturación.
+    - name: ID_LOT_LECT
+      description: Identificador del lote de lectura.
+    - name: ANY_CALENDARI
+      description: Año del calendario de facturación, expresado con dos dígitos.
+    - name: MES_CALENDARI
+      description: Mes del calendario de facturación, expresado con dos dígitos.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_situacio_fact
+    description: 'Histórico de transiciones de estado de una factura. Granularidad: un evento de situación por partición,
+      factura y marca temporal del cambio.'
+    columns:
+    - name: NUM_PARTICIO
+      description: Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria.    
+    - name: ID_EMPRESA
+      description: Código de la empresa emisora o suministradora. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_fact_resum.ID_EMPRESA.
+    - name: ANY_FACTURA
+      description: Año de emisión que forma parte de la identificación de la factura. Forma parte de la clave primaria. Forma
+        parte de una clave foránea hacia l4_fact_resum.ANY_FACTURA.
+    - name: NUM_FACTURA
+      description: Número secuencial de la factura dentro de la empresa y año. Forma parte de la clave primaria. Forma parte
+        de una clave foránea hacia l4_fact_resum.NUM_FACTURA.
+    - name: MOM_SIT_FACT
+      description: Fecha y hora en que la factura alcanzó la situación registrada. Forma parte de la clave primaria.
+    - name: TIP_SIT_FACT
+      description: Código de situación de factura; debe existir en L4_CODIFICACIONS para la familia R01.
+    - name: CAUSA_SIT_FACT
+      description: Código de causa que explica el cambio de situación de la factura.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_submin_iae
+    description: 'Relación entre un suministro y las actividades económicas declaradas para el mismo. Granularidad: un registro
+      por combinación de póliza de suministro, sección y epígrafe IAE.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria. Forma parte de una clave
+        foránea hacia l4_submin_servei.POLISSA_SUBM.
+    - name: SECCIO
+      description: Sección de actividad económica que agrupa el epígrafe IAE. Forma parte de la clave primaria. Forma parte
+        de una clave foránea hacia l4_epigraf_iae.SECCIO.
+    - name: EPIGRAF_IAE
+      description: Código del epígrafe IAE que identifica la actividad económica. Forma parte de la clave primaria. Forma
+        parte de una clave foránea hacia l4_epigraf_iae.EPIGRAF_IAE.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_submin_servei
+    description: 'Maestro de contratos de suministro y servicios asociados, con vigencia, tipología, titular, cobro y atributos
+      sociales. Granularidad: un registro por póliza de suministro.'
+    columns:
+    - name: POLISSA_SUBM
+      description: Identificador único de la póliza de suministro. Forma parte de la clave primaria.
+    - name: DVER_POLISSA_SUBM
+      description: Dígitos o valor de verificación de la póliza de suministro.
+    - name: TIP_SUBM_SERV
+      description: 'Tipo de suministro o servicio: D doméstico, I industrial y C contra incendios en el piloto.'
+    - name: SIT_SUBM_SERV
+      description: Situación del suministro, utilizada para distinguir contratos activos y dados de baja.
+    - name: DATA_CTE_SUBM_SERV
+      description: Fecha efectiva de las características contractuales actuales del suministro.
+    - name: DATA_ALT_SUBM_SERV
+      description: Fecha de alta del suministro; limita el inicio de los periodos facturables.
+    - name: DATA_RES_SUBM_SERV
+      description: Fecha de resolución o baja; limita el final de los periodos facturables.
+    - name: IMP_FIANSA
+      description: Importe de la fianza constituida para el suministro.
+    - name: SIT_FIANSA
+      description: Situación administrativa de la fianza.
+    - name: DATA_ULTIMA_FACT
+      description: Fecha final de la última factura conocida para el suministro.
+    - name: QL_IDIOMA
+      description: Código o indicador del idioma preferente de comunicación y facturación.
+    - name: ID_PAGA_IVA
+      description: Indicador de si el suministro está sujeto al pago de IVA.
+    - name: US_AIGUA_SUBM
+      description: Código de uso del agua asociado al suministro.
+    - name: NOMB_HABIT_SUBM
+      description: Número de habitantes asociado al suministro, relevante para tramos y bonificaciones domésticas.
+    - name: TIP_HABIT_SUBM
+      description: Tipo o categoría de vivienda del suministro.
+    - name: TIP_TAXA_TRR
+      description: Tipo de tasa TRR aplicable al suministro.
+    - name: POLISSA_RAMAL
+      description: Identificador de la póliza de ramal o acometida. Forma parte de una clave foránea hacia l4_ramal.POLISSA_RAMAL.
+    - name: PIS_PORTA_DESTI
+      description: Identificación de piso, puerta o unidad concreta del punto de suministro.
+    - name: DNI_NIF_CLIENT
+      description: Documento identificativo fiscal del cliente o titular.
+    - name: NUM_ENTITAT_COBRA
+      description: Código de la entidad bancaria utilizada para el cobro.
+    - name: NUM_AGENCIA_APART
+      description: Código de la oficina o agencia bancaria.
+    - name: NUM_COMPTE_DEPEND
+      description: Número de cuenta bancaria dependiente en formato nacional legado.
+    - name: NOM_TITULAR_COMPTE
+      description: Nombre del titular de la cuenta bancaria.
+    - name: ID_QUOTA_SOCIAL
+      description: Indicador de aplicación de cuota social.
+    - name: ID_TARIFA_SOCIAL
+      description: Indicador de aplicación de tarifa social.
+    - name: IND_SERVEI_SOCIAL
+      description: Indicador de intervención o reconocimiento por servicios sociales.
+    - name: IND_POB_ENERG
+      description: Indicador de situación de pobreza energética.
+    - name: NOM_COMERCIAL
+      description: Nombre comercial del titular o establecimiento.
+    - name: TIP_FACT_ENV
+      description: Modalidad o formato de envío de la factura.
+    - name: CODI_PAIS
+      description: Código del país asociado a la cuenta o titular.
+    - name: NUM_COMPTE_IBAN
+      description: Número de cuenta bancaria en formato IBAN.
+    - name: IND_OKUPA
+      description: Indicador de ocupación irregular asociado al suministro.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_fact_regul
+    description: "Histórico de facturas relativas a regularizaciones de consumo en una factura. Registra las regularizaciones de consumo aplicadas cuando existe una incidencia (lectura estimada corregida, cambio de tarifa a mitad de periodo, etc.). Granularidad: un registro por factura y fecha final del periodo de incidencia."
+    columns:
+    - name: NUM_PARTICIO
+      description: Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria.          
+    - name: ID_EMPRESA
+      description: Código de la empresa emisora o suministradora. Forma parte de la clave primaria.
+    - name: ANY_FACTURA
+      description: Año de emisión de la factura. Forma parte de la clave primaria.
+    - name: NUM_FACTURA
+      description: Número secuencial de la factura. Forma parte de la clave primaria.
+    - name: DATA_FIN_PER_INCID
+      description: Fecha final del periodo afectado por la incidencia que origina la regularización. Forma parte de la clave primaria.
+    - name: M3_BLOC1_RG
+      description: Volumen de agua, en m³, asignado al bloque tarifario 1 de la regularización.
+    - name: PREU_M3_BLOC1_RG
+      description: Precio unitario por m³ aplicado al bloque tarifario 1 en la regularización.
+    - name: IMP_BLOC1_RG
+      description: Importe calculado para el bloque tarifario 1 de la regularización.
+    - name: M3_BLOC2_RG
+      description: Volumen de agua, en m³, asignado al bloque tarifario 2 de la regularización.
+    - name: PREU_M3_BLOC2_RG
+      description: Precio unitario por m³ aplicado al bloque tarifario 2 en la regularización.
+    - name: IMP_BLOC2_RG
+      description: Importe calculado para el bloque tarifario 2 de la regularización.
+    - name: M3_BLOC3_RG
+      description: Volumen de agua, en m³, asignado al bloque tarifario 3 de la regularización.
+    - name: PREU_M3_BLOC3_RG
+      description: Precio unitario por m³ aplicado al bloque tarifario 3 en la regularización.
+    - name: IMP_BLOC3_RG
+      description: Importe calculado para el bloque tarifario 3 de la regularización.
+    - name: TIP_CT_XBASICA_RG
+      description: Tipo de cálculo del concepto de cuota o canon de tarifa básica en la regularización.
+    - name: BASE_CT_XBASICA_RG
+      description: Base de cálculo del concepto de cuota o canon de tarifa básica en la regularización.
+    - name: PREU_CT_XBASICA_RG
+      description: Precio unitario del concepto de cuota o canon de tarifa básica en la regularización.
+    - name: IMP_CT_XBASICA_RG
+      description: Importe del concepto de cuota o canon de tarifa básica en la regularización.
+    - name: TIP_TCG_SUBM_RG
+      description: Tipo de cálculo del concepto de tarifa o canon general del suministro en la regularización.
+    - name: BASE_TCG_SUBM_RG
+      description: Base de cálculo del concepto de tarifa o canon general del suministro en la regularización.
+    - name: PREU_TCG_SUBM_RG
+      description: Precio unitario del concepto de tarifa o canon general del suministro en la regularización.
+    - name: IMP_TCG_SUBM_RG
+      description: Importe del concepto de tarifa o canon general del suministro en la regularización.
+    - name: BASE_CTG_SUBM_RG
+      description: Base monetaria del canon o tasa general del suministro regularizada.
+    - name: PERCEN_CTG_SUBM_RG
+      description: Porcentaje aplicado al canon o tasa general del suministro regularizada.
+    - name: IMP_CTG_SUBM_RG
+      description: Importe resultante del canon o tasa general del suministro regularizada.
+    - name: IMP_CAN_BAELLS_RG
+      description: Importe regularizado del componente histórico vinculado al canon de Baells.
+    - name: IMP_CAN_TER_RG
+      description: Importe regularizado del componente histórico vinculado al canon del Ter.
+    - name: IMP_PRODUC_BRUT_RG
+      description: Importe regularizado asociado a producción bruta.
+    - name: TIP_CLAVAG_RG
+      description: Tipo de cálculo del concepto de alcantarillado en la regularización.
+    - name: BASE_CLAVAG_RG
+      description: Base de cálculo del concepto de alcantarillado en la regularización.
+    - name: PREU_CLAVAG_RG
+      description: Precio unitario del concepto de alcantarillado en la regularización.
+    - name: IMP_CLAVAG_RG
+      description: Importe del concepto de alcantarillado en la regularización.
+    - name: TIP_SANEJA_RG
+      description: Tipo de cálculo del concepto de saneamiento en la regularización.
+    - name: BASE_SANEJA_RG
+      description: Base de cálculo del concepto de saneamiento en la regularización.
+    - name: PREU_SANEJA_RG
+      description: Precio unitario del concepto de saneamiento en la regularización.
+    - name: IMP_SANEJA_RG
+      description: Importe del concepto de saneamiento en la regularización.
+    - name: TIP_ERSU_RG
+      description: Tipo de cálculo del concepto de residuos urbanos en la regularización.
+    - name: BASE_ERSU_RG
+      description: Base de cálculo del concepto de residuos urbanos en la regularización.
+    - name: PREU_ERSU_RG
+      description: Precio unitario del concepto de residuos urbanos en la regularización.
+    - name: IMP_ERSU_RG
+      description: Importe del concepto de residuos urbanos en la regularización.
+    - name: TIP_CIH_RG
+      description: Tipo de cálculo del canon o componente de infraestructura hidráulica aplicado en la regularización.
+    - name: BASE_CIH_BLOC1_RG
+      description: Base de cálculo del CIH para el bloque 1 en la regularización.
+    - name: PREU_CIH_BLOC1_RG
+      description: Precio unitario del CIH para el bloque 1 en la regularización.
+    - name: IMP_CIH_BLOC1_RG
+      description: Importe del CIH para el bloque 1 en la regularización.
+    - name: BASE_CIH_BLOC2_RG
+      description: Base de cálculo del CIH para el bloque 2 en la regularización.
+    - name: PREU_CIH_BLOC2_RG
+      description: Precio unitario del CIH para el bloque 2 en la regularización.
+    - name: IMP_CIH_BLOC2_RG
+      description: Importe del CIH para el bloque 2 en la regularización.
+    - name: BASE_CIH_BLOC3_RG
+      description: Base de cálculo del CIH para el bloque 3 en la regularización.
+    - name: PREU_CIH_BLOC3_RG
+      description: Precio unitario del CIH para el bloque 3 en la regularización.
+    - name: IMP_CIH_BLOC3_RG
+      description: Importe del CIH para el bloque 3 en la regularización.
+    - name: TIP_CAI_RG
+      description: Tipo de canon del agua aplicado en la regularización.
+    - name: BASE_CAI_T1_RG
+      description: Base de cálculo del canon del agua, tramo 1, en la regularización.
+    - name: PREU_CAI_T1_RG
+      description: Precio unitario del canon del agua, tramo 1, en la regularización.
+    - name: IMP_CAI_T1_RG
+      description: Importe del canon del agua, tramo 1, en la regularización.
+    - name: BASE_CAI_T2_RG
+      description: Base de cálculo del canon del agua, tramo 2, en la regularización.
+    - name: PREU_CAI_T2_RG
+      description: Precio unitario del canon del agua, tramo 2, en la regularización.
+    - name: IMP_CAI_T2_RG
+      description: Importe del canon del agua, tramo 2, en la regularización.
+    - name: COEF_CAI_RG
+      description: Coeficiente aplicado al canon del agua en la regularización.
+    - name: BASE_CLA_T2_RG
+      description: Base de cálculo del alcantarillado, tramo 2, en la regularización.
+    - name: PREU_CLA_T2_RG
+      description: Precio unitario del alcantarillado, tramo 2, en la regularización.
+    - name: IMP_CLA_T2_RG
+      description: Importe del alcantarillado, tramo 2, en la regularización.
+    - name: BASE_CAI_T3_RG
+      description: Base de cálculo del canon del agua, tramo 3, en la regularización.
+    - name: PREU_CAI_T3_RG
+      description: Precio unitario del canon del agua, tramo 3, en la regularización.
+    - name: IMP_CAI_T3_RG
+      description: Importe del canon del agua, tramo 3, en la regularización.
+    - name: BASE_CAI_T4_RG
+      description: Base de cálculo del canon del agua, tramo 4, en la regularización.
+    - name: PREU_CAI_T4_RG
+      description: Precio unitario del canon del agua, tramo 4, en la regularización.
+    - name: IMP_CAI_T4_RG
+      description: Importe del canon del agua, tramo 4, en la regularización.
+    - name: M3_BLOC4_RG
+      description: Volumen de agua, en m³, asignado al bloque tarifario 4 de la regularización.
+    - name: PREU_M3_BLOC4_RG
+      description: Precio unitario por m³ aplicado al bloque tarifario 4 en la regularización.
+    - name: IMP_BLOC4_RG
+      description: Importe calculado para el bloque tarifario 4 de la regularización.
+    - name: M3_BLOC5_RG
+      description: Volumen de agua, en m³, asignado al bloque tarifario 5 de la regularización.
+    - name: PREU_M3_BLOC5_RG
+      description: Precio unitario por m³ aplicado al bloque tarifario 5 en la regularización.
+    - name: IMP_BLOC5_RG
+      description: Importe calculado para el bloque tarifario 5 de la regularización.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_fact_recup
+    description: "Histórico de facturas relativas a recuperaciones de precios (agua o tasas). Registra recuperaciones de importes por cambio retroactivo de precios (agua, canon, tasas) sobre una factura ya emitida. Granularidad: un registro por factura."
+    columns:
+    - name: NUM_PARTICIO
+      description: Número de partición técnica utilizado para distribuir o localizar físicamente la factura. Forma parte de la clave primaria.
+    - name: ID_EMPRESA
+      description: Código de la empresa emisora o suministradora. Forma parte de la clave primaria.
+    - name: ANY_FACTURA
+      description: Año de emisión de la factura. Forma parte de la clave primaria.
+    - name: NUM_FACTURA
+      description: Número secuencial de la factura. Forma parte de la clave primaria.
+    - name: IMP_QTA_SERV_RC
+      description: Importe de cuota de servicio incluido en la recuperación.
+    - name: M3_BLOC1_RC
+      description: Volumen de agua, en m³, asignado al bloque tarifario 1 de la recuperación.
+    - name: PREU_M3_BLOC1_RC
+      description: Precio unitario por m³ aplicado al bloque tarifario 1 en la recuperación.
+    - name: IMP_BLOC1_RC
+      description: Importe calculado para el bloque tarifario 1 de la recuperación.
+    - name: M3_BLOC2_RC
+      description: Volumen de agua, en m³, asignado al bloque tarifario 2 de la recuperación.
+    - name: PREU_M3_BLOC2_RC
+      description: Precio unitario por m³ aplicado al bloque tarifario 2 en la recuperación.
+    - name: IMP_BLOC2_RC
+      description: Importe calculado para el bloque tarifario 2 de la recuperación.
+    - name: M3_BLOC3_RC
+      description: Volumen de agua, en m³, asignado al bloque tarifario 3 de la recuperación.
+    - name: PREU_M3_BLOC3_RC
+      description: Precio unitario por m³ aplicado al bloque tarifario 3 en la recuperación.
+    - name: IMP_BLOC3_RC
+      description: Importe calculado para el bloque tarifario 3 de la recuperación.
+    - name: BASE_CT_XBASICA_RC
+      description: Base de cálculo del concepto de cuota o canon de tarifa básica en la recuperación.
+    - name: PREU_CT_XBASICA_RC
+      description: Precio unitario del concepto de cuota o canon de tarifa básica en la recuperación.
+    - name: IMP_CT_XBASICA_RC
+      description: Importe del concepto de cuota o canon de tarifa básica en la recuperación.
+    - name: BASE_TCG_SUBM_RC
+      description: Base de cálculo del concepto de tarifa o canon general del suministro en la recuperación.
+    - name: PREU_TCG_SUBM_RC
+      description: Precio unitario del concepto de tarifa o canon general del suministro en la recuperación.
+    - name: IMP_TCG_SUBM_RC
+      description: Importe del concepto de tarifa o canon general del suministro en la recuperación.
+    - name: BASE_CLAVAG_RC
+      description: Base de cálculo del concepto de alcantarillado en la recuperación.
+    - name: PREU_CLAVAG_RC
+      description: Precio unitario del concepto de alcantarillado en la recuperación.
+    - name: IMP_CLAVAG_RC
+      description: Importe del concepto de alcantarillado en la recuperación.
+    - name: BASE_SANEJA_RC
+      description: Base de cálculo del concepto de saneamiento en la recuperación.
+    - name: PREU_SANEJA_RC
+      description: Precio unitario del concepto de saneamiento en la recuperación.
+    - name: IMP_SANEJA_RC
+      description: Importe del concepto de saneamiento en la recuperación.
+    - name: BASE_ERSU_RC
+      description: Base de cálculo del concepto de residuos urbanos en la recuperación.
+    - name: PREU_ERSU_RC
+      description: Precio unitario del concepto de residuos urbanos en la recuperación.
+    - name: IMP_ERSU_RC
+      description: Importe del concepto de residuos urbanos en la recuperación.
+    - name: BASE_CIH_BLOC1_RC
+      description: Base de cálculo del CIH para el bloque 1 en la recuperación.
+    - name: PREU_CIH_BLOC1_RC
+      description: Precio unitario del CIH para el bloque 1 en la recuperación.
+    - name: IMP_CIH_BLOC1_RC
+      description: Importe del CIH para el bloque 1 en la recuperación.
+    - name: BASE_CIH_BLOC2_RC
+      description: Base de cálculo del CIH para el bloque 2 en la recuperación.
+    - name: PREU_CIH_BLOC2_RC
+      description: Precio unitario del CIH para el bloque 2 en la recuperación.
+    - name: IMP_CIH_BLOC2_RC
+      description: Importe del CIH para el bloque 2 en la recuperación.
+    - name: BASE_CIH_BLOC3_RC
+      description: Base de cálculo del CIH para el bloque 3 en la recuperación.
+    - name: PREU_CIH_BLOC3_RC
+      description: Precio unitario del CIH para el bloque 3 en la recuperación.
+    - name: IMP_CIH_BLOC3_RC
+      description: Importe del CIH para el bloque 3 en la recuperación.
+    - name: IMP_BONIF_QTA_RC
+      description: Importe de bonificación de cuota incluido en la recuperación.
+    - name: BASE_CAI_T1_RC
+      description: Base de cálculo del canon del agua, tramo 1, en la recuperación.
+    - name: PREU_CAI_T1_RC
+      description: Precio unitario del canon del agua, tramo 1, en la recuperación.
+    - name: IMP_CAI_T1_RC
+      description: Importe del canon del agua, tramo 1, en la recuperación.
+    - name: BASE_CAI_T2_RC
+      description: Base de cálculo del canon del agua, tramo 2, en la recuperación.
+    - name: PREU_CAI_T2_RC
+      description: Precio unitario del canon del agua, tramo 2, en la recuperación.
+    - name: IMP_CAI_T2_RC
+      description: Importe del canon del agua, tramo 2, en la recuperación.
+    - name: BASE_CLA_T2_RC
+      description: Base de cálculo del alcantarillado, tramo 2, en la recuperación.
+    - name: PREU_CLA_T2_RC
+      description: Precio unitario del alcantarillado, tramo 2, en la recuperación.
+    - name: IMP_CLA_T2_RC
+      description: Importe del alcantarillado, tramo 2, en la recuperación.
+    - name: BASE_CAI_T3_RC
+      description: Base de cálculo del canon del agua, tramo 3, en la recuperación.
+    - name: PREU_CAI_T3_RC
+      description: Precio unitario del canon del agua, tramo 3, en la recuperación.
+    - name: IMP_CAI_T3_RC
+      description: Importe del canon del agua, tramo 3, en la recuperación.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.
+  - name: raw_tarifa_facturacio
+    description: "Maestro auxiliar de tarifas de facturación."
+    columns:
+    - name: TIP_TARIFA
+      description: Tipo de tarifa.
+    - name: SUBTIP_TARIFA
+      description: Subtipo de tarifa.
+    - name: DATA_INI_VIGENCIA
+      description: Fecha de inicio de vigencia.
+    - name: DATA_FI_VIGENCIA
+      description: Fecha de fin de vigencia.
+    - name: ORDRE
+      description: Orden.
+    - name: VALOR_NUMERIC
+      description: Valor numérico.
+    - name: UNITAT
+      description: Unidad.
+    - name: OBSERVACIONS
+      description: Observaciones.
+    - name: FECHA_EXTRACCION
+      description: Fecha de extracción del registro en RAW.
+    - name: SISTEMA_ORIGEN
+      description: Sistema de origen del registro RAW.

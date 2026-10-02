@@ -315,26 +315,49 @@ models:
         arguments:
           to: '{{ ref(''g_d_geografia'') }}'
           field: HK_GEOGRAFIA
-  - name: TIP_SUBM_SERV
+  - name: COD_TIPO_SUMINISTRO_ACTUAL
     data_type: varchar(1)
-    description: 'Tipo actual del suministro: D doméstico, I industrial o C contra incendios.'
+    description: 'Código del tipo actual de suministro: D, I, C o ?.'
     tests:
+    - not_null    
     - accepted_values:
         arguments:
           values:
-          - D
-          - I
-          - C
-          - DESCONOCIDO
+          - 'D'
+          - 'I'
+          - 'C'
+          - '?'    
+  - name: DES_TIPO_SUMINISTRO_ACTUAL
+    data_type: varchar(50)
+    description: Descripción completa del tipo actual de suministro.
+  - name: DES_ABREV_TIPO_SUMINISTRO_ACTUAL
+    data_type: varchar(20)
+    description: Descripción abreviada del tipo actual de suministro.
   - name: SIT_SUBM_SERV
     data_type: varchar(1)
     description: Situación operativa actual del suministro.
-  - name: US_AIGUA_SUBM
+  - name: COD_TIPO_USO_AGUA_ACTUAL
     data_type: varchar(1)
-    description: Código actual de uso del agua del suministro.
-  - name: TIP_HABIT_SUBM
+    description: Código actual del tipo de uso de agua.
+    tests:
+    - not_null
+  - name: DES_TIPO_USO_AGUA_ACTUAL
+    data_type: varchar(50)
+    description: Descripción completa del tipo de uso de agua actual.
+  - name: DES_ABREV_TIPO_USO_AGUA_ACTUAL
+    data_type: varchar(20)
+    description: Descripción abreviada del tipo de uso de agua actual.
+  - name: COD_TIPO_VIVIENDA_ACTUAL
     data_type: varchar(1)
-    description: Tipo actual de vivienda asociado al suministro.
+    description: Código actual del tipo de vivienda.
+    tests:
+    - not_null
+  - name: DES_TIPO_VIVIENDA_ACTUAL
+    data_type: varchar(50)
+    description: Descripción completa del tipo de vivienda actual.
+  - name: DES_ABREV_TIPO_VIVIENDA_ACTUAL
+    data_type: varchar(20)
+    description: Descripción abreviada del tipo de vivienda actual.
   - name: NOMB_HABIT_SUBM
     data_type: number(3,0)
     description: Número actual de habitantes asociado al suministro.
@@ -397,18 +420,18 @@ models:
     - not_null
     - unique
   - name: COD_TIPO_SUMINISTRO
-    data_type: varchar
-    description: Código funcional del tipo de suministro.
+    data_type: varchar(1)
+    description: Código del tipo de suministro.
     tests:
     - not_null
     - unique
   - name: DES_TIPO_SUMINISTRO
-    data_type: varchar
+    data_type: varchar(50)
     description: Descripción completa del tipo de suministro.
     tests:
     - not_null
   - name: DES_ABREV_TIPO_SUMINISTRO
-    data_type: varchar
+    data_type: varchar(20)
     description: Descripción abreviada del tipo de suministro.
   - name: ID_CARGA
     data_type: number
@@ -614,9 +637,8 @@ models:
     tests:
     - not_null
 - name: g_d_concepto
-  description: 'Dimensión conformada de conceptos económicos de factura. Granularidad: una fila por CODIGO_CONCEPTO, más un miembro desconocido
-    estable. Unifica componentes verticalizados de agua, prefijados con AIGUA:, y conceptos explícitos, prefijados con CONCEPTE:. La clasificación
-    funcional procede de la seed g_s_concepto_clasificacion.'
+  description: 'Dimensión conformada de conceptos económicos procedente de S_CONCEPTO. Incluye conceptos F25 y conceptos sintéticos de agua. Granularidad:
+    una fila por HK_CONCEPTO, más un miembro desconocido.'
   config:
     materialized: table
     meta:
@@ -624,10 +646,9 @@ models:
       entity_type: dimension
       grain: una fila por concepto conformado
   columns:
-  - name: CODIGO_CONCEPTO
+  - name: NUM_CONCEPTO
     data_type: varchar(50)
-    description: Clave conformada del concepto. Usa AIGUA:<TIPUS_CONCEPTE> para componentes de L4_FACT_AIGUA y CONCEPTE:<NUM_CONCEPTE> para conceptos
-      explícitos.
+    description: Código unificado del concepto, procedente del catálogo F25 o del catálogo sintético de agua.
     tests:
     - not_null
     - unique
@@ -636,12 +657,12 @@ models:
     description: Código original del concepto antes de aplicar el prefijo conformado.
     tests:
     - not_null
-  - name: DESCRIPCION
+  - name: DESC_CONCEPTO
     data_type: varchar
     description: Descripción funcional completa del concepto.
     tests:
     - not_null
-  - name: DESCRIPCION_BREVE
+  - name: DESC_BREVE_CONCEPTO
     data_type: varchar
     description: Descripción breve utilizada en informes y segmentadores.
   - name: GRUPO_FUNCIONAL
@@ -681,7 +702,7 @@ models:
     - not_null
   - name: ORIGEN_CONCEPTO
     data_type: varchar(50)
-    description: 'Procedencia funcional original del concepto: L4_FACT_AIGUA, L4_FACT_CONCEPTE o GOLD para el miembro desconocido.'
+    description: Fuente funcional del concepto heredada de S_CONCEPTO.
     tests:
     - not_null
   - name: ID_CARGA
@@ -917,9 +938,21 @@ models:
   - name: HK_TIPO_USO_AGUA
     data_type: string
     description: Clave hash del uso del agua congelado en la factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_tipo_uso_agua'') }}'
+          field: HK_TIPO_USO_AGUA
   - name: HK_TIPO_VIVIENDA
     data_type: string
     description: Clave hash del tipo de vivienda congelado en la factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_tipo_vivienda'') }}'
+          field: HK_TIPO_VIVIENDA
   - name: NUM_PARTICIO
     data_type: number(2,0)
     description: Número de partición técnica. Primera columna de la clave natural.
@@ -992,20 +1025,21 @@ models:
   - name: DIES_FACTURATS
     data_type: number
     description: Número inclusivo de días facturados.
-  - name: TIP_SUBM_SERV_FACTURA
+  - name: COD_TIPO_SUMINISTRO_FACTURA
     data_type: varchar(1)
-    description: 'Tipo de suministro congelado en la factura: D, I o C.'
+    description: 'Tipo de suministro congelado en la factura: D, I, C o ?.'
     tests:
     - accepted_values:
         arguments:
           values:
-          - D
-          - I
-          - C
-  - name: US_AIGUA_SUBM_FACT
+          - 'D'
+          - 'I'
+          - 'C'
+          - '?'
+  - name: COD_TIPO_USO_AGUA_FACTURA
     data_type: varchar(1)
-    description: Uso del agua congelado en el momento de facturación.
-  - name: TIP_HABIT_SUBM_FA
+    description: Uso del agua congelado en la factura.
+  - name: COD_TIPO_VIVIENDA_FACTURA
     data_type: varchar(1)
     description: Tipo de vivienda congelado en la factura.
   - name: NOMB_HABIT_FACT
@@ -1017,7 +1051,7 @@ models:
   - name: TIP_DOMESTIC
     data_type: varchar(1)
     description: Subtipología doméstica aplicada.
-  - name: CONSUM_TOTAL_M3
+  - name: CONSUMO_TOTAL_M3
     data_type: number
     description: Consumo total en m3. Medida aditiva a grano factura-partición.
     tests:
@@ -1112,9 +1146,8 @@ models:
     tests:
     - not_null
 - name: g_h_factura_concepto
-  description: 'Hecho de líneas económicas de factura. Granularidad: una fila por componente económico normalizado, factura y partición. Incluye
-    componentes verticalizados de agua y conceptos explícitos. ORIGEN_CONCEPTO conserva la procedencia funcional L4, mientras TABLA_ORIGEN identifica
-    la fuente Silver inmediata.'
+  description: 'Hecho de líneas económicas normalizadas. Granularidad: una fila por HK_FACTURA_CONCEPTO. Se relaciona con G_D_CONCEPTO mediante
+    HK_CONCEPTO y con G_D_TIPO_SUMINISTRO mediante el tipo congelado de factura.'
   config:
     materialized: table
     meta:
@@ -1122,7 +1155,7 @@ models:
       entity_type: fact
       grain: una fila por componente economico normalizado de factura
   columns:
-  - name: HK_FACTURA_CONCEPTE
+  - name: HK_FACTURA_CONCEPTO
     data_type: string
     description: Clave hash única de la línea económica normalizada.
     tests:
@@ -1146,15 +1179,24 @@ models:
         arguments:
           to: '{{ ref(''g_d_suministro'') }}'
           field: HK_SUBMIN_SERVEI
-  - name: CODIGO_CONCEPTO
-    data_type: varchar(50)
-    description: 'Clave foránea conformada del concepto, con prefijo AIGUA: o CONCEPTE:.'
+  - name: HK_TIPO_SUMINISTRO
+    data_type: string
+    description: Clave del tipo de suministro congelado en factura.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''g_d_tipo_suministro'') }}'
+          field: HK_TIPO_SUMINISTRO
+  - name: HK_CONCEPTO
+    data_type: string
+    description: Clave del concepto unificado.
     tests:
     - not_null
     - relationships:
         arguments:
           to: '{{ ref(''g_d_concepto'') }}'
-          field: CODIGO_CONCEPTO
+          field: HK_CONCEPTO
   - name: ORIGEN_CONCEPTO
     data_type: varchar(50)
     description: 'Procedencia funcional original: L4_FACT_AIGUA o L4_FACT_CONCEPTE.'
@@ -1190,13 +1232,10 @@ models:
     description: Orden estable de la línea dentro de la factura.
     tests:
     - not_null
-  - name: TIPUS_CONCEPTE
-    data_type: varchar
-    description: Tipo analítico del componente.
-  - name: NUM_CONCEPTE
+  - name: NUM_CONCEPTO
     data_type: varchar(3)
     description: Código original del concepto explícito; es nulo para componentes derivados de agua.
-  - name: DESC_CONCEPTE
+  - name: DESC_CONCEPTO
     data_type: varchar
     description: Descripción funcional de la línea económica.
     tests:
@@ -1233,28 +1272,28 @@ models:
   - name: TIP_SUBM_SERV_FACTURA
     data_type: varchar(1)
     description: Tipo de suministro congelado en la factura.
-  - name: QUANTITAT
+  - name: CANTIDAD
     data_type: number
     description: Cantidad física o unidades asociadas al componente.
     config:
       meta:
         measure_type: additive_when_applicable
-  - name: UNITAT_MESURA
+  - name: UNIDAD_MEDIDA
     data_type: varchar
     description: Unidad de medida de QUANTITAT.
-  - name: BASE_CALCUL
+  - name: BASE_CALCULO
     data_type: number
     description: Base física o monetaria utilizada en el cálculo.
-  - name: TIP_TAXA
+  - name: TIPO_TASA
     data_type: varchar
     description: Tipo de tarifa, tasa o procedimiento de cálculo.
-  - name: PREU_UNITARI
+  - name: PRECIO_UNITARIO
     data_type: number
     description: Precio aplicado por unidad.
-  - name: PERCENTATGE
+  - name: PORCENTAJE
     data_type: number
     description: Porcentaje aplicado a la base.
-  - name: IMP_CONCEPTE
+  - name: IMP_CONCEPTO
     data_type: number(11,2)
     description: Importe monetario final de la línea. Medida aditiva principal del hecho.
     tests:
@@ -1263,7 +1302,7 @@ models:
       meta:
         measure_type: additive
         currency: EUR
-  - name: IVA_APLICAT
+  - name: IVA_APLICADO
     data_type: number
     description: Porcentaje de IVA asociado al componente.
   - name: ID_CARGA
@@ -1909,69 +1948,107 @@ models:
       lógico de la fuente o del proceso generador.
     tests:
     - not_null
-seeds:
-- name: g_s_concepto_clasificacion
-  description: 'Seed Gold que clasifica funcionalmente los conceptos empleados por g_d_concepto. Granularidad: una fila por CODIGO_CONCEPTO conformado.
-    Debe actualizarse cuando el test gold_fact_conceptos_sin_clasificar detecte un código nuevo.'
+- name: g_d_tipo_uso_agua
+  description: Dimensión de negocio para tipo uso agua. Una fila por HK_TIPO_USO_AGUA, más miembro desconocido.
+  config:
+    materialized: table
+    meta:
+      layer: gold_fact
+      entity_type: dimension
+      grain: una fila por tipo uso agua
   columns:
-  - name: CODIGO_CONCEPTO
-    data_type: varchar(50)
-    description: 'Clave conformada con prefijo AIGUA: o CONCEPTE:.'
+  - name: HK_TIPO_USO_AGUA
+    data_type: string
+    description: Clave hash del catálogo.
     tests:
     - not_null
     - unique
-  - name: CODIGO_ORIGEN
+  - name: COD_TIPO_USO_AGUA
+    data_type: varchar(1)
+    description: Código del catálogo.
+    tests:
+    - not_null
+    - unique
+  - name: DES_TIPO_USO_AGUA
+    data_type: varchar(50)
+    description: Descripción completa.
+    tests:
+    - not_null
+  - name: DES_ABREV_TIPO_USO_AGUA
+    data_type: varchar(20)
+    description: Descripción abreviada.
+  - name: ID_CARGA
+    data_type: number
+    description: ID de carga heredado de EDW_S_TIPO_USO_AGUA; -1 para desconocido.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción heredada; nula para desconocido.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha de carga Gold en Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
     data_type: varchar(30)
-    description: Código original sin prefijo.
+    description: Sistema de origen; GOLD_FACT para desconocido.
     tests:
     - not_null
-  - name: ORIGEN_CONCEPTO
+  - name: TABLA_ORIGEN
     data_type: varchar(50)
-    description: Procedencia funcional esperada.
+    description: EDW_S_TIPO_USO_AGUA para catálogo; G_D_TIPO_USO_AGUA para desconocido.
     tests:
     - not_null
-    - accepted_values:
-        arguments:
-          values:
-          - L4_FACT_AIGUA
-          - L4_FACT_CONCEPTE
-  - name: GRUPO_FUNCIONAL
-    data_type: varchar(50)
-    description: Grupo funcional utilizado en análisis.
-    tests:
-    - not_null
-  - name: ES_CONSUMO
-    data_type: boolean
-    description: Indicador de concepto de consumo.
-    tests:
-    - not_null
-  - name: ES_SERVICIO
-    data_type: boolean
-    description: Indicador de servicio.
-    tests:
-    - not_null
-  - name: ES_TRIBUTO
-    data_type: boolean
-    description: Indicador de tributo o tasa.
-    tests:
-    - not_null
-  - name: ES_BONIFICACION
-    data_type: boolean
-    description: Indicador de bonificación.
-    tests:
-    - not_null
-  - name: ES_IVA
-    data_type: boolean
-    description: Indicador de IVA.
-    tests:
-    - not_null
-  - name: ES_ADITIVO
-    data_type: boolean
-    description: Indicador de inclusión en el total aditivo.
-    tests:
-    - not_null
+- name: g_d_tipo_vivienda
+  description: Dimensión de negocio para tipo vivienda. Una fila por HK_TIPO_VIVIENDA, más miembro desconocido.
   config:
+    materialized: table
     meta:
       layer: gold_fact
-      entity_type: seed
-      grain: una fila por concepto conformado
+      entity_type: dimension
+      grain: una fila por tipo vivienda
+  columns:
+  - name: HK_TIPO_VIVIENDA
+    data_type: string
+    description: Clave hash del catálogo.
+    tests:
+    - not_null
+    - unique
+  - name: COD_TIPO_VIVIENDA
+    data_type: varchar(1)
+    description: Código del catálogo.
+    tests:
+    - not_null
+    - unique
+  - name: DES_TIPO_VIVIENDA
+    data_type: varchar(50)
+    description: Descripción completa.
+    tests:
+    - not_null
+  - name: DES_ABREV_TIPO_VIVIENDA
+    data_type: varchar(20)
+    description: Descripción abreviada.
+  - name: ID_CARGA
+    data_type: number
+    description: ID de carga heredado de EDW_S_TIPO_VIVIENDA; -1 para desconocido.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción heredada; nula para desconocido.
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha de carga Gold en Europe/Madrid.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen; GOLD_FACT para desconocido.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: EDW_S_TIPO_VIVIENDA para catálogo; G_D_TIPO_VIVIENDA para desconocido.
+    tests:
+    - not_null

@@ -1,0 +1,70 @@
+version: 2
+
+seeds:
+
+  - name: s_seed_conceptos_agua
+    description: >
+      Catálogo de conceptos sintéticos utilizados para representar
+      consumos de agua, cuotas, alcantarillado, saneamiento,
+      residuos, cánones hidráulicos e IVA generados a partir
+      de fact_aigua.
+
+    columns:
+
+      - name: NUM_CONCEPTO
+        description: Código funcional del concepto sintético.
+        tests:
+          - not_null
+          - unique
+
+      - name: DESC_CONCEPTO
+        description: Descripción larga del concepto.
+
+      - name: DESC_BREVE_CONCEPTO
+        description: Descripción corta del concepto.
+
+    config:
+      meta:
+        layer: silver_fact
+        entity_type: seed
+        grain: una fila por concepto sintético de agua       
+
+  - name: s_seed_clasificacion_conceptos
+    description: >
+      Clasificación funcional de todos los conceptos facturables
+      del modelo, tanto explícitos F25 como sintéticos de agua.
+
+    columns:
+
+      - name: NUM_CONCEPTO
+        description: Código del concepto a clasificar.
+        tests:
+          - not_null
+          - unique
+
+      - name: GRUPO_FUNCIONAL
+        description: Agrupación funcional para análisis.
+
+      - name: ES_CONSUMO
+        description: Indica si el concepto corresponde a consumo.
+
+      - name: ES_SERVICIO
+        description: Indica si el concepto corresponde a servicio.
+
+      - name: ES_TRIBUTO
+        description: Indica si el concepto corresponde a tributo o tasa.
+
+      - name: ES_BONIFICACION
+        description: Indica si el concepto corresponde a una bonificación.
+
+      - name: ES_IVA
+        description: Indica si el concepto corresponde a IVA.
+
+      - name: ES_ADITIVO
+        description: Indica si el concepto suma al importe de la factura.
+
+    config:
+      meta:
+        layer: silver_fact
+        entity_type: seed
+        grain: una fila por concepto

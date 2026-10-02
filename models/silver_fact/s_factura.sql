@@ -54,9 +54,9 @@ WITH source_data AS (
         f.FREQ_FACT,
         DATEDIFF('day', f.DATA_INI_FACT, f.DATA_FIN_FACT) + 1 AS DIES_FACTURATS,
 
-        f.TIP_SUBM_SERV,
-        f.US_AIGUA_SUBM_FACT,
-        f.TIP_HABIT_SUBM_FA,
+        f.TIP_SUBM_SERV AS COD_TIPO_SUMINISTRO_FACTURA,
+        f.US_AIGUA_SUBM_FACT AS COD_TIPO_USO_AGUA_FACTURA,
+        f.TIP_HABIT_SUBM_FA AS COD_TIPO_VIVIENDA_FACTURA,
         f.NOMB_HABIT_FACT,
         f.SIT_SUBM_SERV_FACT,
         f.TIP_DOMESTIC,
@@ -65,7 +65,7 @@ WITH source_data AS (
             + COALESCE(f.M3_BLOC2, 0)
             + COALESCE(f.M3_BLOC3, 0)
             + COALESCE(f.M3_BLOC4, 0)
-            + COALESCE(f.M3_BLOC5, 0) AS CONSUM_TOTAL_M3,
+            + COALESCE(f.M3_BLOC5, 0) AS CONSUMO_TOTAL_M3,
 
         f.IMP_TOTAL_FACT,
         f.IMP_AIGUA_IVA,

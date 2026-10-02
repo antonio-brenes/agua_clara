@@ -188,16 +188,9 @@ THL;O    ;TIPUS D'HABITATGE O (OBRES)                       ;TIPUS D'HABITATGE O
 THL;U    ;TIPUS D'HABITATGE U (US COMUNITARI)               ;TIPUS D'HABITATGE U 
 THL;W    ;TIPUS D'HABITATGE W (NO DOMESTIC)                 ;TIPUS D'HABITATGE W 
 THL;X    ;TIPUS D'HABITATGE X (DESCONEGUT)                  ;TIPUS D'HABITATGE X 
-TSS;C    ;CONVENI                                           ;CONVENI             
-TSS;D    ;SUBMINISTRAMENT COMPTADOR DIVISIONARI             ;COMPT.DIV           
-TSS;E    ;SUBMINISTRAMENT AFORAMENT DIVISIONARI             ;AFORA.DIV           
-TSS;F    ;FRAU                                              ;FRAU                
-TSS;G    ;SUBMINISTRAMENT COMPTADOR GENERAL                 ;COMPT.GEN           
-TSS;I    ;SERVEI EQUIP C.INCENDIS                           ;C.INCENDI           
-TSS;M    ;SUBMINISTRAMENT AFORAMENT GENERAL                 ;AFORA.GEN           
-TSS;R    ;SERVEI BOCA DE REG                                ;BOCA REG            
-TSS;V    ;VARIS (NO S'USA)                                  ;VARIS               
-TSS;X    ;SUBMIN.DESCALC.-DOSIFICADOR (NO S'USA)            ;DOSIFICAD           
+TSS;D    ;SUBMINISTRAMENT DOMESTIC                          ;DOMESTIC
+TSS;I    ;SUBMINISTRAMENT INDUSTRIAL                        ;INDUSTRIAL
+TSS;C    ;SERVEI CONTRA INCENDIS                            ;CONTRA INC.        
 US ;0    ;DOMESTIC                                          ;DOMESTIC            
 US ;1    ;DOMESTIC                                          ;DOMESTIC            
 US ;2    ;COMERCIAL                                         ;COMERCIAL           

@@ -8,5 +8,5 @@ with x as (
 select HK_EPIGRAF_IAE as HK_ACTIVIDAD_ECONOMICA,HK_EPIGRAF_IAE,SECCIO,EPIGRAF_IAE,DESCR_IAE,TIP_TARIFA,TIP_QUOTA_TAMGREM,NIV_GEN_RES,COD_GEN_RES,
        ID_CARGA,FECHA_EXTRACCION,convert_timezone('Europe/Madrid',current_timestamp()) FECHA_CARGA,SISTEMA_ORIGEN,'EDW_S_EPIGRAF_IAE' TABLA_ORIGEN
 from x where RN=1
-union all select sha2_hex('ACTIVIDAD|DESCONOCIDA',256),sha2_hex('EPIGRAF|DESCONOCIDO',256),'D','DESCONOCIDO','Desconocida',null,null,null,null,0,null,
+union all select sha2_hex('DESCONOCIDO',256),sha2_hex('DESCONOCIDO',256),'D','DESCONOCIDO','Desconocida',null,null,null,null,-1,null,
 convert_timezone('Europe/Madrid',current_timestamp()),'GOLD','EDW_S_EPIGRAF_IAE'

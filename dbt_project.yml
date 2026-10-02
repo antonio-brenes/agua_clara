@@ -36,18 +36,23 @@ flags:
 
 seeds:
   agua_clara:
-    gold_fact:
-      +schema: gold_fact
+    silver_fact:
+      +schema: silver_fact
       +quote_columns: false
-      g_s_concepto_clasificacion:
+      s_seed_conceptos_agua:
         +column_types:
-          CODIGO_CONCEPTO: varchar(50)
-          CODIGO_ORIGEN: varchar(30)
-          ORIGEN_CONCEPTO: varchar(50)
+          NUM_CONCEPTO: varchar(10)
+          DESC_CONCEPTO: varchar(255)
+          DESC_BREVE_CONCEPTO: varchar(100)
+
+      s_seed_clasificacion_conceptos:
+        +column_types:
+          NUM_CONCEPTO: varchar(10)
           GRUPO_FUNCIONAL: varchar(50)
+
           ES_CONSUMO: boolean
           ES_SERVICIO: boolean
           ES_TRIBUTO: boolean
           ES_BONIFICACION: boolean
           ES_IVA: boolean
-          ES_ADITIVO: boolean  
+          ES_ADITIVO: boolean          

@@ -110,34 +110,38 @@ models:
     description: Código del municipio de 3 dígitos, estándar oficial (INE / Idescat).
   - name: NOMB_DIES_INDEMN
     data_type: number(3,0)
-    description: Número de días que la empresa debe abonar o compensar al cliente en caso de cortes de servicio no programados que superen el límite legal establecido en el reglamento.
+    description: Número de días que la empresa debe abonar o compensar al cliente en caso de cortes de servicio no programados que superen el
+      límite legal establecido en el reglamento.
   - name: NOMB_DIES_SENSE_AUT
     data_type: number(2,0)
     description: Número de días sin autorización. Alude a los días en los que un suministro ha estado activo de manera irregular.
   - name: ADHERIT_L24
     data_type: varchar(1)
-    description: Adherido a L24 (Ley 24/2015, de 29 de julio, de medidas urgentes para afrontar la emergencia en el ámbito de la vivienda y la pobreza energética).
+    description: Adherido a L24 (Ley 24/2015, de 29 de julio, de medidas urgentes para afrontar la emergencia en el ámbito de la vivienda y la
+      pobreza energética).
   - name: CARTA_CIRER
     data_type: varchar(1)
-    description: Carta CIRER. Es un modelo de carta de notificación de deuda, siendo la primera carta de aviso de impago que se envía al cliente tras vencer el recibo.
+    description: Carta CIRER. Es un modelo de carta de notificación de deuda, siendo la primera carta de aviso de impago que se envía al cliente
+      tras vencer el recibo.
   - name: NUM_CAIPS
     data_type: number(5,0)
     description: Número de CAIPS.
   - name: NUM_DIAS_ENV_CAIPS
     data_type: number(5,0)
-    description: Número de días de envío a CAIPS. Número de días de margen que el sistema espera desde que se genera la deuda (o desde la primera notificación) hasta que los datos se
-      exportan y envían a la plataforma/proveedor CAIPS (módulo centralizado de gestión de impagos o centro de impresión que emite la notificación física de suspensión).
+    description: Número de días de envío a CAIPS. Número de días de margen que el sistema espera desde que se genera la deuda (o desde la primera
+      notificación) hasta que los datos se exportan y envían a la plataforma/proveedor CAIPS (módulo centralizado de gestión de impagos o centro
+      de impresión que emite la notificación física de suspensión).
   - name: CARTA_CIRER_2
     data_type: varchar(1)
-    description: Carta CIRER 2. Es un modelo de carta de notificación de deuda, siendo la segunda carta de aviso de impago (frecuentemente la carta certificada o burofax que sirve como
-      preaviso legal obligatorio antes de interrumpir el servicio).
+    description: Carta CIRER 2. Es un modelo de carta de notificación de deuda, siendo la segunda carta de aviso de impago (frecuentemente la
+      carta certificada o burofax que sirve como preaviso legal obligatorio antes de interrumpir el servicio).
   - name: NUM_DIAS_CIRER_2
     data_type: number(5,0)
     description: Número de días de espera entre el primer y el segundo aviso de impago.
   - name: NUM_DIAS_GENERA_CORTE
     data_type: number(5,0)
-    description: El plazo legal/operativo en días que debe transcurrir tras las cartas de aviso para que el sistema genere automáticamente la orden física de corte de suministro (suspensión
-      por impago).
+    description: El plazo legal/operativo en días que debe transcurrir tras las cartas de aviso para que el sistema genere automáticamente la
+      orden física de corte de suministro (suspensión por impago).
   - name: ID_CARGA
     data_type: number
     description: Identificador técnico del lote o ejecución que incorporó el registro.
@@ -1299,7 +1303,8 @@ models:
     - not_null
   - name: NUM_CARRER
     data_type: number(6,0)
-    description: Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria. Forma parte de una clave foránea hacia l4_carrer.NUM_CARRER.
+    description: Número interno que identifica la vía dentro del municipio. Forma parte de la clave primaria. Forma parte de una clave foránea
+      hacia l4_carrer.NUM_CARRER.
     tests:
     - not_null
   - name: NUM_INI_FINCA
@@ -1579,7 +1584,8 @@ models:
     description: Complemento al número final de finca. Forma parte de una clave foránea hacia l4_finca.COMP_NUM_FIN_FINCA.
   - name: SIT_FINCA_ESPEC
     data_type: varchar(1)
-    description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de una clave foránea hacia l4_finca.SIT_FINCA_ESPEC.
+    description: Código de situación especial utilizado para diferenciar fincas con la misma numeración. Forma parte de una clave foránea hacia
+      l4_finca.SIT_FINCA_ESPEC.
   - name: ORD_FINCA_ESPEC
     data_type: varchar(1)
     description: Ordinal que distingue fincas especiales con igual dirección base. Forma parte de una clave foránea hacia l4_finca.ORD_FINCA_ESPEC.
@@ -1850,7 +1856,7 @@ models:
   - name: DVER_POLISSA_SUBM
     data_type: varchar(2)
     description: Dígitos o valor de verificación de la póliza de suministro.
-  - name: TIP_SUBM_SERV
+  - name: COD_TIPO_SUMINISTRO
     data_type: varchar(1)
     description: 'Tipo de suministro o servicio: D doméstico, I industrial y C contra incendios en el piloto.'
   - name: SIT_SUBM_SERV
@@ -2296,5 +2302,209 @@ models:
   - name: HASHDIFF
     data_type: string
     description: Hash de cambios de los atributos del satélite.
+    tests:
+    - not_null
+- name: edw_l_submin_tipo_suministro
+  description: Link entre suministro y tipo suministro. Una fila por combinación histórica distinta.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_TIPO_SUMINISTRO
+  columns:
+  - name: HK_SUBMIN_TIPO_SUMINISTRO
+    data_type: string
+    description: Hash técnica del link.
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_submin_servei'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_TIPO_SUMINISTRO
+    data_type: string
+    description: Hash de tipo suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tipo_suministro'') }}'
+          field: HK_TIPO_SUMINISTRO
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Póliza del suministro.
+    tests:
+    - not_null
+  - name: COD_TIPO_SUMINISTRO
+    data_type: varchar(1)
+    description: Código de tipo suministro.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador de carga heredado de L4.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción heredada de L4.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha de carga en Silver EDW.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla L4 de procedencia.
+    tests:
+    - not_null
+- name: edw_l_submin_tipo_uso_agua
+  description: Link entre suministro y tipo uso agua. Una fila por combinación histórica distinta.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_TIPO_USO_AGUA
+  columns:
+  - name: HK_SUBMIN_TIPO_USO_AGUA
+    data_type: string
+    description: Hash técnica del link.
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_submin_servei'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_TIPO_USO_AGUA
+    data_type: string
+    description: Hash de tipo uso agua.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tipo_uso_agua'') }}'
+          field: HK_TIPO_USO_AGUA
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Póliza del suministro.
+    tests:
+    - not_null
+  - name: COD_TIPO_USO_AGUA
+    data_type: varchar(1)
+    description: Código de tipo uso agua.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador de carga heredado de L4.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción heredada de L4.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha de carga en Silver EDW.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla L4 de procedencia.
+    tests:
+    - not_null
+- name: edw_l_submin_tipo_vivienda
+  description: Link entre suministro y tipo vivienda. Una fila por combinación histórica distinta.
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - HK_SUBMIN_SERVEI
+        - HK_TIPO_VIVIENDA
+  columns:
+  - name: HK_SUBMIN_TIPO_VIVIENDA
+    data_type: string
+    description: Hash técnica del link.
+    tests:
+    - not_null
+    - unique
+  - name: HK_SUBMIN_SERVEI
+    data_type: string
+    description: Hash del suministro.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_submin_servei'') }}'
+          field: HK_SUBMIN_SERVEI
+  - name: HK_TIPO_VIVIENDA
+    data_type: string
+    description: Hash de tipo vivienda.
+    tests:
+    - not_null
+    - relationships:
+        arguments:
+          to: '{{ ref(''edw_h_tipo_vivienda'') }}'
+          field: HK_TIPO_VIVIENDA
+  - name: POLISSA_SUBM
+    data_type: varchar(10)
+    description: Póliza del suministro.
+    tests:
+    - not_null
+  - name: COD_TIPO_VIVIENDA
+    data_type: varchar(1)
+    description: Código de tipo vivienda.
+    tests:
+    - not_null
+  - name: ID_CARGA
+    data_type: number
+    description: Identificador de carga heredado de L4.
+    tests:
+    - not_null
+  - name: FECHA_EXTRACCION
+    data_type: timestamp_tz
+    description: Fecha de extracción heredada de L4.
+    tests:
+    - not_null
+  - name: FECHA_CARGA
+    data_type: timestamp_tz
+    description: Fecha de carga en Silver EDW.
+    tests:
+    - not_null
+  - name: SISTEMA_ORIGEN
+    data_type: varchar(30)
+    description: Sistema de origen heredado.
+    tests:
+    - not_null
+  - name: TABLA_ORIGEN
+    data_type: varchar(50)
+    description: Tabla L4 de procedencia.
     tests:
     - not_null

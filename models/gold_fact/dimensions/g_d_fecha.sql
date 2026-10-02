@@ -24,7 +24,7 @@ select
     last_day(FECHA, 'month')::date as FIN_MES,
     date_trunc('quarter', FECHA)::date as INICIO_TRIMESTRE,
     last_day(FECHA, 'quarter')::date as FIN_TRIMESTRE,
-    0::number as ID_CARGA,
+    -1::number as ID_CARGA,
     null::timestamp_tz as FECHA_EXTRACCION,
     convert_timezone('Europe/Madrid', current_timestamp()) as FECHA_CARGA,
     'GOLD' as SISTEMA_ORIGEN,
